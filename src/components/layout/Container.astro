@@ -16,7 +16,7 @@ const maxWidthMap: Record<string, string> = {
   '2xl': 'max-w-(--breakpoint-2xl)',
 };
 const maxWidthClass = maxWidthMap[contentWidth] || 'max-w-(--breakpoint-md)';
-const allClasses = `relative mx-auto px-4 sm:px-6 lg:px-8 ${className} ${maxWidthClass}`.trim();
+const allClasses = `relative container mx-auto px-4 sm:px-6 lg:px-8 w-full ${className} ${maxWidthClass}`.trim();
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 import { siteConfig } from '@/site.config';
-import Container from '@/components/common/Container.astro';
+import Container from '@/components/layout/Container.astro';
 import Icon from '@/components/common/IconWrapper.astro';
 // import ThemeToggle from '@/components/widgets/ThemeToggle.astro'
 
@@ -17,7 +17,7 @@ const getHeaderProfilePictureClasses = (style: string) => {
 };
 
 ---
-<header id="main-header">
+<div id="main-header">
   <Container>
     <div class="flex items-center justify-between h-24">
       <!-- Logo / Site Title / Profile Picture -->
@@ -100,7 +100,7 @@ const getHeaderProfilePictureClasses = (style: string) => {
         </nav>
       </div>
   </Container>
-</header>
+</div>
 
 <script>
   // Mobile menu toggle

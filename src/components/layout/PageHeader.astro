@@ -1,0 +1,56 @@
+---
+import IconWrapper from '@/components/common/IconWrapper.astro';
+import { formatDate, getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+
+interface Props {
+  breadcrumb?: string;
+  title: string;
+  description?: string;
+  lastUpdated?: Date;
+  showLastUpdated?: boolean;
+}
+
+const { 
+  breadcrumb, 
+  title, 
+  description, 
+  lastUpdated,
+  showLastUpdated = true 
+} = Astro.props;
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(breadcrumb || Astro.url.pathname);
+
+---
+
+<header class="page-header mb-20">
+  <div class="content-stretch flex flex-col gap-12">
+    <div class="flex flex-col gap-2">
+      {breadcrumb && (
+        <Breadcrumbs items={breadcrumbs} separator="slash" class="text-sm font-mono text-content-3" />
+      )}
+      <div class="flex flex-col gap-4">
+        <h1 class="text-4xl md:text-5xl font-bold text-content-1">
+          {title}
+        </h1>
+
+        {showLastUpdated && lastUpdated && (
+          <div class="flex items-center gap-2 text-sm text-content-3 font-mono">
+            <IconWrapper name="calendar-week" size={16} class="opacity-60" />
+            <time datetime={lastUpdated.toISOString()}>
+              Last updated: {formatDate(lastUpdated, 'monthDay')}
+            </time>
+        </div>
+        )}
+      </div>
+    </div>
+
+    {description && (
+      <p class="text-lg text-content-2">
+        {description}
+      </p>
+    )}
+
+  </div>
+</header>

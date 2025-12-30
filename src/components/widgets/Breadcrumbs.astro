@@ -1,0 +1,102 @@
+---
+import type { BreadcrumbItem } from "@/types";
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  items: BreadcrumbItem[];
+  separator?: 'chevron' | 'slash' | 'arrow';
+  showHome?: boolean;
+  class?: string;
+}
+
+const {
+  items,
+  separator = 'chevron',
+  showHome = true,
+  class: customClass = '',
+} = Astro.props;
+
+// Separator icons/text
+const separators = {
+  chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+  slash: '/',
+  arrow: '→',
+};
+
+const separatorContent = separators[separator];
+
+// Build breadcrumb trail
+const breadcrumbs: BreadcrumbItem[] = [];
+
+// Add home if enabled
+if (showHome) {
+  breadcrumbs.push({ label: 'Home', href: '/' });
+}
+
+// Add provided items
+breadcrumbs.push(...items);
+---
+
+<nav 
+  aria-label="Breadcrumb" 
+  class={`breadcrumb flex items-center gap-2 text-sm mb-4 ${customClass}`}
+>
+  <ol class="flex items-center gap-2 flex-wrap">
+    {breadcrumbs.map((item, index) => {
+      const isLast = index === breadcrumbs.length - 1;
+      const isHome = index === 0 && showHome;
+
+      return (
+        <li class="flex items-center gap-2">
+          {/* Breadcrumb item */}
+          {item.href && !isLast ? (
+            <a
+              href={item.href}
+              class="text-content-muted hover:text-content-primary transition-colors"
+              aria-label={isHome ? 'Go to homepage' : `Go to ${item.label}`}
+            >
+              {isHome ? (
+                <Icon name="home" class="size-4" />
+              ) : (
+                <span>{item.label}</span>
+              )}
+            </a>
+          ) : (
+            <span 
+              class={isLast ? 'text-content-primary font-medium' : 'text-content-muted'}
+              aria-current={isLast ? 'page' : undefined}
+            >
+              {isHome ? (
+                <Icon name="home" class="size-4" />
+              ) : (
+                item.label
+              )}
+            </span>
+          )}
+
+          {/* Separator (not for last item) */}
+          {!isLast && (
+            <span 
+              class="text-content-muted separator" 
+              aria-hidden="true"
+              set:html={separatorContent}
+            />
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+  .separator {
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.5;
+  }
+
+  .separator svg {
+    width: 1rem;
+    height: 1rem;
+  }
+</style>

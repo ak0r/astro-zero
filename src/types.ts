@@ -133,6 +133,11 @@ export interface SocialLink {
   icon: string;
 }
 
+export interface BreadcrumbItem {
+  label: string;
+  href?: string; // Optional - last item typically has no href
+}
+
 // ============================================================================
 // COMMAND PALETTE
 // ============================================================================

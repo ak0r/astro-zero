@@ -105,4 +105,21 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+ /* Container */
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 w-full;
+  }
+
+  /* Breakout - moderately wider */
+  .breakout {
+    @apply -mx-24;
+  }
+
+  /* Breakout-wide - full viewport */
+  .breakout-wide {
+    @apply w-screen;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
 }
