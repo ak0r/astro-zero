@@ -2,200 +2,160 @@
 import { siteConfig } from '@/site.config';
 import Container from '@/components/layout/Container.astro';
 import Icon from '@/components/common/IconWrapper.astro';
-// import ThemeToggle from '@/components/widgets/ThemeToggle.astro'
 
 const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'header';
 const profilePicture = siteConfig.profilePicture;
 
-// Style classes for profile picture in header
 const getHeaderProfilePictureClasses = (style: string) => {
   switch (style) {
-    case 'circle': return 'w-8 h-8 rounded-full object-cover border-2 border-ui-primary';
-    case 'square': return 'w-8 h-8 rounded-lg object-cover border-2 border-ui-primary';
-    default: return 'h-8 object-contain'; // none - height constrained, width flexible
+    case 'circle': return 'w-8 h-8 rounded-full object-cover border-2 border-ui';
+    case 'square': return 'w-8 h-8 rounded-lg object-cover border-2 border-ui';
+    default: return 'h-8 object-contain';
   }
 };
 
+const currentPath = Astro.url.pathname;
 ---
-<div id="main-header">
+
+<header id="main-header" class="sticky top-0 bg-background z-50">
   <Container>
-    <div class="flex items-center justify-between h-24">
-      <!-- Logo / Site Title / Profile Picture -->
-      <div class="flex items-center">
-        <a href="/" class="hover:opacity-75 transition-opacity">
-          {showProfilePicture ? (
-            <img
-              src={profilePicture.image}
-              alt={profilePicture.alt}
-              class={getHeaderProfilePictureClasses(profilePicture.style)}
-            />
-          ) : (
-            <span class="font-semibold text-2xl text-content-primary">
-              {siteConfig.title}
-            </span>
-          )}
-        </a>
-      </div>
+    <div class="flex items-center justify-between h-24 relative z-50">
+      
+      <!-- Logo -->
+      <a href="/" class="hover:opacity-75 transition-opacity relative z-50">
+        {showProfilePicture ? (
+          <img
+            src={profilePicture.image}
+            alt={profilePicture.alt}
+            class={getHeaderProfilePictureClasses(profilePicture.style)}
+          />
+        ) : (
+          <span class="font-semibold text-2xl text-content-1">
+            {siteConfig.title}
+          </span>
+        )}
+      </a>
 
-      <!-- Center area with smart navigation -->
-      <div class="flex-1 flex items-center justify-center"> 
-        <nav class="hidden md:flex items-center space-x-5" aria-label="Main navigation">
-            {siteConfig.navigation.pages.map(page => (
-              <a 
-                href={page.url}
-                class="flex items-center space-x-1 text-sm font-medium transition-colors hover:text-primary text-content-1"
-                target={page.url.startsWith('http') ? '_blank' : undefined}
-                aria-label={`Navigate to ${page.title}`}
-              >
-                <span> / { page.title.toLowerCase() }</span>
-                {page.url.startsWith('http') && (
-                  <Icon name="external-link" class="w-3 h-3 text-content-2" />
-                )}
-              </a>
-            ))}
-          </nav>
-      </div>
+      <!-- Mobile menu toggle -->
+      <button
+        id="mobile-menu-toggle"
+        class="md:hidden p-2 text-content-1 hover:bg-ui rounded-lg transition-colors relative z-50"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+      >
+        <span id="menu-icon">
+          <Icon name="menu" size={20} />
+        </span>
+        <span id="close-icon" class="hidden">
+          <Icon name="x" size={20} />
+        </span>
+      </button>
 
-      <!-- Action buttons -->
-      <div class="flex items-center space-x-2">
-        <!-- Theme Toggle -->
-        <!-- <ThemeToggle /> -->
+      <!-- Navigation -->
+      <nav 
+        id="main-nav"
+        class="
+          fixed inset-0 bg-background/95 backdrop-blur-lg p-6 pt-24
+          md:static md:bg-transparent md:backdrop-blur-none md:p-0 md:pt-0
+          translate-x-full md:translate-x-0
+          transition-transform duration-300 ease-in-out
+          z-40
+        "
+      >
+        <ul class="
+          flex flex-col md:flex-row 
+          gap-6 md:gap-6 
+          text-lg md:text-sm 
+          font-mono
+        ">
+          {siteConfig.navigation.pages.map(page => {
+            const isActive = currentPath === page.url || currentPath.startsWith(page.url);
+            return (
+              <li>
+                <a 
+                  href={page.url}
+                  class:list={[
+                    'transition-colors hover:text-primary',
+                    isActive ? 'text-primary' : 'text-content-2'
+                  ]}
+                  target={page.url.startsWith('http') ? '_blank' : undefined}
+                >
+                  /{page.title.toLowerCase()}
+                  {page.url.startsWith('http') && (
+                    <Icon name="external-link" size={12} class="inline ml-1" />
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
 
-        <button
-            id="mobile-menu-toggle"
-            class="md:hidden p-2 text-content-1 hover:bg-background/50 rounded-lg transition-colors"
-            aria-label="Toggle mobile navigation menu"
-            aria-expanded="false"
-          >
-            <span class="menu-icon">
-              <Icon name="menu" class="size-5" />
-            </span>
-            <span class="close-icon hidden">
-              <Icon name="x" class="size-5" />
-            </span>
-          </button>
-      </div>
     </div>
-
-    <!-- Mobile navigation menu -->
-    <div id="mobile-menu" 
-        class="md:hidden animate hidden z-40 bg-background py-4 border-t border-ui" 
-        role="dialog"
-        aria-modal="true"
-        aria-label="Mobile navigation menu">
-        <nav class="flex flex-col space-y-3">
-          {siteConfig.navigation.pages.map(page => (
-            <a 
-              href={page.url}
-              class="flex items-center justify-start space-x-2 px-3 py-2 text-content-1 hover:text-primary hover:bg-background/50 transition-colors font-medium rounded-md"
-              target={page.url.startsWith('http') ? '_blank' : undefined}
-              aria-label={`Navigate to ${page.title}`}
-            >
-              <span>{page.title}</span>
-              {page.url.startsWith('http') && (
-                <Icon name="external-link" class="w-3 h-3 text-content-2" />
-              )}
-            </a>
-          ))}
-        </nav>
-      </div>
   </Container>
-</div>
+</header>
 
 <script>
-  // Mobile menu toggle
   document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    const nav = document.getElementById('main-nav');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
 
-    if (menuToggle && mobileMenu) {
-      menuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-
-        // Update menu icon and ARIA attribute
-        const menuIcon = menuToggle.querySelector('.menu-icon');
-        const closeIcon = menuToggle.querySelector('.close-icon');
-        
-        if (menuIcon && closeIcon) {
-          if (mobileMenu.classList.contains('hidden')) {
-            menuIcon.classList.remove('hidden');
-            closeIcon.classList.add('hidden');
-            menuToggle.setAttribute('aria-expanded', 'false');
-          } else {
-            menuIcon.classList.add('hidden');
-            closeIcon.classList.remove('hidden');
-            menuToggle.setAttribute('aria-expanded', 'true');
-          }
-        }
-      });
-    }
-
-    // Function to close mobile menu
-    function closeMobileMenu() {
-      if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-        mobileMenu.classList.add('hidden');
-        
-        // Update menu icon and ARIA attribute
-        if (menuToggle) {
-          const menuIcon = menuToggle.querySelector('.menu-icon');
-          const closeIcon = menuToggle.querySelector('.close-icon');
-          if (menuIcon && closeIcon) {
-            menuIcon.classList.remove('hidden');
-            closeIcon.classList.add('hidden');
-            menuToggle.setAttribute('aria-expanded', 'false');
-          }
-        }
+    menuToggle?.addEventListener('click', () => {
+      const isOpen = !nav?.classList.contains('translate-x-full');
+      
+      if (isOpen) {
+        // Close menu
+        nav?.classList.add('translate-x-full');
+        menuIcon?.classList.remove('hidden');
+        closeIcon?.classList.add('hidden');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+      } else {
+        // Open menu
+        nav?.classList.remove('translate-x-full');
+        menuIcon?.classList.add('hidden');
+        closeIcon?.classList.remove('hidden');
+        menuToggle?.setAttribute('aria-expanded', 'true');
       }
-    }
+    });
 
-    // Close mobile menu when navigation links are clicked
-    const mobileMenuLinks = mobileMenu?.querySelectorAll('nav a');
-    mobileMenuLinks?.forEach(link => {
+    // Close menu when clicking nav links
+    nav?.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        closeMobileMenu();
+        nav.classList.add('translate-x-full');
+        menuIcon?.classList.remove('hidden');
+        closeIcon?.classList.add('hidden');
+        menuToggle?.setAttribute('aria-expanded', 'false');
       });
     });
 
-    // Make closeMobileMenu globally accessible for other components
-    (window as any).closeMobileMenu = closeMobileMenu;
-
-    // Close mobile menu when clicking outside of it
+    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      const isMenuToggle = target.closest('#mobile-menu-toggle');
-      const isMobileMenu = target.closest('#mobile-menu');
-      
-      // If clicking outside the menu and toggle button, close the menu
-      if (!isMenuToggle && !isMobileMenu && mobileMenu && !mobileMenu.classList.contains('hidden')) {
-        closeMobileMenu();
+      if (!target.closest('#main-nav') && !target.closest('#mobile-menu-toggle')) {
+        if (nav && !nav.classList.contains('translate-x-full')) {
+          nav.classList.add('translate-x-full');
+          menuIcon?.classList.remove('hidden');
+          closeIcon?.classList.add('hidden');
+          menuToggle?.setAttribute('aria-expanded', 'false');
+        }
       }
     });
-    
+
     // Header shadow on scroll
     const header = document.getElementById('main-header');
-    if (header) {
-      let isScrolled = false;
-      
-      
-      const updateHeaderShadow = () => {
-        const scrollY = window.scrollY;
-        const shouldHaveShadow = scrollY > 0;
-        
-        if (shouldHaveShadow !== isScrolled) {
-          isScrolled = shouldHaveShadow;
-          if (shouldHaveShadow) {
-            header.classList.add('shadow-sm');
-          } else {
-            header.classList.remove('shadow-sm');
-          }
-        }
-      };
+    let isScrolled = false;
+    
+    const updateShadow = () => {
+      const shouldHaveShadow = window.scrollY > 0;
+      if (shouldHaveShadow !== isScrolled) {
+        isScrolled = shouldHaveShadow;
+        header?.classList.toggle('shadow-sm', shouldHaveShadow);
+      }
+    };
 
-      // Initial check
-      updateHeaderShadow();
-      
-      // Listen for scroll events
-      window.addEventListener('scroll', updateHeaderShadow, { passive: true });
-    }
+    updateShadow();
+    window.addEventListener('scroll', updateShadow, { passive: true });
   });
 </script>
