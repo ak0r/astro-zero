@@ -1,0 +1,36 @@
+---
+import IconWrapper from '@/components/common/IconWrapper.astro';
+
+export interface FilterTab {
+  label: string;
+  href: string;
+  icon?: string;
+  active?: boolean;
+}
+
+interface Props {
+  tabs: FilterTab[];
+  class?: string;
+}
+
+const { tabs, class: className = '' } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+<section id="archive">
+  <div class={`filter-tabs flex flex-wrap sm:flex-nowrap sm:justify-normal items-center gap-2 font-mono ${className}`}>
+    {tabs.map(tab => {
+      const isActive = tab.active ?? currentPath === tab.href;
+      
+      return (
+        <a href={tab.href} class:list={[
+          'inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm border border-ui   transition-all duration-300',
+          isActive ? 'bg-content-2 text-background' : ' text-content-3 bg-content-2/10 hover:text-content-1'
+        ]}>
+          {tab.icon && <IconWrapper name={tab.icon} size={16} />}
+          <span>{tab.label}</span>
+        </a>
+      );
+    })}
+    <div class="h-[1px] bg-ui flex-1"></div>
+  </div>
+</section>

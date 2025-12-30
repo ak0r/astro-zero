@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/Container.astro';
+import PageHeader from '@/components/layout/PageHeader.astro';
+import FilterTabs from '@/components/layout/FilterTabs.astro';
+import YearGroup from '@/components/content/YearGroup.astro';
+
+export async function getStaticPaths() {
+  return [
+    { params: { category: 'travel' } },
+    { params: { category: 'tech' } },
+  ];
+}
+
+const { category } = Astro.params;
+
+// Fetch filtered posts
+const posts = await getCollection('posts', ({ data }) => 
+  !data.draft && data.category === category
+);
+
+const sortedPosts = posts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Group by year
+const postsByYear = sortedPosts.reduce((acc, post) => {
+  const year = post.data.date.getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(post);
+  return acc;
+}, {} as Record<number, typeof posts>);
+
+const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+
+// Page metadata
+const titles = {
+  travel: 'Travel',
+  tech: 'Tech',
+};
+
+const descriptions = {
+  travel: 'Adventures and explorations around the world.',
+  tech: 'Technical articles and coding insights.',
+};
+
+const filterTabs = [
+  { label: 'All', href: '/posts', icon: 'layout-grid' },
+  { label: 'Travel', href: '/posts/travel', icon: 'plane' },
+  { label: 'Tech', href: '/posts/tech', icon: 'code' },
+  { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
+];
+---
+
+<BaseLayout>
+  <Container class="py-8">
+    
+    <PageHeader
+      title={titles[category]}
+      description={descriptions[category]}
+    />
+    
+    <FilterTabs tabs={filterTabs} class="mb-12" />
+    
+    <div class="flex flex-col gap-16">
+      {years.map(year => (
+        <YearGroup 
+          year={year} 
+          posts={postsByYear[year]}
+          showIcon={true}
+        />
+      ))}
+    </div>
+    
+  </Container>
+</BaseLayout>

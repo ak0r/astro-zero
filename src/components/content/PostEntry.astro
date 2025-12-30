@@ -1,0 +1,52 @@
+---
+import IconWrapper from '@/components/common/IconWrapper.astro';
+import { formatDate } from '@/utils/commonFunctions';
+import type { Post } from '@/types';
+
+interface Props {
+  post: Post;
+  showIcon?: boolean;
+}
+
+const { post, showIcon = true } = Astro.props;
+const { title, date, category, featured } = post.data;
+const slug = post.id.replace(/\.mdx?$/, '');
+
+// Determine icon based on type
+let icon = 'file-text';
+if (featured) {
+  icon = 'star';
+} else if (post.collection === 'gallery') {
+  icon = 'library-photo';
+} else if (category === 'travel') {
+  icon = 'plane';
+} else if (category === 'tech') {
+  icon = 'code';
+}
+---
+
+<a 
+  href={`/${slug}`}
+  class="post-entry group flex items-start gap-3 py-2 transition-colors hover:text-content-1"
+>
+  {showIcon && (
+    <IconWrapper 
+      name={icon} 
+      size={20} 
+      class={`mt-1 flex-shrink-0 ${featured ? 'text-primary' : 'text-content-3'}`}
+    />
+  )}
+  
+  <div class="flex-1 flex items-baseline justify-between gap-4">
+    <span class="text-content-2 group-hover:text-content-1 transition-colors">
+      {title}
+    </span>
+    <div class="hidden sm:block h-px flex-1 bg-ui"></div>
+    <time 
+      datetime={date.toISOString()}
+      class="text-sm text-content-3 font-mono whitespace-nowrap"
+    >
+      {formatDate(date, 'monthDay')}
+    </time>
+  </div>
+</a>

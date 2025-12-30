@@ -18,7 +18,7 @@ export const siteConfig: SiteConfig = {
     style: "none"
   },
   layout: {
-    contentWidth: "lg",
+    contentWidth: "md",
   },
   navigation: {
     pages: [

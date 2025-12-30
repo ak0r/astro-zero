@@ -1,0 +1,24 @@
+---
+import type { Post } from '@/types';
+import PostEntry from './PostEntry.astro';
+
+interface Props {
+  year: number;
+  posts: Post[];
+  showIcon?: boolean;
+}
+
+const { year, posts, showIcon = true } = Astro.props;
+---
+
+<section class="year-group">
+  <h2 class="text-sm text-content-3 font-mono mb-4">
+    {year}
+  </h2>
+  
+  <div class="flex flex-col gap-1">
+    {posts.map(post => (
+      <PostEntry post={post} showIcon={showIcon} />
+    ))}
+  </div>
+</section>
