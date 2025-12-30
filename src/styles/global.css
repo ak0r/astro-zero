@@ -1,1 +1,108 @@
 @import "tailwindcss";
+
+@theme {
+  
+  /* Semantic Colors - Light Mode Defaults */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  
+  /* Text Hierarchy (4 shades) */
+  --color-content-1: #0a0a0a;
+  --color-content-2: #525252;
+  --color-content-3: #737373;
+  --color-content-4: #a3a3a3;
+  
+  /* UI Elements */
+  --color-ui: #e5e5e5;
+  
+  /* Brand Colors */
+  --color-primary: #f97316;
+  --color-secondary: #0ea5e9;
+  
+  /* Status Colors */
+  --color-info: #3b82f6;
+  --color-tip: #8b5cf6;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* Accent/Highlight */
+  --color-accent: #fef08a;
+
+  --color-inherit: inherit;
+  --color-current: currentColor;
+  --color-transparent: transparent;
+  --font-primary: var(--font-primary);
+  --font-secondary: var(--font-secondary);
+  --font-headings: var(--font-headings);
+  --font-code: var(--font-code); 
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: #0a0a0a;
+    --color-foreground: #fafafa;
+    
+    --color-content-1: #fafafa;
+    --color-content-2: #e5e5e5;
+    --color-content-3: #a3a3a3;
+    --color-content-4: #737373;
+    
+    --color-ui: #262626;
+    
+    --color-primary: #fb923c;
+    --color-secondary: #38bdf8;
+    
+    --color-info: #60a5fa;
+    --color-tip: #a78bfa;
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-error: #f87171;
+    
+    --color-accent: #fef08a;
+  }
+}
+
+/* Manual dark mode override (class-based) */
+.dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  
+  --color-content-1: #fafafa;
+  --color-content-2: #e5e5e5;
+  --color-content-3: #a3a3a3;
+  --color-content-4: #737373;
+  
+  --color-ui: #262626;
+  
+  --color-primary: #fb923c;
+  --color-secondary: #38bdf8;
+  
+  --color-info: #60a5fa;
+  --color-tip: #a78bfa;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  
+  --color-accent: #fef08a;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+  }
+
+  body {
+    @apply m-0 font-primary bg-background text-content-1 leading-relaxed antialiased text-base ;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+}

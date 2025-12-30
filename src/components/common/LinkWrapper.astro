@@ -1,0 +1,48 @@
+---
+type Props = {
+  href: string;
+  class?: string;
+  external?: boolean;
+  underline?: boolean;
+  variant?: 'default' | 'tag' | 'subtle' | 'accent';
+  active?: boolean;
+};
+
+const {
+  href,
+  class: className = '',
+  external = false,
+  underline = false,
+  variant = 'default',
+  active = false,
+  ...rest
+} = Astro.props;
+
+// Variant styles
+const variants = {
+  default: 'text-content-muted hover:text-content-primary',
+  tag: 'text-content-subtle hover:text-accent',
+  subtle: 'text-content-muted hover:text-content-secondary',
+  accent: 'text-accent hover:text-accent-hover',
+};
+
+const variantClass = variants[variant];
+const underlineClass = underline ? 'underline underline-offset-[3px]' : '';
+const activeClass = active ? 'font-semibold text-content-primary!' : '';
+---
+
+<a
+  href={href}
+  target={external ? '_blank' : '_self'}
+  rel={external ? 'noopener noreferrer' : undefined}
+  class={`
+    inline-block not-prose transition-colors duration-300 ease-in-out
+    ${variantClass}
+    ${underlineClass}
+    ${activeClass}
+    ${className}
+  `}
+  {...rest}
+>
+  <slot />
+</a>

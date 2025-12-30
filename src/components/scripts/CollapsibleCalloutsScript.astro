@@ -1,0 +1,60 @@
+---
+// Collapsible callouts functionality
+---
+
+<script>
+  function initializeCollapsibleCallouts() {
+    const collapsibleCallouts = document.querySelectorAll('.callout-collapsible');
+
+    collapsibleCallouts.forEach(callout => {
+      const toggleButton = callout.querySelector('.callout-toggle');
+      const content = callout.querySelector('.callout-content');
+
+      if (!toggleButton || !content) return;
+
+      // Toggle callout state
+      const toggleCallout = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isCollapsed = callout.classList.contains('callout-collapsed');
+
+        if (isCollapsed) {
+          // Expand
+          callout.classList.remove('callout-collapsed');
+          (content as HTMLElement).style.display = '';
+          toggleButton.setAttribute('aria-expanded', 'true');
+        } else {
+          // Collapse
+          callout.classList.add('callout-collapsed');
+          (content as HTMLElement).style.display = 'none';
+          toggleButton.setAttribute('aria-expanded', 'false');
+        }
+      };
+
+      // Add click handler to toggle button
+      toggleButton.addEventListener('click', toggleCallout);
+
+      // Add click handler to title for easier interaction
+      const title = callout.querySelector('.callout-title');
+      if (title) {
+        title.addEventListener('click', (e) => {
+          // Only trigger if not clicking the toggle button directly
+          if (!(e.target as Element).closest('.callout-toggle')) {
+            toggleButton.dispatchEvent(new Event('click'));
+          }
+        });
+      }
+    });
+  }
+
+  // Run on initial load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCollapsibleCallouts);
+  } else {
+    initializeCollapsibleCallouts();
+  }
+
+  // Re-run on Astro page transitions
+  document.addEventListener('astro:after-swap', initializeCollapsibleCallouts);
+</script>

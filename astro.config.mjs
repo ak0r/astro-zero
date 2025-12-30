@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import icon from 'astro-icon';
@@ -19,7 +19,7 @@ export default defineConfig({
     contentIntellisense: true,
     fonts: [
       {
-        name: "Poppins",
+        name: "Lora",
         cssVariable: "--font-headings",
         provider: fontProviders.fontsource(),
         weights: [400, 500, 600, 700],
@@ -33,14 +33,14 @@ export default defineConfig({
         fallbacks: ["sans-serif"],
       },
       {
-        name: "Rubik",
+        name: "Google Sans Flex",
         cssVariable: "--font-primary",
         provider: fontProviders.fontsource(),
         weights: [400, 500, 600, 700],
         fallbacks: ["sans-serif"],
       },
       {
-        name: "JetBrains Mono",
+        name: "Google Sans Code",
         cssVariable: "--font-code",
         provider: fontProviders.fontsource(),
         weights: [400, 500, 600, 700],

@@ -1,0 +1,246 @@
+---
+import { siteConfig } from '@/site.config';
+---
+
+<script>
+  declare global {
+    interface Window {
+      initializeImageGalleries: () => void;
+    }
+  }
+
+ function createMasonryLayout(container, items) {
+  // Get column count from CSS or set default
+  let columnCount = 3;
+  
+  if (window.innerWidth <= 640) columnCount = 1;
+  else if (window.innerWidth <= 1024) columnCount = 2;
+  
+  // Clear container
+  container.innerHTML = '';
+  container.style.display = 'flex';
+  container.style.gap = '1rem';
+  container.style.alignItems = 'flex-start';
+  
+  // Create columns
+  const columns = [];
+  for (let i = 0; i < columnCount; i++) {
+    const column = document.createElement('div');
+    column.style.display = 'flex';
+    column.style.flexDirection = 'column';
+    column.style.gap = '1rem';
+    column.style.flex = '1';
+    column.style.minWidth = '0'; // Important for flex sizing
+    columns.push(column);
+    container.appendChild(column);
+  }
+  
+  // Initially distribute items round-robin
+  items.forEach((item, index) => {
+    const columnIndex = index % columnCount;
+    columns[columnIndex].appendChild(item);
+  });
+  
+  // Function to redistribute based on actual heights
+  function redistributeItems() {
+    const allItems = Array.from(container.querySelectorAll('.image-item'));
+    
+    // Clear columns
+    columns.forEach(col => col.innerHTML = '');
+    
+    // Get column heights helper
+    const getColumnHeights = () => columns.map(col => {
+      const height = col.offsetHeight || 0;
+      return height;
+    });
+    
+    // Add each item to shortest column
+    allItems.forEach(item => {
+      const heights = getColumnHeights();
+      const shortestIndex = heights.indexOf(Math.min(...heights));
+      columns[shortestIndex].appendChild(item);
+    });
+  }
+  
+  // Wait for all images to load
+  const images = container.querySelectorAll('img');
+  const imageLoadPromises = Array.from(images).map(img => {
+    return new Promise((resolve) => {
+      if (img.complete && img.naturalHeight !== 0) {
+        resolve();
+      } else {
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Resolve even on error
+        
+        // Fallback timeout
+        setTimeout(() => resolve(), 5000);
+      }
+    });
+  });
+  
+  // Redistribute after all images load
+  Promise.all(imageLoadPromises).then(() => {
+    redistributeItems();
+    
+    // Do one more redistribution after a short delay to catch any late renders
+    setTimeout(() => redistributeItems(), 100);
+  });
+  
+  // Also redistribute on window load (catches very late images)
+  window.addEventListener('load', () => {
+    setTimeout(() => redistributeItems(), 200);
+  }, { once: true });
+}
+
+  // Modify your existing initializeImageGalleries function
+  function initializeImageGalleries() {
+    const contentElement = document.querySelector('.prose');
+    if (!contentElement) return;
+
+    const paragraphs = contentElement.querySelectorAll('p');
+
+    paragraphs.forEach((paragraph, paraIndex) => {
+      const images = Array.from(paragraph.querySelectorAll('img'))
+        .filter(img => !img.closest('a'));
+
+      if (images.length === 0) return;
+
+      const imageCount = images.length;
+      const galleryContainer = document.createElement('div');
+
+      if (imageCount === 1) {
+        galleryContainer.className = 'image-grid image-grid-single my-2';
+      } else {
+        galleryContainer.className = 'image-grid image-grid-masonry my-2';
+      }
+
+      let nonImageContent = [];
+      if (imageCount === 1) {
+        nonImageContent = Array.from(paragraph.childNodes).filter(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const el = node;
+            return el.tagName !== 'IMG' && el.tagName !== 'PICTURE';
+          }
+          if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent.trim() !== '';
+          }
+          return true;
+        });
+
+        if (nonImageContent.length === 0) {
+          const next = paragraph.nextElementSibling;
+          if (next && next.tagName === 'P') {
+            const hasItalic = next.querySelector('em, i');
+            const hasLinks = next.querySelector('a');
+            const isHeading = next.querySelector('h1,h2,h3,h4,h5,h6');
+            const hasOnlyText =
+              next.textContent.trim() !== '' && next.children.length <= 2;
+
+            if ((hasItalic || hasLinks || hasOnlyText) && !isHeading) {
+              nonImageContent = Array.from(next.childNodes);
+              next.style.display = 'none';
+            }
+          }
+        }
+      }
+
+      // Collect image items
+      const imageItems = [];
+      
+      images.forEach((img) => {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'image-item';
+
+        const link = document.createElement('a');
+        const resolvedSrc = img.currentSrc || img.src;
+        link.href = resolvedSrc;
+        link.setAttribute('data-type', 'image');
+
+        if (resolvedSrc.startsWith('http')) {
+          link.setAttribute('data-src', resolvedSrc);
+        }
+        
+        link.className = 'glightbox group block relative';
+        link.setAttribute('data-gallery', `gallery-${paraIndex}`);
+        link.setAttribute('data-description', img.alt || '');
+
+        const imgClone = img.cloneNode(true);
+        imgClone.src = resolvedSrc;
+        imgClone.alt = img.alt || '';
+        
+        // Remove lazy loading for masonry calculations
+        imgClone.loading = 'eager';
+        imgClone.decoding = 'sync';
+        
+        imgClone.className =
+          'w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:shadow-lg group-hover:scale-[1.02] not-prose';
+
+        const overlay = document.createElement('div');
+        overlay.className =
+          'absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center';
+
+        const zoomIcon = document.createElement('div');
+        zoomIcon.className =
+          'w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300';
+        zoomIcon.innerHTML = `
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+          </svg>
+        `;
+
+        overlay.appendChild(zoomIcon);
+        link.appendChild(imgClone);
+        link.appendChild(overlay);
+        imageItem.appendChild(link);
+        
+        imageItems.push(imageItem);
+      });
+
+      // Apply masonry layout for multiple images
+      if (imageCount > 1) {
+        createMasonryLayout(galleryContainer, imageItems);
+      } else {
+        galleryContainer.appendChild(imageItems[0]);
+      }
+
+      const container = document.createElement('div');
+      container.className = 'image-container';
+      container.appendChild(galleryContainer);
+
+      if (nonImageContent.length > 0) {
+        const captionContainer = document.createElement('div');
+        captionContainer.className = 'image-caption-container';
+
+        nonImageContent.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === '') return;
+          if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') return;
+          captionContainer.appendChild(node.cloneNode(true));
+        });
+
+        container.appendChild(captionContainer);
+      }
+
+      paragraph.parentNode.replaceChild(container, paragraph);
+    });
+    
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        document.querySelectorAll('.image-grid-masonry').forEach(container => {
+          const items = Array.from(container.querySelectorAll('.image-item'));
+          if (items.length > 1) {
+            createMasonryLayout(container, items);
+          }
+        });
+      }, 250);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initializeImageGalleries);
+  document.addEventListener('astro:after-swap', initializeImageGalleries);
+
+  window.initializeImageGalleries = initializeImageGalleries;
+</script>

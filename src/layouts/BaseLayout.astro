@@ -1,0 +1,110 @@
+---
+import { Font } from 'astro:assets';
+import { generateThemeHash } from '@/utils/theme';
+import { siteConfig } from "@/site.config";
+import "@/styles/global.css";
+
+// Components
+import Header from "@/components/common/Header.astro";
+import Footer from "@/components/common/Footer.astro";
+// import ScrollToTop from "@/components/widgets/ScrollToTop.astro";
+// import ImageGalleryManager from '@/components/common/ImageGalleryManager.astro';
+// import ThemeManager from '@/components/common/ThemeManager.astro';
+import ScrollScript from '@/components/scripts/ScrollScript.astro';
+import AnimationScript from '@/components/scripts/AnimationScript.astro';
+import CollapsibleCalloutsScript from '@/components/scripts/CollapsibleCalloutsScript.astro';
+// import CommandPalette from '@/components/widgets/CommandPalette.astro';
+// import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
+
+export interface Props {
+  bodyClass?: string;
+}
+
+const { bodyClass = '' } = Astro.props;
+
+// Theme configuration
+const defaultTheme = siteConfig.defaultTheme;
+const lightTheme = 'light';
+const darkTheme = 'dark';
+const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, darkTheme);
+---
+
+<!DOCTYPE html>
+<html 
+  lang={siteConfig.language ?? "en"}
+  data-theme={defaultTheme}
+  data-dark-theme={darkTheme}
+  data-light-theme={lightTheme}
+  data-theme-hash={themeHash}
+>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.png" />
+
+    <!-- Preload fonts -->
+    <Font cssVariable="--font-primary" preload />
+    <Font cssVariable="--font-secondary" preload />
+    <Font cssVariable="--font-headings" preload />
+    <Font cssVariable="--font-code" preload />
+
+    <!-- Theme Manager -->
+    <!-- <ThemeManager /> -->
+
+    <!-- SEO slot - pages inject SEO component here -->
+    <slot name="seo" />
+
+    <!-- Additional head content -->
+    <slot name="head" />
+    
+    <!-- Twitter Widgets Script -->
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <!-- <link href="/pagefind/pagefind-ui.css" rel="stylesheet" /> -->
+    <!-- <script src="/pagefind/pagefind-ui.js" is:inline /> -->
+  </head>
+
+  <body class={`min-h-screen ${bodyClass}`}>
+    <!-- Fallback for JS disabled -->
+    <noscript>
+      <style>
+        .animate {
+          opacity: 1;
+          translate: var(--tw-translate-x) calc(var(--spacing) * 0);
+        }
+      </style>
+    </noscript>
+
+    <!-- Header -->
+    <Header />
+
+    <!-- Main content -->
+    <main id="main-content" class="pt-16">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <Footer />
+
+    <!-- Widgets -->
+    <!-- {siteConfig.scrollToTop && <ScrollToTop />} -->
+
+    <!-- <ImageGalleryManager /> -->
+    
+    <!-- {siteConfig.commandPaletteConfig.enabled && <CommandPalette />} -->
+    
+    <!-- {siteConfig.commandPaletteConfig.search.enabled && <PagefindSearch />} -->
+
+    <!-- Scripts -->
+    <ScrollScript />
+    <AnimationScript />
+    <CollapsibleCalloutsScript />
+
+    <!-- Additional page-specific scripts -->
+    <slot name="scripts" />
+
+    <!-- GLightbox initialization -->
+    <script type="module" src="/src/scripts/glightbox-init.ts"></script>
+  </body>
+</html>

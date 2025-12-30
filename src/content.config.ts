@@ -11,6 +11,7 @@ const postsCollection = defineCollection({
     description: z.string().nullable().optional().default('No description provided'),
     category: z.enum(POST_CATEGORIES).default("travel"),
     date: z.coerce.date().default(() => new Date()),
+    lastUpdated: z.coerce.date().optional(),
     tags: z.array(z.string()).nullable().optional(),
     draft: z.boolean().optional(),
     featured: z.boolean().optional(),
@@ -36,6 +37,7 @@ const pagesCollection = defineCollection({
   schema: z.object({
     title: z.string().optional().default('Untitled Page'),
     description: z.string().nullable().optional().default('No description provided'),
+    lastUpdated: z.coerce.date().optional(),
     draft: z.boolean().optional(),
     cover: z.any().nullable().optional().transform((val) => {
       // Handle various Obsidian syntax formats
@@ -92,7 +94,7 @@ const docsCollection = defineCollection({
     series: z.string().nullable().optional(),
     seriesOrder: z.number().nullable().optional(),
     order: z.number().default(0),
-    lastModified: z.coerce.date().optional(),
+    lastUpdated: z.coerce.date().optional(),
     version: z.string().nullable().optional(),
     cover: z.any().nullable().optional().transform((val) => {
       // Handle various Obsidian syntax formats

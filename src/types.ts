@@ -214,7 +214,6 @@ export interface SiteConfig {
   // Theme & UI
   defaultTheme: "light";
   availableThemes: ["light", "dark"];
-  featureButton: "mode" | "none";
   scrollToTop: boolean;
   
   // Profile Picture
@@ -230,8 +229,7 @@ export interface SiteConfig {
 
   // Layout
   layout: {
-    innerContentWidth: string;
-    outerContentWidth: string;
+    contentWidth: string;
   };
 
   // Navigation
@@ -241,8 +239,8 @@ export interface SiteConfig {
   };
 
   // Command Palette
-  commandPaletteConfig: CommandPaletteConfig; // Fixed: Not an array!
-
+  commandPaletteConfig: CommandPaletteConfig;
+  
   // Table of Contents
   tableOfContents: {
     enabled: boolean;

@@ -1,0 +1,48 @@
+---
+// Arrow.astro
+interface Props {
+  direction: 'left' | 'right';
+  size?: string;
+  position?: 'absolute' | 'relative';
+  class?: string;
+}
+
+const { direction, size = '5', position = 'absolute', class: className = '' } = Astro.props;
+
+// Position classes based on direction
+const positionClass = direction === 'left' ? 'left-2 top-1/2 -translate-y-1/2' : 'right-2 top-1/2 -translate-y-1/2';
+
+// Animation classes based on direction for the line
+const lineAnimationClass = direction === 'left' 
+  ? 'translate-x-3 scale-x-0 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-hover:scale-x-100 group-focus-visible:translate-x-0 group-focus-visible:scale-x-100'
+  : 'translate-x-3 scale-x-0 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-hover:scale-x-100 group-focus-visible:translate-x-0 group-focus-visible:scale-x-100';
+
+// Animation classes based on direction for the polyline
+const polylineAnimationClass = direction === 'left'
+  ? 'translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0'
+  : '-translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0';
+
+// Polyline points based on direction
+const polylinePoints = direction === 'left' ? '12 5 5 12 12 19' : '12 5 19 12 12 19';
+
+// Combine all classes
+const allClasses = `${position} ${positionClass} size-${size} fill-none stroke-current stroke-2 ${className}`.trim();
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  class={allClasses}
+>
+  <line
+    x1="5"
+    y1="12"
+    x2="19"
+    y2="12"
+    class={lineAnimationClass}
+  />
+  <polyline
+    points={polylinePoints}
+    class={polylineAnimationClass}
+  />
+</svg>

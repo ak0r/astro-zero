@@ -1,0 +1,25 @@
+---
+import { siteConfig } from '@/site.config';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const contentWidth = siteConfig.layout.contentWidth || 'md';
+const maxWidthMap: Record<string, string> = {
+  'sm': 'max-w-(--breakpoint-sm)',
+  'md': 'max-w-(--breakpoint-md)',
+  'lg': 'max-w-(--breakpoint-lg)',
+  'xl': 'max-w-(--breakpoint-xl)',
+  '2xl': 'max-w-(--breakpoint-2xl)',
+};
+const maxWidthClass = maxWidthMap[contentWidth] || 'max-w-(--breakpoint-md)';
+const allClasses = `relative mx-auto px-4 sm:px-6 lg:px-8 ${className} ${maxWidthClass}`.trim();
+
+---
+
+<div class={allClasses}>
+  <slot />
+</div>

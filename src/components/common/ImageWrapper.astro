@@ -1,0 +1,71 @@
+---
+import { Picture } from "astro:assets";
+import type { ResolvedImage } from "@/types";
+
+type Props = {
+  src: ResolvedImage | null;
+  alt: string;
+  width?: number;
+  height?: number;
+  basePath?: string;
+  class?: string;
+  loading?: "lazy" | "eager";
+  size?: "default" | "wide";
+  layout?: 'constrained' | 'full-width' | 'fixed' | 'none';
+  fit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  position?: string;
+  caption?: string;
+};
+
+const {
+  src,
+  alt,
+  width = 900,
+  height = 600,
+  basePath = "",
+  class: className,
+  loading = "lazy",
+  size = "default",
+  layout = 'constrained',
+  fit = 'cover',
+  position = "center",
+  caption,
+  ...rest
+} = Astro.props as Props;
+
+
+---
+{src ? (
+  src.kind === 'astro' ? (
+    <figure class="">
+      <Picture
+        src={src.image}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="auto"
+        format="webp, avif"
+        class:list={[className, 'overflow-hidden relative']}
+        layout={layout}
+        fit={fit}
+        position={position}
+        {...rest}
+      />
+      {caption && (
+        <figcaption class="mt-2 text-sm text-center text-content-subtle sm:text-base md:text-[1rem] leading-snug">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  ) : (
+    <figure class="">
+      <img src={src.url} alt={alt} class:list={[className, 'overflow-hidden relative']} loading={loading} />
+      {caption && (
+        <figcaption class="mt-2 text-sm text-center text-content-subtle sm:text-base md:text-[1rem] leading-snug">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  )
+) : null}

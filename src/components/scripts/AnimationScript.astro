@@ -1,0 +1,21 @@
+---
+// Animation script for .animate elements
+---
+
+<script>
+  function initAnimations() {
+    const animateElements = document.querySelectorAll(".animate");
+
+    animateElements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add("show");
+      }, index * 100);
+    });
+  }
+
+  // Run on initial load
+  document.addEventListener("DOMContentLoaded", initAnimations);
+
+  // Re-run on Astro page transitions
+  document.addEventListener("astro:after-swap", initAnimations);
+</script>

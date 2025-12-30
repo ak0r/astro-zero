@@ -1,0 +1,48 @@
+---
+// Scroll handling script
+---
+
+<script>
+  function initScrollHandling() {
+    // Update scroll state on document
+    function onScroll() {
+      if (window.scrollY > 0) {
+        document.documentElement.classList.add("scrolled");
+      } else {
+        document.documentElement.classList.remove("scrolled");
+      }
+    }
+
+    // Smooth scroll to top
+    function scrollToTop(event: Event) {
+      event.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    // Scroll to previous page
+    function scrollToPrev() {
+      window.history.back();
+    }
+
+    // Initialize scroll state
+    onScroll();
+
+    // Attach event listeners
+    const backToTop = document.getElementById("back-to-top");
+    backToTop?.addEventListener("click", scrollToTop);
+
+    const backToPrev = document.getElementById("back-to-prev");
+    backToPrev?.addEventListener("click", scrollToPrev);
+
+    document.addEventListener("scroll", onScroll, { passive: true });
+  }
+
+  // Run on initial load
+  document.addEventListener("DOMContentLoaded", initScrollHandling);
+
+  // Re-run on Astro page transitions
+  document.addEventListener("astro:after-swap", initScrollHandling);
+</script>
