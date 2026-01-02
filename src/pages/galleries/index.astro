@@ -7,16 +7,23 @@ import FilterTabs from '@/components/layout/FilterTabs.astro';
 import GalleryGrid from '@/components/content/GalleryGrid.astro';
 import { sortEntriesByDate } from '@/utils/entries';
 import { siteConfig } from '@/site.config';
+import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 
 // Fetch galleries
 const allGalleries = await getCollection('gallery', ({ data }) => !data.draft);
 const sortedGalleries = sortEntriesByDate(allGalleries);
 const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
 
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+
 ---
 
 <BaseLayout>
   <Container class="py-8">
+    
+    <Breadcrumbs items={breadcrumbs} class="my-6" />
     
     <PageHeader
       title="Photo Galleries"

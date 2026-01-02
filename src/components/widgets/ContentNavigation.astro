@@ -1,0 +1,76 @@
+---
+import type { Post, Gallery } from '@/types';
+import Arrow from '@/components/common/AnimatedArrow.astro';
+
+interface Props {
+  prevEntry?: Post | Gallery;
+  nextEntry?: Post | Gallery;
+  seriesName?: string;
+}
+
+const { prevEntry, nextEntry, seriesName } = Astro.props;
+
+// Helper function to get the base path from collection
+const getBasePath = (entry: Post | Gallery): string => {
+  return entry.collection === 'posts' ? '/posts' : '/galleries';
+};
+---
+{ ( prevEntry || nextEntry) && (
+  <section class="mt-12 pt-8 border-t border-ui">
+    {
+      seriesName && (
+        <div class="mb-4">
+          <p class="text-sm">
+            Continue in <span class="font-medium">{seriesName}</span>
+          </p>
+        </div>
+      )
+    }
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Previous Entry -->
+      <div class="">
+        {prevEntry ? (
+          <a
+            href={`${getBasePath(prevEntry)}/${prevEntry.id}`}
+            class="internal-link post-nav group flex gap-4 p-2 sm:p-4 rounded-lg border border-ui transition-all"
+          >
+            <div class="shrink-0 flex muted-2 content-center transition-colors">
+              <Arrow direction="left" class='size-5 justify-items-start' position="relative" />
+            </div>
+            <div class="flex-1 min-w-0 text-left">
+              <div class="text-xs mb-1 muted-3">Previous</div>
+              <div class="font-medium muted-2 transition-colors truncate">
+                {prevEntry.data.title}
+              </div>
+            </div>
+          </a>
+        ) : (
+          <div class="h-full"></div>
+        )}
+      </div>
+      
+      <!-- Next Entry -->
+      <div class="">
+        {nextEntry ? (
+          <a
+            href={`${getBasePath(nextEntry)}/${nextEntry.id}`}
+            class="internal-link post-nav group flex gap-4 p-2 sm:p-4 rounded-lg border border-ui transition-all"
+          >
+            <div class="flex-1 min-w-0 text-right">
+              <div class="text-xs mb-1 muted-3">Next</div>
+              <div class="font-medium muted-2 transition-colors truncate">
+                {nextEntry.data.title}
+              </div>
+            </div>
+            <div class="shrink-0 flex content-center muted-2 transition-colors">
+              <Arrow direction="right" class='size-5 justify-items-end' position="relative" />
+            </div>
+          </a>
+        ) : (
+          <div class="h-full"></div>
+        )}
+      </div>
+    </div>
+  </section>
+)}

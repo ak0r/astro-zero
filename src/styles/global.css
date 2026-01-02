@@ -2,6 +2,7 @@
 @import "./colors.css";
 
 @theme {
+  
   --color-inherit: inherit;
   --color-current: currentColor;
   --color-transparent: transparent;
@@ -59,6 +60,18 @@
     @apply w-screen;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+  }
+
+  .content-1 {
+    @apply text-content-1;
+  }
+
+  .muted-2 {
+    @apply text-content-2;
+  }
+
+  .muted-3 {
+    @apply text-content-3;
   }
 
 }

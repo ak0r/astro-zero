@@ -150,7 +150,7 @@
 
 :root[data-theme="light"] {
   --theme-background: var(--theme-paper);
-  --theme-foreground: var(--theme-black)
+  --theme-foreground: var(--theme-black);
   
   --theme-content-1: var(--theme-black);
   --theme-content-2: var(--theme-base-600);
@@ -166,6 +166,7 @@
 }
 
 :root[data-theme="dark"] {
+
   --theme-background: var(--theme-black);
   --theme-foreground: var(--theme-paper);
   

@@ -9,7 +9,7 @@ interface Props {
 
 const { direction, size = '5', position = 'absolute', class: className = '' } = Astro.props;
 
-// Position classes based on direction
+// Position classes based on direction 
 const positionClass = direction === 'left' ? 'left-2 top-1/2 -translate-y-1/2' : 'right-2 top-1/2 -translate-y-1/2';
 
 // Animation classes based on direction for the line
@@ -26,7 +26,7 @@ const polylineAnimationClass = direction === 'left'
 const polylinePoints = direction === 'left' ? '12 5 5 12 12 19' : '12 5 19 12 12 19';
 
 // Combine all classes
-const allClasses = `${position} ${positionClass} size-${size} fill-none stroke-current stroke-2 ${className}`.trim();
+const allClasses = `${position} ${positionClass} fill-none stroke-current stroke-2 ${className}`.trim();
 ---
 
 <svg

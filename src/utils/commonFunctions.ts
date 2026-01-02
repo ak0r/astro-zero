@@ -35,7 +35,7 @@ export const titleify = (content: string) => {
     .join(" ");
 };
 
-export type DateFormat = 'monthDay' | 'default' | 'dayMonthYear';
+export type DateFormat = 'monthDay' | 'default' | 'dayMonthYear' | 'full';
 
 export function formatDate(date: Date, format: DateFormat = 'monthDay'): string {
   switch (format) {
@@ -62,6 +62,15 @@ export function formatDate(date: Date, format: DateFormat = 'monthDay'): string 
       const month = date.toLocaleDateString('en-US', { month: 'short' });
       const year = date.getFullYear();
       return `${day}${ordinal} ${month} ${year}`;
+    }
+
+    case 'full': {
+      // December 1st, 2025
+      const day = date.getDate();
+      const ordinal = getOrdinal(day);
+      const month = date.toLocaleDateString('en-US', { month: 'long' });
+      const year = date.getFullYear();
+      return `${month} ${day}${ordinal}, ${year}`;
     }
     
     default:

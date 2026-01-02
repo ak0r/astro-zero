@@ -1,0 +1,141 @@
+---
+import { render } from "astro:content";
+import type { Post } from '@/types';
+import { siteConfig } from '@/site.config';
+import { resolveImage } from '@/utils/images';
+import { generatePostSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+// import LinkedMentions from '@/components/widgets/LinkedMentions.astro';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import Container from '@/components/layout/Container.astro';
+import ContentNavigation from '@/components/widgets/ContentNavigation.astro';
+import { filterEntriesBy } from '@/utils/entries';
+import { getAllPosts, getTopLevelPosts, getAdjacentPosts, sortPostsByDate } from '@/utils/getContent';
+import { formatDate, getFormattedDate, calculateReadingTime, getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import IconWrapper from "@/components/common/IconWrapper.astro";
+
+export interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+// Generate SEO data
+const seoData = generatePostSEO(post, Astro.url.href);
+
+// Filter posts based on environment
+const allPosts = await getAllPosts();
+const filteredPosts = filterEntriesBy(allPosts, 'category', post.data.category);
+const sortedPosts = sortPostsByDate(filteredPosts);
+const topLevelPosts = getTopLevelPosts(sortedPosts);
+
+// Get adjacent posts for navigation
+const { prev: prevPost, next: nextPost } = getAdjacentPosts(topLevelPosts, post.id);
+
+// Process the post content
+const { Content, headings = [], remarkPluginFrontmatter } = await render(post);
+const readingTime = calculateReadingTime(post.body || '');
+const tags = post.data.tags;
+
+// Process image path
+let postImage = post.data.cover;
+
+if (Array.isArray(postImage)) {
+  postImage = postImage[0];
+}
+
+const coverImage = resolveImage(postImage);
+const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.data.title}`;
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+---
+
+<BaseLayout>
+  <!-- SEO -->
+  <SEO data={seoData} slot="seo" />
+
+  <Container class="py-8">
+
+    <div class="relative animate">
+      
+      <Breadcrumbs items={breadcrumbs} class="my-6"/>
+
+      <!-- Post header -->
+      <div class="my-8 sm:my-10 space-y-2 sm:space-y-4">
+
+        <!-- Cover Image -->
+        {coverImage && (
+          <div class="mb-10 sm:breakout">
+            <ImageWrapper
+              src={coverImage}
+              alt={coverImageAlt}
+              class="w-full mb-4 rounded-lg border border-ui shadow-lg"
+              fit="contain"
+            />
+          </div>
+        )}
+
+        <h1 class="text-2xl font-bold my-6 leading-tight">
+          {post.data.title}
+        </h1>
+
+        <div class="flex flex-wrap gap-2 text-sm font-mono muted-2">
+          <div class="flex items-center self-start gap-2">
+            <IconWrapper name="calendar-week" size={16} />
+            <time>{formatDate(post.data.date, 'full')}</time>
+          </div>
+          {readingTime && (
+            <>
+              <span class="">&bull;</span>
+              <span>
+                {readingTime.text && readingTime.text !== 'read0' && readingTime.text !== '' 
+                  ? readingTime.text 
+                  : '1 min read'}
+              </span>
+            </>
+          )}
+
+          {tags && (
+            <>
+              <span class="">&bull;</span>
+              {tags.map(tag => (
+                <div class="flex gap-2 items-center self-start text-sm font-mono">
+                  <IconWrapper name="tag" size={16} />
+                  <a
+                    href={`/posts/tag/${encodeURIComponent(tag)}`}
+                    class="badge internal-link"
+                  >
+                    {tag}
+                  </a>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <article data-pagefind-body class="animate flex flex-col gap-y-10">
+      <meta data-pagefind-filter="category[content]" content="posts" />
+      <meta data-pagefind-meta="title[content]" content={post.data.title} />
+      <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
+      
+      <!-- Article content -->
+      <div class="" id="post-content">
+        <Content />
+      </div>
+    </article>
+
+    <!-- {siteConfig.postOptions.linkedMentions.enabled && (
+      <LinkedMentions currentSlug={post.id} />
+    )} -->
+
+    <!-- Post navigation -->
+    {(prevPost || nextPost) && (
+      <ContentNavigation prevEntry={prevPost} nextEntry={nextPost} />
+    )}
+  </Container>
+</BaseLayout>

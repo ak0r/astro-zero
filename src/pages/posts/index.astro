@@ -1,15 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
 import YearGroup from '@/components/content/YearGroup.astro';
-import type { Post } from '@/types';
-import { getEntriesByYearSorted } from '@/utils/entries';
 import { getAllPosts, getTopLevelPosts, sortPostsByDate, getPostsByYearSorted } from '@/utils/getContent';
-import { getAllGalleries, sortGalleriesByDate } from '@/utils/getGallery';
+import { getAllGalleries } from '@/utils/getGallery';
 import { siteConfig } from '@/site.config';
+import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 
 // Fetch all posts and galleries
 const allPosts = await getAllPosts();
@@ -24,11 +23,13 @@ const groupedPosts = await getPostsByYearSorted(allContent);
 
 const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
 
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 ---
 
 <BaseLayout>
   <Container class="py-8">
-    
+    <Breadcrumbs items={breadcrumbs} class="my-6" />
     <PageHeader
       title="Thinking out loud."
       description="This is my personal blog, a space where I share my thoughts, ideas and other interesting things I come across."
