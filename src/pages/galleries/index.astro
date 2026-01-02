@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/Container.astro';
+import PageHeader from '@/components/layout/PageHeader.astro';
+import FilterTabs from '@/components/layout/FilterTabs.astro';
+import GalleryGrid from '@/components/content/GalleryGrid.astro';
+import { sortEntriesByDate } from '@/utils/entries';
+import { siteConfig } from '@/site.config';
+
+// Fetch galleries
+const allGalleries = await getCollection('gallery', ({ data }) => !data.draft);
+const sortedGalleries = sortEntriesByDate(allGalleries);
+const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
+
+---
+
+<BaseLayout>
+  <Container class="py-8">
+    
+    <PageHeader
+      title="Photo Galleries"
+      description="Photo collections from travels and adventures around the world."
+    />
+    
+    <!-- Filter tabs (same as posts pages) -->
+    <FilterTabs tabs={indexPageFilters} class="mb-12" />
+    
+    <!-- Gallery Grid (2 columns on desktop) -->
+    <GalleryGrid galleries={sortedGalleries} />
+    
+  </Container>
+</BaseLayout>

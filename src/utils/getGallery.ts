@@ -141,8 +141,8 @@ export async function getGalleryCoverImage(
   const imageDir = gallery.data.imageDir || './attachments';
   
   // If coverImage specified, resolve it first
-  if (gallery.data.coverImage) {
-    const resolved = resolveImage(gallery.data.coverImage);
+  if (gallery.data.cover) {
+    const resolved = resolveImage(gallery.data.cover);
     
     // If it's an Astro-optimized image, find it in the gallery images
     if (resolved?.kind === 'astro') {
@@ -160,9 +160,9 @@ export async function getGalleryCoverImage(
     }
   }
   
-  // Fallback: return first image
-  const images = await getGalleryImages(dir, imageDir);
-  return images[0] || null;
+  // // Fallback: return first image
+  // const images = await getGalleryImages(dir, imageDir);
+  // return images[0] || null;
 }
 /**
  * Gallery statistics

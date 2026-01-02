@@ -123,6 +123,7 @@ const galleryCollection = defineCollection({
     title: z.string().default('Untitled Gallery'),
     slug: z.string().optional(),
     description: z.string().nullable().optional().default('No description provided'),
+    category: z.enum(['gallery']).default('gallery'),
     date: z.coerce.date().default(() => new Date()),
     imageDir: z.string().optional(),
     cover: z.string().default('cover.jpg'),

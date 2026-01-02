@@ -114,5 +114,15 @@ export const siteConfig: SiteConfig = {
     tags: false,
     rss: false,
     analytics: false
+  },
+  
+  pageFilters: {
+    indexPageFilters: [
+      { label: 'All', href: '/posts', icon: 'layout-grid' },
+      { label: 'Travel', href: '/posts/travel', icon: 'plane' },
+      { label: 'Tech', href: '/posts/tech', icon: 'code' },
+      { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
+    ],
+    abouutPageFilters: undefined
   }
 }

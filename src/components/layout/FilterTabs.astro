@@ -1,12 +1,6 @@
 ---
 import IconWrapper from '@/components/common/IconWrapper.astro';
-
-export interface FilterTab {
-  label: string;
-  href: string;
-  icon?: string;
-  active?: boolean;
-}
+import type { FilterTab } from '@/types';
 
 interface Props {
   tabs: FilterTab[];

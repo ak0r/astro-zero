@@ -14,8 +14,10 @@ export type ProjectData = CollectionEntry<"projects">["data"];
 export type Gallery = CollectionEntry<"gallery">;
 export type GalleryData = CollectionEntry<"gallery">["data"];
 
-export const POST_CATEGORIES = ['travel', 'tech'] as const;
+export const POST_CATEGORIES = ['travel', 'tech', 'gallery'] as const;
 export type PostCategory = typeof POST_CATEGORIES[number];
+
+export type AllContentEntry = Post | Gallery;
 
 // ============================================================================
 // IMAGE TYPES
@@ -136,6 +138,13 @@ export interface SocialLink {
 export interface BreadcrumbItem {
   label: string;
   href?: string; // Optional - last item typically has no href
+}
+
+export interface FilterTab {
+  label: string;
+  href: string;
+  icon?: string;
+  active?: boolean;
 }
 
 // ============================================================================
@@ -314,4 +323,9 @@ export interface SiteConfig {
     rss: boolean;
     analytics: boolean;
   };
+
+  pageFilters: {
+    indexPageFilters?: FilterTab[];
+    abouutPageFilters?: FilterTab[];
+  }
 }

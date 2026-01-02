@@ -9,23 +9,21 @@ import type { Post } from '@/types';
 import { getEntriesByYearSorted } from '@/utils/entries';
 import { getAllPosts, getTopLevelPosts, sortPostsByDate, getPostsByYearSorted } from '@/utils/getContent';
 import { getAllGalleries, sortGalleriesByDate } from '@/utils/getGallery';
-
+import { siteConfig } from '@/site.config';
 
 // Fetch all posts and galleries
 const allPosts = await getAllPosts();
 const parentPosts = await getTopLevelPosts(allPosts);
 const sortedPosts = await sortPostsByDate(parentPosts);
+const galleries = await getAllGalleries();
+
+const allContent = [...sortedPosts, ...galleries];
 
 // Combine and sort by date
-const groupedPosts = await getPostsByYearSorted(sortedPosts);
+const groupedPosts = await getPostsByYearSorted(allContent);
 
-// Filter tabs configuration
-const filterTabs = [
-  { label: 'All', href: '/posts', icon: 'layout-grid' },
-  { label: 'Travel', href: '/posts/travel', icon: 'plane' },
-  { label: 'Tech', href: '/posts/tech', icon: 'code' },
-  { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
-];
+const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
+
 ---
 
 <BaseLayout>
@@ -36,7 +34,7 @@ const filterTabs = [
       description="This is my personal blog, a space where I share my thoughts, ideas and other interesting things I come across."
     />
     
-    <FilterTabs tabs={filterTabs} class="mb-12" />
+    <FilterTabs tabs={indexPageFilters} class="mb-12" />
     
     <div class="flex flex-col gap-16">
       {groupedPosts.map(([year, posts]) => (

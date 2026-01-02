@@ -1,10 +1,10 @@
 ---
-import type { Post } from '@/types';
-import PostEntry from './PostEntry.astro';
+import type { AllContentEntry } from '@/types';
+import ContentEntry from '@/components/content/ContentEntry.astro';
 
 interface Props {
   year: number;
-  entries: Post[];
+  entries: AllContentEntry[];
   showIcon?: boolean;
 }
 
@@ -19,7 +19,7 @@ const { year, entries, showIcon = true } = Astro.props;
   
   <div class="flex flex-col gap-1">
     {entries.map(entry => (
-      <PostEntry entry={entry} showIcon={showIcon} />
+      <ContentEntry entry={entry} showIcon={showIcon} />
     ))}
   </div>
 

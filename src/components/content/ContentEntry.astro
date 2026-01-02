@@ -1,16 +1,18 @@
 ---
 import IconWrapper from '@/components/common/IconWrapper.astro';
 import { formatDate } from '@/utils/commonFunctions';
-import type { Post } from '@/types';
+import type { Post, Gallery } from '@/types';
 
 interface Props {
-  entry: Post;
+  entry: Post | Gallery;
   showIcon?: boolean;
 }
 
 const { entry, showIcon = true } = Astro.props;
 const { title, date, category, featured } = entry.data;
-const slug = entry.id.replace(/\.(md|mdx)$/, '').replace('/index', '');
+const slug = entry.collection === 'gallery' 
+  ? `galleries/${entry.id.replace(/\.(md|mdx)$/, '')}`
+  : entry.id.replace(/\.(md|mdx)$/, '').replace('/index', '');
 
 // Determine icon
 let icon = 'file-text';
@@ -20,6 +22,8 @@ if (featured) {
   icon = 'plane';
 } else if (category === 'tech') {
   icon = 'code';
+} else if (category === 'gallery') {
+  icon = 'library-photo';
 }
 ---
 
