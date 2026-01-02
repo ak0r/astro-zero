@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { POST_CATEGORIES } from '@/types';
+import { number } from 'astro:schema';
 
 // Define schema for blog posts
 const postsCollection = defineCollection({
@@ -28,6 +29,7 @@ const postsCollection = defineCollection({
       return null;
     }),
     coverAlt: z.string().nullable().optional(),
+    order: z.number().optional(),
   }),
 });
 

@@ -1,10 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
 import YearGroup from '@/components/content/YearGroup.astro';
+import { 
+  getAllPosts, 
+  sortPostsByDate, 
+  getTopLevelPosts,
+  getPostsByYearSorted 
+} from '@/utils/getContent';
+
+import { filterEntriesBy } from '@/utils/entries';
 
 export async function getStaticPaths() {
   return [
@@ -15,24 +22,14 @@ export async function getStaticPaths() {
 
 const { category } = Astro.params;
 
-// Fetch filtered posts
-const posts = await getCollection('posts', ({ data }) => 
-  !data.draft && data.category === category
-);
-
-const sortedPosts = posts.sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
-);
+const allPosts = await getAllPosts();
+const filteredPosts = filterEntriesBy(allPosts, 'category', category);
+const sortedPosts = sortPostsByDate(filteredPosts);
+const topLevelPosts = getTopLevelPosts(sortedPosts);
 
 // Group by year
-const postsByYear = sortedPosts.reduce((acc, post) => {
-  const year = post.data.date.getFullYear();
-  if (!acc[year]) acc[year] = [];
-  acc[year].push(post);
-  return acc;
-}, {} as Record<number, typeof posts>);
-
-const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+const postsByYear = await getPostsByYearSorted(topLevelPosts);
+const nonEmptyYears = postsByYear.filter(([year, posts]) => posts.length > 0);
 
 // Page metadata
 const titles = {
@@ -64,10 +61,10 @@ const filterTabs = [
     <FilterTabs tabs={filterTabs} class="mb-12" />
     
     <div class="flex flex-col gap-16">
-      {years.map(year => (
+      {nonEmptyYears.map(([year, posts]) => (
         <YearGroup 
-          year={year} 
-          posts={postsByYear[year]}
+          year={parseInt(year)} 
+          entries={posts}
           showIcon={true}
         />
       ))}

@@ -1,90 +1,29 @@
 @import "tailwindcss";
+@import "./colors.css";
 
 @theme {
-  
-  /* Semantic Colors - Light Mode Defaults */
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
-  
-  /* Text Hierarchy (4 shades) */
-  --color-content-1: #0a0a0a;
-  --color-content-2: #525252;
-  --color-content-3: #737373;
-  --color-content-4: #a3a3a3;
-  
-  /* UI Elements */
-  --color-ui: #e5e5e5;
-  
-  /* Brand Colors */
-  --color-primary: #f97316;
-  --color-secondary: #0ea5e9;
-  
-  /* Status Colors */
-  --color-info: #3b82f6;
-  --color-tip: #8b5cf6;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  
-  /* Accent/Highlight */
-  --color-accent: #fef08a;
-
   --color-inherit: inherit;
   --color-current: currentColor;
   --color-transparent: transparent;
+
   --font-primary: var(--font-primary);
   --font-secondary: var(--font-secondary);
   --font-headings: var(--font-headings);
   --font-code: var(--font-code); 
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #0a0a0a;
-    --color-foreground: #fafafa;
-    
-    --color-content-1: #fafafa;
-    --color-content-2: #e5e5e5;
-    --color-content-3: #a3a3a3;
-    --color-content-4: #737373;
-    
-    --color-ui: #262626;
-    
-    --color-primary: #fb923c;
-    --color-secondary: #38bdf8;
-    
-    --color-info: #60a5fa;
-    --color-tip: #a78bfa;
-    --color-success: #4ade80;
-    --color-warning: #fbbf24;
-    --color-error: #f87171;
-    
-    --color-accent: #fef08a;
-  }
-}
+@theme inline {
 
-/* Manual dark mode override (class-based) */
-.dark {
-  --color-background: #0a0a0a;
-  --color-foreground: #fafafa;
-  
-  --color-content-1: #fafafa;
-  --color-content-2: #e5e5e5;
-  --color-content-3: #a3a3a3;
-  --color-content-4: #737373;
-  
-  --color-ui: #262626;
-  
-  --color-primary: #fb923c;
-  --color-secondary: #38bdf8;
-  
-  --color-info: #60a5fa;
-  --color-tip: #a78bfa;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-error: #f87171;
-  
-  --color-accent: #fef08a;
+  --color-background: var(--theme-background);
+  --color-foreground: var(--theme-foreground);
+  --color-content-1: var(--theme-content-1);
+  --color-content-2: var(--theme-content-2);
+  --color-content-3: var(--theme-content-3);
+  --color-surface-elevated: var(--theme-surface-elevated);
+  --color-surface-muted: var(--theme-surface-muted);
+  --color-ui: var(--theme-ui);
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
 }
 
 @layer base {

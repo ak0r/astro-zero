@@ -6,27 +6,18 @@ import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
 import YearGroup from '@/components/content/YearGroup.astro';
 import type { Post } from '@/types';
+import { getEntriesByYearSorted } from '@/utils/entries';
+import { getAllPosts, getTopLevelPosts, sortPostsByDate, getPostsByYearSorted } from '@/utils/getContent';
+import { getAllGalleries, sortGalleriesByDate } from '@/utils/getGallery';
+
 
 // Fetch all posts and galleries
-const posts = await getCollection('posts', ({ data }) => !data.draft);
-const galleries = await getCollection('gallery', ({ data }) => !data.draft);
+const allPosts = await getAllPosts();
+const parentPosts = await getTopLevelPosts(allPosts);
+const sortedPosts = await sortPostsByDate(parentPosts);
 
 // Combine and sort by date
-const allContent = [...posts, ...galleries].sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
-);
-
-// Group by year
-const contentByYear = allContent.reduce((acc, item) => {
-  const year = item.data.date.getFullYear();
-  if (!acc[year]) acc[year] = [];
-  acc[year].push(item);
-  return acc;
-}, {} as Record<number, Post[]>);
-
-const years = Object.keys(contentByYear)
-  .map(Number)
-  .sort((a, b) => b - a);
+const groupedPosts = await getPostsByYearSorted(sortedPosts);
 
 // Filter tabs configuration
 const filterTabs = [
@@ -48,14 +39,12 @@ const filterTabs = [
     <FilterTabs tabs={filterTabs} class="mb-12" />
     
     <div class="flex flex-col gap-16">
-      {years.map(year => (
+      {groupedPosts.map(([year, posts]) => (
         <YearGroup 
-          year={year} 
-          posts={contentByYear[year]}
-          showIcon={true}
+          year={parseInt(year)} 
+          entries={posts}
         />
       ))}
     </div>
-    
   </Container>
 </BaseLayout>

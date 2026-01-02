@@ -11,8 +11,8 @@ export type Page = CollectionEntry<"pages">;
 export type PageData = CollectionEntry<"pages">["data"];
 export type Project = CollectionEntry<"projects">;
 export type ProjectData = CollectionEntry<"projects">["data"];
-export type Docs = CollectionEntry<"docs">;
-export type DocsData = CollectionEntry<"docs">["data"];
+export type Gallery = CollectionEntry<"gallery">;
+export type GalleryData = CollectionEntry<"gallery">["data"];
 
 export const POST_CATEGORIES = ['travel', 'tech'] as const;
 export type PostCategory = typeof POST_CATEGORIES[number];

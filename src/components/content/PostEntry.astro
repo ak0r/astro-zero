@@ -4,20 +4,18 @@ import { formatDate } from '@/utils/commonFunctions';
 import type { Post } from '@/types';
 
 interface Props {
-  post: Post;
+  entry: Post;
   showIcon?: boolean;
 }
 
-const { post, showIcon = true } = Astro.props;
-const { title, date, category, featured } = post.data;
-const slug = post.id.replace(/\.mdx?$/, '');
+const { entry, showIcon = true } = Astro.props;
+const { title, date, category, featured } = entry.data;
+const slug = entry.id.replace(/\.(md|mdx)$/, '').replace('/index', '');
 
-// Determine icon based on type
+// Determine icon
 let icon = 'file-text';
 if (featured) {
   icon = 'star';
-} else if (post.collection === 'gallery') {
-  icon = 'library-photo';
 } else if (category === 'travel') {
   icon = 'plane';
 } else if (category === 'tech') {
