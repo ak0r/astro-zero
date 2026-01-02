@@ -30,13 +30,13 @@ const getBasePath = (entry: Post): string => {
       >
         <IconWrapper
           name="arrow-left"
-          class="shrink-0 size-5 muted-2 transition-transform group-hover:-translate-x-1"
+          class="shrink-0 size-5 text-content-3 transition-transform group-hover:-translate-x-1"
         />
         <div class="flex flex-col items-start overflow-hidden text-left text-wrap">
-          <div class="text-xs mb-1 muted-3">
+          <div class="text-xs mb-1 text-content-3">
             {isSubpost ? 'Previous Subpost' : 'Previous Post'}
           </div>
-          <div class="w-full text-left text-sm muted-2 text-balance text-ellipsis">
+          <div class="w-full text-left text-sm text-content-2 text-balance text-ellipsis">
             {
               prevEntry.data.title || 
               (isSubpost ? 'No older subposts' : "You're at the oldest post!")
@@ -57,13 +57,13 @@ const getBasePath = (entry: Post): string => {
       >
         <IconWrapper
           name="corner-left-up"
-          class="shrink-0 size-5 muted-2 transition-transform group-hover:-translate-y-1"
+          class="shrink-0 size-5 text-content-3 transition-transform group-hover:-translate-y-1"
         />
         <div class="flex flex-col items-center overflow-hidden text-center text-wrap">
-          <div class="text-xs mb-1 muted-3">
+          <div class="text-xs mb-1 text-content-3">
             Parent Post
           </div>
-          <div class="w-full text-left text-sm muted-2 text-ellipsis">
+          <div class="w-full text-left text-sm text-content-2 text-ellipsis">
             {
               parentEntry.data.title || 'No parent post'
             }
@@ -81,10 +81,10 @@ const getBasePath = (entry: Post): string => {
         aria-disabled={!nextEntry}
       >
         <div class="flex flex-col items-end overflow-hidden text-right text-wrap">
-          <div class="text-xs mb-1 muted-3">
+          <div class="text-xs mb-1 text-content-3">
             {isSubpost ? 'Next Subpost' : 'Next Post'}
           </div>
-          <div class="w-full text-right text-sm muted-2 text-balance text-ellipsis">
+          <div class="w-full text-right text-sm text-content-2 text-balance text-ellipsis">
             {
               nextEntry.data.title || 
               (isSubpost ? 'No newer subposts' : "You're at the newest post!")
@@ -93,7 +93,7 @@ const getBasePath = (entry: Post): string => {
         </div>
         <IconWrapper
           name="arrow-right"
-          class="shrink-0 size-5 muted-2 transition-transform group-hover:translate-x-1"
+          class="shrink-0 size-5 text-content-3 transition-transform group-hover:translate-x-1"
         />
       </LinkWrapper>
     ) : (

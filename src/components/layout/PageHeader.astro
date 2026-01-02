@@ -28,10 +28,10 @@ const breadcrumbs = getBreadcrumbsFromPath(breadcrumb || Astro.url.pathname);
   <div class="content-stretch flex flex-col gap-12">
     <div class="flex flex-col gap-2">
       {breadcrumb && (
-        <Breadcrumbs items={breadcrumbs} separator="slash" class="text-sm font-mono text-content-3" />
+        <Breadcrumbs items={breadcrumbs} separator="slash" class="text-sm" />
       )}
       <div class="flex flex-col gap-4">
-        <h1 class="text-4xl md:text-5xl font-bold text-content-1">
+        <h1 class="text-3xl md:text-4xl font-bold text-content">
           {title}
         </h1>
 
@@ -47,7 +47,7 @@ const breadcrumbs = getBreadcrumbsFromPath(breadcrumb || Astro.url.pathname);
     </div>
 
     {description && (
-      <p class="text-lg text-content-2">
+      <p class="text-lg text-content-3">
         {description}
       </p>
     )}

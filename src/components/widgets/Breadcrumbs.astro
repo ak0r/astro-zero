@@ -52,7 +52,7 @@ breadcrumbs.push(...items);
           {item.href && !isLast ? (
             <a
               href={item.href}
-              class="text-content-muted hover:text-content-primary transition-colors"
+              class="text-content-3 hover:text-content transition-colors"
               aria-label={isHome ? 'Go to homepage' : `Go to ${item.label}`}
             >
               {isHome ? (
@@ -63,7 +63,7 @@ breadcrumbs.push(...items);
             </a>
           ) : (
             <span 
-              class={isLast ? 'text-content-primary font-medium' : 'text-content-muted'}
+              class={isLast ? 'text-content font-medium' : 'text-content-3'}
               aria-current={isLast ? 'page' : undefined}
             >
               {isHome ? (
@@ -77,7 +77,7 @@ breadcrumbs.push(...items);
           {/* Separator (not for last item) */}
           {!isLast && (
             <span 
-              class="text-content-muted separator" 
+              class="text-content-3 separator" 
               aria-hidden="true"
               set:html={separatorContent}
             />

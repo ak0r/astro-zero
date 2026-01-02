@@ -28,18 +28,18 @@ function getPartLabel(post: Post, index: number) {
 ---
 
 <details class={`series-widget ${className}`} close>
-  <summary class="flex items-center justify-between cursor-pointer p-4 card-interactive transition-colors group">
+  <summary class="flex items-center justify-between cursor-pointer p-4 border border-ui rounded-lg hover:bg-surface-2/50 transition-colors group">
     <div class="flex items-center gap-3">
       <IconWrapper name="book" size={20} class="text-primary shrink-0" />
       <div>
-        <h3 class="text-sm font-semibold text-content-1">Series</h3>
+        <h3 class="text-sm font-semibold text-content">Series</h3>
         <p class="text-sm text-content-2">{title}</p>
       </div>
     </div>
     <IconWrapper 
       name="chevron-down" 
       size={16} 
-      class="text-content-3 transition-transform group-hover:text-content-1 chevron-icon" 
+      class="text-content-3 transition-transform group-hover:text-content chevron-icon" 
     />
   </summary>
   
@@ -63,7 +63,7 @@ function getPartLabel(post: Post, index: number) {
             ) : (
               <a 
                 href={`/posts/${slug}`}
-                class="flex items-start gap-3 p-3 rounded-md transition-colors hover:bg-surface-elevated text-content-2 hover:text-content-1"
+                class="flex items-start gap-3 p-3 rounded-md transition-colors hover:bg-surface-2/50 text-content-3 hover:text-content"
               >
                 <IconWrapper name="circle" size={16} class="text-content-4 flex-shrink-0 mt-0.5" />
                 <div class="flex-1 min-w-0">

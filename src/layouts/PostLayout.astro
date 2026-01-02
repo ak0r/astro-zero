@@ -102,7 +102,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
           {post.data.title}
         </h1>
 
-        <div class="flex flex-wrap gap-2 text-sm font-mono muted-2">
+        <div class="flex flex-wrap gap-2 text-sm font-mono text-content-3">
           <div class="flex items-center self-start gap-2">
             <IconWrapper name="calendar-week" size={16} />
             <time>{formatDate(post.data.date, 'full')}</time>
