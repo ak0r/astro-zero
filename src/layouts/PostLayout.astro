@@ -1,7 +1,6 @@
 ---
 import { render } from "astro:content";
 import type { Post } from '@/types';
-import { siteConfig } from '@/site.config';
 import { resolveImage } from '@/utils/images';
 import { generatePostSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -11,10 +10,18 @@ import ImageWrapper from '@/components/common/ImageWrapper.astro';
 import Container from '@/components/layout/Container.astro';
 import ContentNavigation from '@/components/widgets/ContentNavigation.astro';
 import { filterEntriesBy } from '@/utils/entries';
-import { getAllPosts, getTopLevelPosts, getAdjacentPosts, sortPostsByDate } from '@/utils/getContent';
-import { formatDate, getFormattedDate, calculateReadingTime, getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import { 
+  getAllPosts, 
+  getTopLevelPosts, 
+  getAdjacentPosts, 
+  sortPostsByDate, 
+  getParentId, 
+  getSeriesContext 
+  } from '@/utils/getContent';
+import { formatDate, calculateReadingTime, getBreadcrumbsFromPath } from '@/utils/commonFunctions';
 import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 import IconWrapper from "@/components/common/IconWrapper.astro";
+import SeriesPosts from "@/components/widgets/SeriesPosts.astro";
 
 export interface Props {
   post: Post;
@@ -31,8 +38,22 @@ const filteredPosts = filterEntriesBy(allPosts, 'category', post.data.category);
 const sortedPosts = sortPostsByDate(filteredPosts);
 const topLevelPosts = getTopLevelPosts(sortedPosts);
 
+// Get series context
+const seriesContext = getSeriesContext(allPosts, post);
+
+const { 
+  isCurrentParent,
+  isCurrentSubpost,
+  isInSeries,
+  seriesId, 
+  seriesPosts,
+  nextInSeries,
+  prevInSeries,
+  parentPost,  
+} = seriesContext;
+
 // Get adjacent posts for navigation
-const { prev: prevPost, next: nextPost } = getAdjacentPosts(topLevelPosts, post.id);
+const { older: prevPost, newer: nextPost, parent: parentPostSeries } = getAdjacentPosts(sortedPosts, post.id);
 
 // Process the post content
 const { Content, headings = [], remarkPluginFrontmatter } = await render(post);
@@ -59,10 +80,9 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 
   <Container class="py-8">
 
-    <div class="relative animate">
-      
+    <div class="relative animate">      
       <Breadcrumbs items={breadcrumbs} class="my-6"/>
-
+      
       <!-- Post header -->
       <div class="my-8 sm:my-10 space-y-2 sm:space-y-4">
 
@@ -116,6 +136,16 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
           )}
         </div>
       </div>
+
+      {/* Series Widget (if in series) */}
+      {isInSeries && seriesPosts.length > 1 && (
+        <SeriesPosts 
+          seriesPosts={seriesPosts}
+          currentPostId={post.id}
+          seriesTitle={parentPost?.data.title}
+          class="mb-8"
+        />
+      )}
     </div>
 
     <article data-pagefind-body class="animate flex flex-col gap-y-10">
@@ -134,8 +164,11 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
     )} -->
 
     <!-- Post navigation -->
-    {(prevPost || nextPost) && (
-      <ContentNavigation prevEntry={prevPost} nextEntry={nextPost} />
-    )}
+    <ContentNavigation 
+      prevEntry={prevPost} 
+      nextEntry={nextPost} 
+      parentEntry={isCurrentSubpost ? parentPost : undefined}
+    />
+
   </Container>
 </BaseLayout>

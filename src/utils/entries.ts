@@ -225,56 +225,68 @@ export function getEntriesByIds<T extends { id: string }>(
 // ============================================================================
 
 /**
- * Get adjacent entries (prev/next)
- * @param entries - Sorted array of entries
- * @param currentId - ID of current entry
- * @returns Object with prev and next entries
+ * Get adjacent entries with series awareness
+ * @param entries - All entries
+ * @param currentId - Current entry ID
+ * @returns Object with newer, older, and parent entries
  */
-export function getAdjacentEntries<T extends { id: string }>(
+export function getAdjacentEntriesWithSeries<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
   entries: T[],
   currentId: string
 ): {
-  prev: T | null;
-  next: T | null;
+  newer: T | null;
+  older: T | null;
+  parent: T | null;
 } {
-  const currentIndex = entries.findIndex((entry) => entry.id === currentId);
-
+  // If current is a subpost, navigate within series
+  if (isSubpost(currentId)) {
+    const parentId = getParentId(currentId);
+    const parent = entries.find((entry) => entry.id === parentId) || null;
+    
+    // Get all subposts in this series
+    const subposts = entries
+      .filter((entry) => 
+        isSubpost(entry.id) &&
+        getParentId(entry.id) === parentId &&
+        !entry.data.draft
+      )
+      .sort((a, b) => {
+        const dateDiff = a.data.date.valueOf() - b.data.date.valueOf();
+        if (dateDiff !== 0) return dateDiff;
+        const orderA = a.data.order ?? 0;
+        const orderB = b.data.order ?? 0;
+        return orderA - orderB;
+      });
+    
+    const currentIndex = subposts.findIndex((entry) => entry.id === currentId);
+    
+    if (currentIndex === -1) {
+      return { newer: null, older: null, parent };
+    }
+    
+    return {
+      newer: currentIndex < subposts.length - 1 ? subposts[currentIndex + 1] : null,
+      older: currentIndex > 0 ? subposts[currentIndex - 1] : null,
+      parent,
+    };
+  }
+  
+  // If current is a parent or standalone, navigate between top-level posts
+  const parentPosts = entries.filter((entry) => !isSubpost(entry.id));
+  const currentIndex = parentPosts.findIndex((entry) => entry.id === currentId);
+  
   if (currentIndex === -1) {
-    return { prev: null, next: null };
+    return { newer: null, older: null, parent: null };
   }
-
+  
   return {
-    prev: currentIndex > 0 ? entries[currentIndex - 1] : null,
-    next: currentIndex < entries.length - 1 ? entries[currentIndex + 1] : null,
+    newer: currentIndex > 0 ? parentPosts[currentIndex - 1] : null,
+    older: currentIndex < parentPosts.length - 1 ? parentPosts[currentIndex + 1] : null,
+    parent: null,
   };
-}
-
-/**
- * Get adjacent entries within a specific group/category
- * @param allEntries - All entries
- * @param currentEntry - Current entry
- * @param groupField - Field name to group by
- * @returns Object with prev and next entries within the same group
- */
-export function getAdjacentInGroup<T extends { id: string; data: Record<string, any> }>(
-  allEntries: T[],
-  currentEntry: T,
-  groupField: keyof T['data']
-): {
-  prev: T | null;
-  next: T | null;
-} {
-  const groupValue = currentEntry.data[groupField];
-
-  if (!groupValue) {
-    return getAdjacentEntries(allEntries, currentEntry.id);
-  }
-
-  const groupEntries = allEntries.filter(
-    (entry) => entry.data[groupField] === groupValue
-  );
-
-  return getAdjacentEntries(groupEntries, currentEntry.id);
 }
 
 // ============================================================================
@@ -428,78 +440,99 @@ export function paginateEntries<T>(
 /**
  * Check if an entry is a subpost (part of a series)
  * @param entryId - Entry ID to check
- * @returns True if entry ID contains '/' (is a subpost)
+ * @returns True if entry ID contains '/'
  */
 export function isSubpost(entryId: string): boolean {
-  return entryId.includes('/') && !entryId.endsWith('/index');
+  return entryId.includes('/');
 }
 
 /**
- * Check if an entry is a series parent (index file)
- * @param entryId - Entry ID to check
- * @returns True if entry ID ends with '/index'
+ * Get parent ID from a subpost
+ * @param subpostId - Subpost ID
+ * @returns Parent series ID
  */
-export function isSeriesParent(entryId: string): boolean {
-  return entryId.endsWith('/index');
-}
-
-/**
- * Get parent ID from a subpost or series parent ID
- * @param entryId - Entry ID (subpost or parent)
- * @returns Parent series ID or null
- * @example
- * getParentId('homelab-setup/hardware') → 'homelab-setup'
- * getParentId('homelab-setup/index') → 'homelab-setup'
- * getParentId('standalone-post') → null
- */
-export function getParentId(entryId: string): string | null {
-  if (!entryId.includes('/')) return null;
-  
-  // Remove '/index' if present, then get first segment
-  const cleaned = entryId.replace('/index', '');
-  const segments = cleaned.split('/');
-  return segments[0];
-}
-
-/**
- * Get parent entry from a subpost
- * @param entries - All entries
- * @param currentEntryId - Current entry ID
- * @returns Parent entry or null
- */
-export function getParentEntry<T extends { id: string }>(
-  entries: T[],
-  currentEntryId: string
-): T | null {
-  const parentId = getParentId(currentEntryId);
-  if (!parentId) return null;
-  
-  return entries.find((entry) => entry.id === `${parentId}/index`) || null;
+export function getParentId(subpostId: string): string {
+  return subpostId.split('/')[0];
 }
 
 /**
  * Get all subposts for a series parent
  * @param entries - All entries
- * @param parentId - Parent series ID (without '/index')
+ * @param parentId - Parent series ID
  * @returns Array of subposts sorted by order field
  */
 export function getSubpostsForParent<T extends { 
   id: string; 
-  data: { order?: number } 
+  data: { draft?: boolean; order?: number; date: Date } 
 }>(
   entries: T[],
   parentId: string
 ): T[] {
   return entries
-    .filter((entry) => {
-      // Must start with parentId/ and not be the index itself
-      return entry.id.startsWith(`${parentId}/`) && !entry.id.endsWith('/index');
-    })
+    .filter((entry) => 
+      !entry.data.draft &&
+      isSubpost(entry.id) &&
+      getParentId(entry.id) === parentId
+    )
     .sort((a, b) => {
+      // First sort by date
+      const dateDiff = a.data.date.valueOf() - b.data.date.valueOf();
+      if (dateDiff !== 0) return dateDiff;
+      
+      // Then by order if dates are same
       const orderA = a.data.order ?? 0;
       const orderB = b.data.order ?? 0;
       return orderA - orderB;
     });
+}
+
+/**
+ * Check if an entry has subposts (is a series parent)
+ * @param entries - All entries
+ * @param entryId - Entry ID to check
+ * @returns True if entry has subposts
+ */
+export function hasSubposts<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
+  entries: T[],
+  entryId: string
+): boolean {
+  const subposts = getSubpostsForParent(entries, entryId);
+  return subposts.length > 0;
+}
+
+/**
+ * Get parent entry from a subpost
+ * @param entries - All entries
+ * @param subpostId - Subpost ID
+ * @returns Parent entry or null
+ */
+export function getParentEntry<T extends { id: string }>(
+  entries: T[],
+  subpostId: string
+): T | null {
+  if (!isSubpost(subpostId)) return null;
+  
+  const parentId = getParentId(subpostId);
+  return entries.find((entry) => entry.id === parentId) || null;
+}
+
+/**
+ * Get subpost count for a parent
+ * @param entries - All entries
+ * @param parentId - Parent series ID
+ * @returns Number of subposts
+ */
+export function getSubpostCount<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
+  entries: T[],
+  parentId: string
+): number {
+  return getSubpostsForParent(entries, parentId).length;
 }
 
 /**
@@ -510,12 +543,12 @@ export function getSubpostsForParent<T extends {
  */
 export function getSeriesEntries<T extends { 
   id: string; 
-  data: { order?: number } 
+  data: { draft?: boolean; order?: number; date: Date } 
 }>(
   entries: T[],
   parentId: string
 ): T[] {
-  const parent = entries.find((entry) => entry.id === `${parentId}/index`);
+  const parent = entries.find((entry) => entry.id === parentId);
   const subposts = getSubpostsForParent(entries, parentId);
   
   return parent ? [parent, ...subposts] : subposts;
@@ -529,13 +562,14 @@ export function getSeriesEntries<T extends {
  */
 export function getNextInSeries<T extends { 
   id: string; 
-  data: { order?: number } 
+  data: { draft?: boolean; order?: number; date: Date } 
 }>(
   entries: T[],
   currentEntry: T
 ): T | null {
-  const parentId = getParentId(currentEntry.id);
-  if (!parentId) return null;
+  const parentId = isSubpost(currentEntry.id) 
+    ? getParentId(currentEntry.id) 
+    : currentEntry.id;
   
   const seriesEntries = getSeriesEntries(entries, parentId);
   const currentIndex = seriesEntries.findIndex((e) => e.id === currentEntry.id);
@@ -553,13 +587,14 @@ export function getNextInSeries<T extends {
  */
 export function getPrevInSeries<T extends { 
   id: string; 
-  data: { order?: number } 
+  data: { draft?: boolean; order?: number; date: Date } 
 }>(
   entries: T[],
   currentEntry: T
 ): T | null {
-  const parentId = getParentId(currentEntry.id);
-  if (!parentId) return null;
+  const parentId = isSubpost(currentEntry.id) 
+    ? getParentId(currentEntry.id) 
+    : currentEntry.id;
   
   const seriesEntries = getSeriesEntries(entries, parentId);
   const currentIndex = seriesEntries.findIndex((e) => e.id === currentEntry.id);
@@ -576,14 +611,5 @@ export function getPrevInSeries<T extends {
 export function getTopLevelEntries<T extends { id: string }>(
   entries: T[]
 ): T[] {
-  return entries.filter((entry) => {
-    // Include standalone posts (no '/')
-    if (!entry.id.includes('/')) return true;
-    
-    // Include series parents (ends with '/index')
-    if (entry.id.endsWith('/index')) return true;
-    
-    // Exclude subposts
-    return false;
-  });
+  return entries.filter((entry) => !isSubpost(entry.id));
 }

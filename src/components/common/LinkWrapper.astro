@@ -4,7 +4,6 @@ type Props = {
   class?: string;
   external?: boolean;
   underline?: boolean;
-  variant?: 'default' | 'tag' | 'subtle' | 'accent';
   active?: boolean;
 };
 
@@ -13,35 +12,30 @@ const {
   class: className = '',
   external = false,
   underline = false,
-  variant = 'default',
   active = false,
   ...rest
 } = Astro.props;
 
-// Variant styles
-const variants = {
-  default: 'text-content-muted hover:text-content-primary',
-  tag: 'text-content-subtle hover:text-accent',
-  subtle: 'text-content-muted hover:text-content-secondary',
-  accent: 'text-accent hover:text-accent-hover',
-};
+const isExternal = external || href.startsWith('http');
 
-const variantClass = variants[variant];
 const underlineClass = underline ? 'underline underline-offset-[3px]' : '';
-const activeClass = active ? 'font-semibold text-content-primary!' : '';
+const activeClass = active ? 'font-semibold text-content-1!' : '';
+
+const combinedClass = [
+  'transition-colors duration-300 ease-in-out',
+  underlineClass,
+  activeClass,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
 ---
 
 <a
   href={href}
-  target={external ? '_blank' : '_self'}
-  rel={external ? 'noopener noreferrer' : undefined}
-  class={`
-    inline-block not-prose transition-colors duration-300 ease-in-out
-    ${variantClass}
-    ${underlineClass}
-    ${activeClass}
-    ${className}
-  `}
+  target={isExternal ? '_blank' : undefined}
+  rel={isExternal ? 'noopener noreferrer' : undefined}
+  class={combinedClass}
   {...rest}
 >
   <slot />

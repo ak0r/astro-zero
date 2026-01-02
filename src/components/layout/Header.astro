@@ -2,6 +2,8 @@
 import { siteConfig } from '@/site.config';
 import Container from '@/components/layout/Container.astro';
 import Icon from '@/components/common/IconWrapper.astro';
+import LinkWrapper from '@/components/common/LinkWrapper.astro';
+import Navigation from '@/components/layout/Navigation.astro';
 
 const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'header';
 const profilePicture = siteConfig.profilePicture;
@@ -15,14 +17,18 @@ const getHeaderProfilePictureClasses = (style: string) => {
 };
 
 const currentPath = Astro.url.pathname;
+
 ---
 
-<header id="main-header" class="sticky top-0 bg-background z-50">
+<header
+  id="main-header"
+  class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg"
+>
   <Container>
-    <div class="flex items-center justify-between h-24 relative z-50">
-      
+    <div class="flex items-center justify-between h-24 relative">
+
       <!-- Logo -->
-      <a href="/" class="hover:opacity-75 transition-opacity relative z-50">
+      <a href="/" class="hover:opacity-75 transition-opacity">
         {showProfilePicture ? (
           <img
             src={profilePicture.image}
@@ -30,7 +36,7 @@ const currentPath = Astro.url.pathname;
             class={getHeaderProfilePictureClasses(profilePicture.style)}
           />
         ) : (
-          <span class="font-semibold text-2xl text-content-1">
+          <span class="font-semibold text-2xl">
             {siteConfig.title}
           </span>
         )}
@@ -39,7 +45,7 @@ const currentPath = Astro.url.pathname;
       <!-- Mobile menu toggle -->
       <button
         id="mobile-menu-toggle"
-        class="md:hidden p-2 text-content-1 hover:bg-ui rounded-lg transition-colors relative z-50"
+        class="md:hidden p-2 hover:bg-ui rounded-lg transition-colors"
         aria-label="Toggle navigation"
         aria-expanded="false"
       >
@@ -51,111 +57,65 @@ const currentPath = Astro.url.pathname;
         </span>
       </button>
 
-      <!-- Navigation -->
-      <nav 
-        id="main-nav"
-        class="
-          fixed inset-0 bg-background/95 backdrop-blur-lg p-6 pt-24
-          md:static md:bg-transparent md:backdrop-blur-none md:p-0 md:pt-0
-          translate-x-full md:translate-x-0
-          transition-transform duration-300 ease-in-out
-          z-40
-        "
-      >
-        <ul class="
-          flex flex-col md:flex-row 
-          gap-6 md:gap-6 
-          text-lg md:text-sm 
-          font-mono
-        ">
-          {siteConfig.navigation.pages.map(page => {
-            const isActive = currentPath === page.url || currentPath.startsWith(page.url);
-            return (
-              <li>
-                <a 
-                  href={page.url}
-                  class:list={[
-                    'transition-colors hover:text-primary',
-                    isActive ? 'text-primary' : 'text-content-2'
-                  ]}
-                  target={page.url.startsWith('http') ? '_blank' : undefined}
-                >
-                  /{page.title.toLowerCase()}
-                  {page.url.startsWith('http') && (
-                    <Icon name="external-link" size={12} class="inline ml-1" />
-                  )}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+      <!-- Desktop navigation -->
+      <nav class="hidden md:block">
+        <Navigation />
       </nav>
 
     </div>
   </Container>
 </header>
 
+<nav
+  id="mobile-drawer"
+  class="
+    fixed inset-0 z-40
+    bg-surface
+    p-6 pt-24
+    translate-x-full
+    transition-transform duration-300 ease-in-out
+    md:hidden
+  "
+>
+  <Navigation />
+</nav>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.getElementById('mobile-menu-toggle');
-    const nav = document.getElementById('main-nav');
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const drawer = document.getElementById('mobile-drawer');
     const menuIcon = document.getElementById('menu-icon');
     const closeIcon = document.getElementById('close-icon');
 
-    menuToggle?.addEventListener('click', () => {
-      const isOpen = !nav?.classList.contains('translate-x-full');
-      
-      if (isOpen) {
-        // Close menu
-        nav?.classList.add('translate-x-full');
-        menuIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
-        menuToggle?.setAttribute('aria-expanded', 'false');
-      } else {
-        // Open menu
-        nav?.classList.remove('translate-x-full');
-        menuIcon?.classList.add('hidden');
-        closeIcon?.classList.remove('hidden');
-        menuToggle?.setAttribute('aria-expanded', 'true');
-      }
+    toggle?.addEventListener('click', () => {
+      const isOpen = !drawer.classList.contains('translate-x-full');
+
+      drawer.classList.toggle('translate-x-full', isOpen);
+      menuIcon.classList.toggle('hidden', !isOpen);
+      closeIcon.classList.toggle('hidden', isOpen);
+      toggle.setAttribute('aria-expanded', String(!isOpen));
     });
 
-    // Close menu when clicking nav links
-    nav?.querySelectorAll('a').forEach(link => {
+    drawer?.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        nav.classList.add('translate-x-full');
-        menuIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
-        menuToggle?.setAttribute('aria-expanded', 'false');
+        drawer.classList.add('translate-x-full');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
       });
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('#main-nav') && !target.closest('#mobile-menu-toggle')) {
-        if (nav && !nav.classList.contains('translate-x-full')) {
-          nav.classList.add('translate-x-full');
-          menuIcon?.classList.remove('hidden');
-          closeIcon?.classList.add('hidden');
-          menuToggle?.setAttribute('aria-expanded', 'false');
-        }
+      const target = e.target;
+      if (
+        !target.closest('#mobile-drawer') &&
+        !target.closest('#mobile-menu-toggle')
+      ) {
+        drawer.classList.add('translate-x-full');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
       }
     });
-
-    // Header shadow on scroll
-    const header = document.getElementById('main-header');
-    let isScrolled = false;
-    
-    const updateShadow = () => {
-      const shouldHaveShadow = window.scrollY > 0;
-      if (shouldHaveShadow !== isScrolled) {
-        isScrolled = shouldHaveShadow;
-        header?.classList.toggle('shadow-sm', shouldHaveShadow);
-      }
-    };
-
-    updateShadow();
-    window.addEventListener('scroll', updateShadow, { passive: true });
   });
 </script>

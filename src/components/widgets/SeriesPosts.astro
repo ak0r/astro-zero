@@ -1,0 +1,91 @@
+---
+import type { Post } from '@/types';
+import IconWrapper from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  seriesPosts: Post[];
+  currentPostId: string;
+  seriesTitle?: string;
+  class?: string;
+}
+
+const { seriesPosts, currentPostId, seriesTitle, class: className = '' } = Astro.props;
+
+// Get series parent for title
+const parent = seriesPosts.find(p => p.id.endsWith('/index'));
+const title = seriesTitle || parent?.data.title || 'Series';
+
+// Helper to get clean slug
+function getSlug(post: Post) {
+  return post.id.replace(/\.(md|mdx)$/, '').replace('/index', '');
+}
+
+// Helper to get part label
+function getPartLabel(post: Post, index: number) {
+  if (post.id.endsWith('/index')) return 'Overview';
+  return `Part ${index}`;
+}
+---
+
+<details class={`series-widget ${className}`} close>
+  <summary class="flex items-center justify-between cursor-pointer p-4 card-interactive transition-colors group">
+    <div class="flex items-center gap-3">
+      <IconWrapper name="book" size={20} class="text-primary shrink-0" />
+      <div>
+        <h3 class="text-sm font-semibold text-content-1">Series</h3>
+        <p class="text-sm text-content-2">{title}</p>
+      </div>
+    </div>
+    <IconWrapper 
+      name="chevron-down" 
+      size={16} 
+      class="text-content-3 transition-transform group-hover:text-content-1 chevron-icon" 
+    />
+  </summary>
+  
+  <div class="mt-2 p-4 border border-ui rounded-lg">
+    <ol class="space-y-1">
+      {seriesPosts.map((post, index) => {
+        const isCurrent = post.id === currentPostId;
+        const label = getPartLabel(post, index);
+        const slug = getSlug(post);
+        
+        return (
+          <li>
+            {isCurrent ? (
+              <div class="flex items-start gap-3 p-3 rounded-md bg-primary/10 border border-primary/20">
+                <IconWrapper name="arrow-right" size={16} class="text-primary shrink-0 mt-0.5" />
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-primary/70 mb-0.5">{label}</div>
+                  <div class="text-sm font-medium text-primary">{post.data.title}</div>
+                </div>
+              </div>
+            ) : (
+              <a 
+                href={`/posts/${slug}`}
+                class="flex items-start gap-3 p-3 rounded-md transition-colors hover:bg-surface-elevated text-content-2 hover:text-content-1"
+              >
+                <IconWrapper name="circle" size={16} class="text-content-4 flex-shrink-0 mt-0.5" />
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-content-3 mb-0.5">{label}</div>
+                  <div class="text-sm">{post.data.title}</div>
+                </div>
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</details>
+
+<style>
+  details[open] .chevron-icon {
+    transform: rotate(180deg);
+  }
+  
+  details summary::-webkit-details-marker,
+  details summary::marker {
+    display: none;
+  }
+</style>

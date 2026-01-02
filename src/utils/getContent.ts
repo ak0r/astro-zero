@@ -7,20 +7,20 @@ import {
   getUniqueTags,
   getEntriesByTag,
   getFeaturedEntries,
-  getAdjacentEntries,
+  getAdjacentEntriesWithSeries,
   getRelatedEntries,
   searchEntries,
   paginateEntries,
   isSubpost as isSubpostGeneric,
-  isSeriesParent as isSeriesParentGeneric,
   getParentId as getParentIdGeneric,
   getParentEntry,
   getSubpostsForParent as getSubpostsForParentGeneric,
+  hasSubposts as hasSubpostsGeneric,
+  getSubpostCount as getSubpostCountGeneric,
   getSeriesEntries,
   getNextInSeries as getNextInSeriesGeneric,
   getPrevInSeries as getPrevInSeriesGeneric,
   getTopLevelEntries,
-  filterEntriesBy,
 } from './entries';
 
 /**
@@ -67,17 +67,21 @@ export function getFeaturedPosts(posts: Post[]): Post[] {
 }
 
 /**
- * Get adjacent posts (prev/next)
+ * Get adjacent posts with series awareness
+ * For subposts: returns prev/next within series + parent
+ * For parent/standalone: returns prev/next top-level posts
  */
 export function getAdjacentPosts(
   posts: Post[],
-  currentSlug: string
+  currentId: string
 ): {
-  prev: Post | null;
-  next: Post | null;
+  newer: Post | null;
+  older: Post | null;
+  parent: Post | null;
 } {
-  return getAdjacentEntries(posts, currentSlug);
+  return getAdjacentEntriesWithSeries(posts, currentId);
 }
+
 
 /**
  * Get related posts based on tags
@@ -120,16 +124,9 @@ export function isSubpost(postId: string): boolean {
 }
 
 /**
- * Check if a post is a series parent
- */
-export function isSeriesParent(postId: string): boolean {
-  return isSeriesParentGeneric(postId);
-}
-
-/**
  * Get parent ID from post
  */
-export function getParentId(postId: string): string | null {
+export function getParentId(postId: string): string {
   return getParentIdGeneric(postId);
 }
 
@@ -138,9 +135,9 @@ export function getParentId(postId: string): string | null {
  */
 export function getParentPost(
   posts: Post[],
-  currentPostId: string
+  subpostId: string
 ): Post | null {
-  return getParentEntry(posts, currentPostId);
+  return getParentEntry(posts, subpostId);
 }
 
 /**
@@ -151,6 +148,26 @@ export function getSubpostsForParent(
   parentId: string
 ): Post[] {
   return getSubpostsForParentGeneric(posts, parentId);
+}
+
+/**
+ * Check if a post has subposts
+ */
+export function hasSubposts(
+  posts: Post[],
+  postId: string
+): boolean {
+  return hasSubpostsGeneric(posts, postId);
+}
+
+/**
+ * Get subpost count for a parent
+ */
+export function getSubpostCount(
+  posts: Post[],
+  parentId: string
+): number {
+  return getSubpostCountGeneric(posts, parentId);
 }
 
 /**
@@ -185,8 +202,61 @@ export function getPrevInSeries(
 
 /**
  * Get only top-level posts (standalone + series parents)
- * Use this for main posts index to hide subposts
  */
 export function getTopLevelPosts(posts: Post[]): Post[] {
   return getTopLevelEntries(posts);
+}
+
+/**
+ * Get series context for current post
+ */
+export function getSeriesContext(
+  allPosts: Post[],
+  currentPost: Post
+): {
+  isCurrentSubpost: boolean;
+  isCurrentParent: boolean;
+  isInSeries: boolean;
+  seriesId: string;
+  parentPost: Post | null;
+  seriesPosts: Post[];
+  prevInSeries: Post | null;
+  nextInSeries: Post | null;
+} {
+  const isCurrentSubpost = isSubpost(currentPost.id);
+  const isCurrentParent = hasSubposts(allPosts, currentPost.id);
+  const isInSeries = isCurrentSubpost || isCurrentParent;
+
+  if (!isInSeries) {
+    return {
+      isCurrentSubpost,
+      isCurrentParent,
+      isInSeries: false,
+      seriesId: '',
+      parentPost: null,
+      seriesPosts: [],
+      prevInSeries: null,
+      nextInSeries: null,
+    };
+  }
+
+  // Determine series ID and parent
+  const seriesId = isCurrentSubpost ? getParentId(currentPost.id) : currentPost.id;
+  const parentPost = isCurrentSubpost ? getParentPost(allPosts, currentPost.id) : currentPost;
+
+  // Get series data
+  const seriesPosts = getSeriesPosts(allPosts, seriesId);
+  const prevInSeries = getPrevInSeries(allPosts, currentPost);
+  const nextInSeries = getNextInSeries(allPosts, currentPost);
+
+  return {
+    isCurrentSubpost,
+    isCurrentParent,
+    isInSeries: true,
+    seriesId,
+    parentPost,
+    seriesPosts,
+    prevInSeries,
+    nextInSeries,
+  };
 }

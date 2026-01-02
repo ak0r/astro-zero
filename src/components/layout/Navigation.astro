@@ -1,0 +1,30 @@
+---
+import LinkWrapper from '@/components/common/LinkWrapper.astro';
+import { siteConfig } from '@/site.config';
+
+const currentPath = Astro.url.pathname;
+---
+
+<ul class="flex flex-col md:flex-row gap-6 text-lg md:text-sm font-mono">
+  {siteConfig.navigation.pages.map(page => {
+    const isActive =
+      currentPath === page.url ||
+      currentPath.startsWith(page.url);
+
+    return (
+      <li>
+        <LinkWrapper
+          href={page.url}
+          class:list={[
+            'transition-colors',
+            isActive
+              ? 'text-primary font-semibold'
+              : 'text-content-3',
+          ]}
+        >
+          /{page.title.toLowerCase()}
+        </LinkWrapper>
+      </li>
+    );
+  })}
+</ul>
