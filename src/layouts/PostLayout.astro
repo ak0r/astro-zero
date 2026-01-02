@@ -88,7 +88,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 
         <!-- Cover Image -->
         {coverImage && (
-          <div class="mb-10 sm:breakout">
+          <div class="mb-10 breakout">
             <ImageWrapper
               src={coverImage}
               alt={coverImageAlt}
@@ -154,7 +154,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
       <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
       
       <!-- Article content -->
-      <div class="" id="post-content">
+      <div class="md-content" id="post-content">
         <Content />
       </div>
     </article>

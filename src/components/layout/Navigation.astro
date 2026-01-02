@@ -5,7 +5,7 @@ import { siteConfig } from '@/site.config';
 const currentPath = Astro.url.pathname;
 ---
 
-<ul class="flex flex-col md:flex-row gap-6 text-lg md:text-sm font-mono">
+<ul class="not-prose flex flex-col md:flex-row gap-6 text-lg md:text-sm font-mono">
   {siteConfig.navigation.pages.map(page => {
     const isActive =
       currentPath === page.url ||

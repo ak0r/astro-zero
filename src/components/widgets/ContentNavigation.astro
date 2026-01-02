@@ -19,7 +19,7 @@ const getBasePath = (entry: Post): string => {
   return entry.collection === 'posts' ? '/posts' : '/galleries';
 };
 ---
-<section class="mt-12 pt-8 border-t border-ui">
+<section class="mt-12 pt-8 border-t border-ui not-prose">
   <nav class={`grid grid-cols-1 gap-4 ${gridClass}`}>
     <!-- Previous Entry -->
     {prevEntry ? (

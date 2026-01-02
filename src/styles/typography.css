@@ -1,0 +1,142 @@
+@layer base {
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply break-words;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-balance;
+  }
+
+  p {
+    @apply text-pretty;
+  }
+}
+
+@layer components {
+  :where(body) {
+    @apply text-content text-base leading-relaxed;
+  }
+
+  :where(p):not(:where(.not-prose, .not-prose *)) {
+    @apply my-5 text-content;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6):not(
+    :where(.not-prose, .not-prose *)
+  ) {
+    @apply text-content font-semibold leading-tight scroll-mt-28;
+  }
+
+  :where(h1):not(:where(.not-prose, .not-prose *)) {
+    @apply mt-8 mb-6 text-2xl sm:text-3xl;
+  }
+
+  :where(h2):not(:where(.not-prose, .not-prose *)) {
+    @apply mt-8 mb-4 text-xl sm:text-2xl;
+  }
+
+  :where(h3):not(:where(.not-prose, .not-prose *)) {
+    @apply mt-7 mb-4 text-lg sm:text-xl;
+  }
+
+  :where(h4):not(:where(.not-prose, .not-prose *)) {
+    @apply mt-6 mb-3 text-base sm:text-lg;
+  }
+
+  :where(h5, h6):not(:where(.not-prose, .not-prose *)) {
+    @apply mt-5 mb-3 text-sm text-content-2;
+  }
+
+  :where(a):not(:where(.not-prose, .not-prose *)) {
+    @apply font-medium underline underline-offset-[3px]
+           transition-colors;
+  }
+
+  :where(a:hover):not(:where(.not-prose, .not-prose *)) {
+    @apply text-primary-2;
+  }
+
+  :where(strong):not(:where(.not-prose, .not-prose *)) {
+    @apply text-content font-semibold;
+  }
+
+  :where(ul):not(:where(.not-prose, .not-prose *)) {
+    @apply my-5 ml-6 list-disc marker:text-content-3;
+  }
+
+  :where(ol):not(:where(.not-prose, .not-prose *)) {
+    @apply my-5 ml-6 list-decimal marker:text-content-3;
+  }
+
+  :where(li):not(:where(.not-prose, .not-prose *)) {
+    @apply my-2 pl-2 text-content;
+  }
+
+  :where(ul ul, ol ol, ul ol, ol ul):not(
+    :where(.not-prose, .not-prose *)
+  ) {
+    @apply my-2 ml-6;
+  }
+
+  :where(code):not(:where(.not-prose, .not-prose *)) {
+    @apply font-mono text-sm px-1.5 py-0.5 rounded
+           bg-ui text-content break-words;
+  }
+
+  :where(pre):not(:where(.not-prose, .not-prose *)) {
+    @apply my-6 p-4 overflow-x-auto rounded-lg
+           bg-surface-2 text-sm;
+  }
+
+  :where(pre code):not(:where(.not-prose, .not-prose *)) {
+    @apply bg-transparent p-0 text-content;
+  }
+
+  :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+    @apply my-6 pl-4 border-l-2 border-ui
+           italic text-content-2;
+  }
+
+  :where(hr):not(:where(.not-prose, .not-prose *)) {
+    @apply my-10 border-0 border-t border-ui-2;
+  }
+
+  :where(table):not(:where(.not-prose, .not-prose *)) {
+    @apply my-6 w-full text-sm border-collapse;
+  }
+
+  :where(th):not(:where(.not-prose, .not-prose *)) {
+    @apply px-4 py-2 text-left font-medium
+           bg-surface-2 text-content;
+  }
+
+  :where(td):not(:where(.not-prose, .not-prose *)) {
+    @apply px-4 py-2 border-t border-ui-2
+           text-content break-words align-top;
+  }
+
+  :where(img, video, figure):not(
+    :where(.not-prose, .not-prose *)
+  ) {
+    @apply my-6 mx-auto;
+  }
+
+  a:not(.plain):not(.tag):not(.internal-link):not(.footnote):not(.reversefootnote):not([href^="#"]):not([href^="/"]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='gray' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25' /%3E%3C/svg%3E%0A");
+    background-position: right 33%;
+    background-repeat: no-repeat;
+    background-size: 0.7em;
+    padding-right: 0.75em;
+  } 
+}
