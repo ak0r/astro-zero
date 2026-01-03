@@ -6,7 +6,19 @@
 }
 
 .btn {
-  @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm border border-ui transition-all duration-300
+  @apply inline-flex items-center gap-2 p-2 rounded-md text-sm border border-ui transition-all duration-300
+}
+
+.btn-ghost {
+  @apply inline-flex items-center gap-2 p-2 rounded-md text-sm transition-all duration-300
+}
+
+.btn:hover{
+  @apply bg-surface-2;
+}
+
+.btn-ghost:hover{
+  @apply bg-surface-2;
 }
 
 /* Breakout - moderately wider */

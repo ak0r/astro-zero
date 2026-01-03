@@ -15,54 +15,73 @@ const getHeaderProfilePictureClasses = (style: string) => {
     default: return 'h-8 object-contain';
   }
 };
-
-const currentPath = Astro.url.pathname;
-
 ---
 <header
   id="main-header"
   class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg"
 >
   <Container>
-    <div class="not-prose flex items-center justify-between h-24 relative">
+    <div class="not-prose flex items-center h-24">
 
-      <!-- Logo -->
-      <a href="/" class="hover:opacity-75 transition-opacity">
-        {showProfilePicture ? (
-          <img
-            src={profilePicture.image}
-            alt={profilePicture.alt}
-            class={getHeaderProfilePictureClasses(profilePicture.style)}
-          />
-        ) : (
-          <span class="font-semibold text-2xl">
-            {siteConfig.title}
-          </span>
-        )}
-      </a>
+      <!-- LEFT: Logo -->
+      <div class="flex items-center flex-shrink-0">
+        <a href="/" class="hover:opacity-75 transition-opacity">
+          {showProfilePicture ? (
+            <img
+              src={profilePicture.image}
+              alt={profilePicture.alt}
+              class={getHeaderProfilePictureClasses(profilePicture.style)}
+            />
+          ) : (
+            <span class="font-semibold text-2xl">
+              {siteConfig.title}
+            </span>
+          )}
+        </a>
+      </div>
 
-      <!-- Mobile menu toggle -->
-      <button
-        id="mobile-menu-toggle"
-        class="md:hidden p-2 hover:bg-ui rounded-lg transition-colors"
-        aria-label="Toggle navigation"
-        aria-expanded="false"
-      >
-        <span id="menu-icon">
-          <Icon name="menu" size={20} />
-        </span>
-        <span id="close-icon" class="hidden">
-          <Icon name="x" size={20} />
-        </span>
-      </button>
-
-      <!-- Desktop navigation -->
-      <nav class="hidden md:block">
+      <!-- CENTER: Desktop Navigation -->
+      <div class="hidden md:flex flex-1 justify-center">
         <Navigation />
-      </nav>
-      
-      <ThemeToggle />
+      </div>
 
+      <!-- RIGHT: Actions -->
+      <div class="flex items-center ml-auto gap-2 shrink-0">
+
+        <!-- Theme toggle (always visible) -->
+        <ThemeToggle />
+
+        <!-- Command palette -->
+        {siteConfig.commandPaletteConfig.enabled && (
+          <button
+            id="command-palette-trigger"
+            class="btn-ghost flex items-center sm:gap-2 text-content-3"
+            aria-label="Open command palette"
+            onclick="window.dispatchEvent(new CustomEvent('command-palette:open', { detail: { mode: 'command' } }))"
+          >
+            <Icon name="command" size={16} class="shrink-0" />
+            <kbd class="hidden sm:inline text-sm font-medium">
+              K
+            </kbd>
+          </button>
+        )}
+
+        <!-- Mobile menu -->
+        <button
+          id="mobile-menu-toggle"
+          class="md:hidden btn"
+          aria-label="Toggle navigation"
+          aria-expanded="false"
+        >
+          <span id="menu-icon">
+            <Icon name="menu" size={16} />
+          </span>
+          <span id="close-icon" class="hidden">
+            <Icon name="x" size={16} />
+          </span>
+        </button>
+
+      </div>
     </div>
   </Container>
 </header>

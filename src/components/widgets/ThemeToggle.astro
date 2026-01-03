@@ -11,15 +11,15 @@ const { class: className = '' } = Astro.props;
 
 <button
   id="theme-toggle"
-  class={`p-2 text-content-3 hover:bg-surface-2/50 rounded-lg transition-colors duration-200 ${className}`}
+  class={`btn-ghost text-content-3 ${className}`}
   aria-label="Toggle theme"
   type="button"
 >
   <span class="sun-icon">
-    <Icon name="sun" class="size-5" />
+    <Icon name="sun"  size={16} />
   </span>
   <span class="moon-icon">
-    <Icon name="moon" class="size-5" />
+    <Icon name="moon"  size={16} />
   </span>
 </button>
 

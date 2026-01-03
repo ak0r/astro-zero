@@ -401,6 +401,7 @@ const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
     private init() {
       this.setupKeyboardShortcuts();
       this.setupEventListeners();
+      this.setupGlobalOpenListener();
     }
 
     private setupKeyboardShortcuts() {
@@ -544,6 +545,14 @@ const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
           console.warn('[CommandPalette] Unknown action:', action);
       }
     }
+
+    private setupGlobalOpenListener() {
+      window.addEventListener('command-palette:open', (event) => {
+        const detail = (event as CustomEvent).detail;
+        const mode = detail?.mode === 'search' ? 'search' : 'command';
+        this.open(mode);
+      });
+    }
   }
 
   declare global {
@@ -561,17 +570,4 @@ const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
 
   // Reinitialize on view transitions
   document.addEventListener('astro:page-load', () => new CommandPalette());
-  // const initPalette = () => {
-  //   if (!window.__commandPalette) {
-  //     window.__commandPalette = new CommandPalette();
-  //   }
-  // };
-
-  // if (document.readyState === 'loading') {
-  //   document.addEventListener('DOMContentLoaded', initPalette);
-  // } else {
-  //   initPalette();
-  // }
-
-  // document.addEventListener('astro:page-load', initPalette);
 </script>
