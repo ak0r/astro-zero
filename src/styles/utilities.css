@@ -1,3 +1,5 @@
+@layer components {
+
 .badge {
     @apply inline-flex items-center px-2 py-1 text-xs text-content-3 font-mono  
       rounded-full border border-ui hover:bg-surface-2/50 transition-colors;
@@ -33,4 +35,42 @@
 
 .card-primary:hover {
   @apply bg-primary/50;
+}
+
+/* ================================
+   Image Masonry Grid
+   ================================ */
+
+.image-container {
+  @apply my-8;
+  }
+/* Image grid containers - override default image margins */
+.image-grid-masonry,
+.image-grid-single {
+  @apply my-8; /* Container gets the standard vertical margin */
+}
+
+.image-grid-masonry .image-item {
+  @apply block w-full;
+}
+
+.image-grid-single {
+  @apply block;
+}
+
+.image-grid-single .image-item {
+  @apply w-full mb-2;
+}
+
+/* Remove default image margins inside image grids */
+.image-grid-masonry img,
+.image-grid-single img {
+  @apply my-0; /* Override the default img margin */
+}
+
+/* Captions */
+.image-caption-container p,
+.image-caption-container em {
+  @apply text-content-3 text-sm mt-2;
+}
 }

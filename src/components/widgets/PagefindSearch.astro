@@ -1,0 +1,284 @@
+---
+/**
+ * PagefindSearch - Headless Search Component
+ * 
+ * Provides Pagefind search functionality via custom events.
+ * No UI - pure logic component.
+ * 
+ * Events:
+ * - Listens: 'pagefind:search' - { query: string }
+ * - Emits: 'pagefind:results' - { results: SearchResult[], query: string }
+ * - Emits: 'pagefind:error' - { error: string, query: string }
+ * - Emits: 'pagefind:loading' - { loading: boolean, query: string }
+ */
+
+import { siteConfig } from '@/site.config';
+
+const searchConfig = siteConfig.commandPaletteConfig.search;
+const maxResults = 10; // Can be made configurable
+---
+
+<script define:vars={{ searchConfig, maxResults }} is:inline>
+  interface PagefindResult {
+    id: string;
+    score: number;
+    words: number[];
+    data: () => Promise<PagefindDocument>;
+  }
+
+  interface PagefindDocument {
+    url: string;
+    content: string;
+    word_count: number;
+    filters: Record<string, string>;
+    meta: {
+      title: string;
+      description?: string;
+      collection?: string;
+      date?: string;
+      image?: string;
+    };
+    excerpt: string;
+    sub_results: any[];
+  }
+
+  interface SearchResult {
+    id: string;
+    title: string;
+    description: string;
+    excerpt: string;
+    url: string;
+    collection: 'posts' | 'docs' | 'projects' | 'pages' | 'gallery';
+    date?: string;
+  }
+
+  class PagefindSearch {
+    private pagefind: any = null;
+    private initialized = false;
+    private initPromise: Promise<void> | null = null;
+
+    /**
+     * Initialize Pagefind
+     */
+    async init(): Promise<void> {
+      if (this.initialized) return;
+      if (this.initPromise) return this.initPromise;
+
+      this.initPromise = (async () => {
+        try {
+          // Import Pagefind
+          this.pagefind = await import('/pagefind/pagefind.js');
+          
+          // Initialize with options
+          await this.pagefind.init();
+          
+          // Set up filters based on enabled collections
+          const filters: Record<string, string[]> = {};
+          
+          if (searchConfig.collections.posts) filters.collection = filters.collection || [];
+          if (searchConfig.collections.docs) filters.collection = filters.collection || [];
+          if (searchConfig.collections.projects) filters.collection = filters.collection || [];
+          if (searchConfig.collections.pages) filters.collection = filters.collection || [];
+          if (searchConfig.collections.gallery) filters.collection = filters.collection || [];
+          
+          this.initialized = true;
+          console.log('[PagefindSearch] Initialized successfully');
+        } catch (err) {
+          console.error('[PagefindSearch] Failed to initialize:', err);
+          throw new Error('Failed to initialize Pagefind');
+        }
+      })();
+
+      return this.initPromise;
+    }
+
+    /**
+     * Perform search
+     */
+    async search(query: string): Promise<SearchResult[]> {
+      if (!query.trim()) {
+        return [];
+      }
+
+      try {
+        // Ensure initialized
+        await this.init();
+
+        if (!this.pagefind) {
+          throw new Error('Pagefind not initialized');
+        }
+
+        // Perform search
+        const searchResults = await this.pagefind.search(query, {
+          filters: {
+            collection: ['posts', 'docs', 'projects', 'pages'] // All enabled
+          }
+        });
+
+        if (!searchResults || !searchResults.results) {
+          return [];
+        }
+
+        // Get full data for top results
+        const results = await Promise.all(
+          searchResults.results
+            .slice(0, maxResults)
+            .map((result: PagefindResult) => result.data())
+        );
+
+        // Transform to our SearchResult format
+        const transformedResults: SearchResult[] = results
+          .map((doc: PagefindDocument) => this.transformResult(doc))
+          .filter(Boolean) as SearchResult[];
+
+        return transformedResults;
+      } catch (err) {
+        console.error('[PagefindSearch] Search error:', err);
+        throw err;
+      }
+    }
+
+    /**
+     * Transform Pagefind document to SearchResult
+     */
+    private transformResult(doc: PagefindDocument): SearchResult | null {
+      if (!doc || !doc.url) return null;
+
+      // Extract collection from meta or URL
+      const collection = this.detectCollection(doc);
+
+      // Filter out disabled collections
+      if (!this.isCollectionEnabled(collection)) {
+        return null;
+      }
+
+      return {
+        id: doc.url,
+        title: doc.meta.title || 'Untitled',
+        description: doc.meta.description || '',
+        excerpt: this.cleanExcerpt(doc.excerpt),
+        url: doc.url,
+        collection,
+        date: doc.meta.date,
+      };
+    }
+
+    /**
+     * Detect collection from document
+     */
+    private detectCollection(doc: PagefindDocument): SearchResult['collection'] {
+      // First, try meta.collection
+      if (doc.meta.collection) {
+        return doc.meta.collection as SearchResult['collection'];
+      }
+
+      // Fallback to meta
+      if (doc.meta.collection) {
+        return doc.meta.collection as SearchResult['collection'];
+      }
+
+      // Fallback: detect from URL
+      const url = doc.url;
+      if (url.includes('/posts/')) return 'posts';
+      if (url.includes('/docs/')) return 'docs';
+      if (url.includes('/projects/')) return 'projects';
+      if (url.includes('/gallery/')) return 'gallery';
+      
+      return 'pages';
+    }
+
+    /**
+     * Check if collection is enabled in config
+     */
+    private isCollectionEnabled(collection: string): boolean {
+      const enabled = searchConfig.collections as Record<string, boolean>;
+      return enabled[collection] ?? true;
+    }
+
+    /**
+     * Clean and truncate excerpt
+     */
+    private cleanExcerpt(excerpt: string): string {
+      if (!excerpt) return '';
+      
+      // Remove HTML tags
+      const cleaned = excerpt.replace(/<[^>]*>/g, '');
+      
+      // Truncate to reasonable length
+      const maxLength = 150;
+      if (cleaned.length > maxLength) {
+        return cleaned.substring(0, maxLength).trim() + '...';
+      }
+      
+      return cleaned.trim();
+    }
+  }
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+
+  const searcher = new PagefindSearch();
+
+  /**
+   * Listen for search requests
+   */
+  window.addEventListener('pagefind:search', async (event: Event) => {
+    const customEvent = event as CustomEvent<{ query: string }>;
+    const { query } = customEvent.detail;
+
+    console.log('[PagefindSearch] Search requested:', query);
+
+    // Emit loading state
+    window.dispatchEvent(new CustomEvent('pagefind:loading', {
+      detail: { loading: true, query }
+    }));
+
+    try {
+      // Perform search
+      const results = await searcher.search(query);
+
+      console.log('[PagefindSearch] Results found:', results.length);
+
+      // Emit results
+      window.dispatchEvent(new CustomEvent('pagefind:results', {
+        detail: { results, query }
+      }));
+    } catch (err) {
+      console.error('[PagefindSearch] Error:', err);
+
+      // Emit error
+      window.dispatchEvent(new CustomEvent('pagefind:error', {
+        detail: { 
+          error: err instanceof Error ? err.message : 'Search failed',
+          query 
+        }
+      }));
+    } finally {
+      // Emit loading complete
+      window.dispatchEvent(new CustomEvent('pagefind:loading', {
+        detail: { loading: false, query }
+      }));
+    }
+  });
+
+  // Pre-initialize on idle (optional optimization)
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      searcher.init().catch(err => {
+        console.warn('[PagefindSearch] Pre-initialization failed:', err);
+      });
+    });
+  } else {
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(() => {
+      searcher.init().catch(err => {
+        console.warn('[PagefindSearch] Pre-initialization failed:', err);
+      });
+    }, 2000);
+  }
+
+  console.log('[PagefindSearch] Component loaded');
+</script>
+
+<!-- No UI - headless component -->

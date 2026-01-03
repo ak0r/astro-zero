@@ -155,8 +155,8 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
       )}
     </div>
 
-    <article data-pagefind-body class="animate flex flex-col gap-y-10">
-      <meta data-pagefind-filter="category[content]" content="posts" />
+    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
+      <meta data-pagefind-filter="collection[content]" content="posts" />
       <meta data-pagefind-meta="title[content]" content={post.data.title} />
       <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
       

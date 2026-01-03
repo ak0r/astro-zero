@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @import "./colors.css";
 @import "./typography.css";
+@import "./obsidian.css";
 @import "./utilities.css";
+@import "./glightbox-custom.css";
 
 @theme {
   

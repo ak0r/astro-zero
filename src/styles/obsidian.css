@@ -1,0 +1,124 @@
+@layer components {
+  /* ============================================================================
+    OBSIDIAN EMBEDS
+    ============================================================================ */
+
+  /* Audio embeds */
+  .audio-embed {
+    @apply my-6;
+  }
+
+  .audio-embed .audio-player {
+    @apply w-full rounded-lg;
+  }
+
+  /* Video embeds */
+  .video-embed {
+    @apply my-8 rounded-xl overflow-hidden;
+  }
+
+  .video-embed .video-player {
+    @apply w-full rounded-xl;
+  }
+
+  /* Twitter embeds */
+  .twitter-tweet {
+    @apply my-8 mx-auto;
+    @apply max-w-none;
+  }
+
+  /* YouTube embeds */
+  .youtube-embed {
+    @apply aspect-video overflow-hidden rounded-xl my-8;
+    position: relative;
+  }
+
+  .youtube-embed iframe {
+    @apply w-full h-full;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+  }
+
+  /* Twitter/X embeds */
+  .twitter-embed {
+    @apply my-8;
+  }
+
+  .twitter-embed blockquote {
+    @apply border-l-4 border-primary pl-4 py-2;
+    @apply bg-surface-2/50 rounded-r-lg;
+  }
+
+  /* PDF embeds */
+  .pdf-embed {
+    @apply my-8 rounded-lg overflow-hidden;
+    @apply bg-surface-2;
+    @apply border border-ui;
+  }
+
+  .pdf-embed .pdf-viewer {
+    @apply w-full;
+    @apply border-0;
+    height: 80vh;
+    display: block;
+  }
+
+  .pdf-embed .pdf-info {
+    @apply p-4;
+    @apply bg-surface-2;
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .pdf-embed .pdf-filename {
+    @apply text-sm font-medium;
+    @apply text-content-3;
+    @apply truncate flex-1;
+  }
+
+  .pdf-embed .pdf-download-link {
+    @apply px-4 py-2 rounded-md;
+    @apply bg-primary;
+    @apply text-sm font-medium;
+    @apply hover:bg-primary;
+    @apply transition-colors duration-200;
+    @apply whitespace-nowrap;
+    color: white !important;
+    text-decoration: none !important;
+  }
+
+  /* SVG embeds */
+  .svg-embed {
+    @apply my-6;
+    @apply flex justify-center;
+  }
+
+  .svg-embed .svg-image {
+    @apply max-w-full h-auto;
+    @apply rounded-lg;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .pdf-embed .pdf-viewer {
+      height: 50vh;
+      min-height: 300px;
+      max-height: 500px;
+    }
+    
+    .pdf-embed .pdf-info {
+      @apply flex-col items-start gap-2;
+    }
+    
+    .pdf-embed .pdf-download-link {
+      @apply w-full text-center;
+    }
+    
+    .audio-embed,
+    .video-embed,
+    .youtube-embed {
+      @apply my-6;
+    }
+  }
+}

@@ -68,10 +68,9 @@ const breadcrumb = Astro.url.pathname;
       showLastUpdated={showLastUpdated}
     />
 
-    <article data-pagefind-body class="animate flex flex-col gap-y-10">
-      <!-- <meta data-pagefind-meta="collection[content]" content="pages" />
-      <meta data-pagefind-meta="title[content]" content={pageTitle} /> -->
-      <!-- <meta data-pagefind-meta="description[content]" content={pageDesc} /> -->
+    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
+      <meta data-pagefind-meta="collection[content]" content="pages" />
+      <meta data-pagefind-meta="title[content]" content={title} />
 
       <!-- Article content -->
       <div class="" id="page-content">

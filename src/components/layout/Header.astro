@@ -2,8 +2,8 @@
 import { siteConfig } from '@/site.config';
 import Container from '@/components/layout/Container.astro';
 import Icon from '@/components/common/IconWrapper.astro';
-import LinkWrapper from '@/components/common/LinkWrapper.astro';
 import Navigation from '@/components/layout/Navigation.astro';
+import ThemeToggle from '@/components/widgets/ThemeToggle.astro';
 
 const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'header';
 const profilePicture = siteConfig.profilePicture;
@@ -19,7 +19,6 @@ const getHeaderProfilePictureClasses = (style: string) => {
 const currentPath = Astro.url.pathname;
 
 ---
-
 <header
   id="main-header"
   class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg"
@@ -61,6 +60,8 @@ const currentPath = Astro.url.pathname;
       <nav class="hidden md:block">
         <Navigation />
       </nav>
+      
+      <ThemeToggle />
 
     </div>
   </Container>

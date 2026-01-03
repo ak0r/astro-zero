@@ -1,0 +1,577 @@
+---
+// import { PagefindUI } from '@pagefind/default-ui';
+import { siteConfig } from '@/site.config';
+import Icon from '@/components/common/IconWrapper.astro';
+import '@pagefind/default-ui/css/ui.css';
+
+const config = siteConfig.commandPaletteConfig;
+
+// Build command items
+const quickActions = config.quickActions.enabled ? config.quickActions.actions : [];
+const navigationLinks = config.navigation.enabled ? config.navigation.links : [];
+const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
+---
+
+<!-- Pagefind UI CSS -->
+<!-- <link href="/pagefind/pagefind-ui.css" rel="stylesheet" /> -->
+
+<div id="command-palette-backdrop" class="command-palette-backdrop">
+  <div class="command-palette-modal">
+    
+    <!-- Mode Toggle Tabs -->
+    <div class="command-palette-tabs">
+      <button 
+        id="tab-commands" 
+        class="command-palette-tab active"
+        data-mode="command"
+      >
+        <Icon name="command" class="w-4 h-4" />
+        Commands
+      </button>
+      <button 
+        id="tab-search" 
+        class="command-palette-tab"
+        data-mode="search"
+      >
+        <Icon name="search" class="w-4 h-4" />
+        Search
+      </button>
+      <button id="close-palette" class="command-palette-close">
+        <Icon name="x" class="w-4 h-4" />
+      </button>
+    </div>
+
+    <!-- Commands Mode -->
+    <div id="commands-mode" class="command-palette-mode active">
+      
+      <!-- Quick Actions Section -->
+      {quickActions.length > 0 && (
+        <div class="command-palette-section">
+          <div class="command-palette-section-title">Quick Actions</div>
+          <ul class="command-palette-list">
+            {quickActions.map((action) => (
+              <li
+                class="command-palette-item"
+                data-type="action"
+                data-action={action.id}
+              >
+                <Icon name={action.icon} class="command-palette-item-icon" />
+                <span class="command-palette-item-label">{action.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <!-- Navigation Section -->
+      {navigationLinks.length > 0 && (
+        <div class="command-palette-section">
+          <div class="command-palette-section-title">Navigation</div>
+          <ul class="command-palette-list">
+            {navigationLinks.map((link) => (
+              <li
+                class="command-palette-item"
+                data-type="navigation"
+                data-href={link.url}
+              >
+                {link.icon && <Icon name={link.icon} class="command-palette-item-icon" />}
+                <span class="command-palette-item-label">{link.title}</span>
+                {link.external && <Icon name="external-link" class="command-palette-item-external" />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <!-- Social Links Section -->
+      {socialLinks.length > 0 && (
+        <div class="command-palette-section">
+          <div class="command-palette-section-title">Social</div>
+          <ul class="command-palette-list">
+            {socialLinks.map((social) => (
+              <li
+                class="command-palette-item"
+                data-type="social"
+                data-href={social.url}
+              >
+                <Icon name={social.icon} class="command-palette-item-icon" />
+                <span class="command-palette-item-label">{social.title}</span>
+                <Icon name="external-link" class="command-palette-item-external" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+
+    <!-- Search Mode -->
+    <div id="search-mode" class="command-palette-mode max-w-full">
+      <div id="pagefind-container" class="max-w-full"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="command-palette-footer">
+      <div class="command-palette-footer-group">
+        <kbd>↑↓</kbd>
+        <span>Navigate</span>
+      </div>
+      <div class="command-palette-footer-group">
+        <kbd>↵</kbd>
+        <span>Select</span>
+      </div>
+      <div class="command-palette-footer-group">
+        <kbd>ESC</kbd>
+        <span>Close</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style is:global>
+  :root {
+    --pagefind-ui-scale: 0.8;
+    --pagefind-ui-primary: var(--color-content-3);
+    --pagefind-ui-text: var(--color-content);
+    --pagefind-ui-background: var(--color-surface);
+    --pagefind-ui-border: var(--color-ui);
+    --pagefind-ui-tag: var(--color-surface-3);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 10px;
+    --pagefind-ui-image-border-radius: 10px;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: var(--font-sans);
+  }
+
+  #pagefind-container p {
+    font-weight: normal;
+  }
+
+  /* Pagefind Container */
+  #pagefind-container {
+    padding: 16px;
+  }
+
+  /* Override Pagefind UI styles to match theme */
+  #pagefind-container .pagefind-ui__search-input {
+    /* background: var(--color-surface-primary); */
+    /* border: 1px solid var(--color-ui-primary); */
+    /* color: var(--color-content-primary); */
+    /* border-radius: 10px; */
+    font-size: 14px;
+  }
+
+  #pagefind-container .pagefind-ui__result-inner mark {
+    /* background-color: var(--color-accent) !important; */
+    /* color: var(--color-surface-raised) !important; */
+    font-weight: 600 !important;
+    padding: 4px !important;
+    border-radius: 6px !important;
+  }
+
+  #pagefind-container .pagefind-ui__result {
+    /* border: 1px solid var(--color-ui-primary); */
+    /* border-radius: 6px; */
+    /* padding: 12px; */
+    /* margin-bottom: 8px; */
+    /* background: var(--color-surface-primary); */
+  }
+
+  #pagefind-container .pagefind-ui__result-title {
+    /* color: var(--color-content-primary); */
+    font-weight: 600;
+  }
+
+  #pagefind-container .pagefind-ui__result-excerpt {
+    color: var(--color-content-muted);
+  }
+
+</style>
+
+<style>
+
+  .command-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10vh;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .command-palette-backdrop.open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .command-palette-modal {
+    background: var(--color-surface);
+    border: 1px solid var(--color-ui);
+    width: min(95%, 640px);
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .command-palette-backdrop.open .command-palette-modal {
+    transform: scale(1);
+  }
+
+  /* Tabs */
+  .command-palette-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-ui);
+    background: var(--color-surface-2);
+  }
+
+  .command-palette-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--color-content-3);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .command-palette-tab:hover {
+    background: var(--color-surface);
+    color: var(--color-content);
+  }
+
+  .command-palette-tab.active {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .command-palette-close {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--color-content-3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .command-palette-close:hover {
+    background: var(--color-surface);
+    color: var(--color-content);
+  }
+
+  /* Modes */
+  .command-palette-mode {
+    display: none;
+    overflow-y: auto;
+    max-height: 500px;
+    padding: 8px;
+  }
+
+  .command-palette-mode.active {
+    display: block;
+  }
+
+  /* Sections */
+  .command-palette-section {
+    padding: 8px;
+  }
+
+  .command-palette-section-title {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-content-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .command-palette-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Items */
+  .command-palette-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--color-content);
+    transition: background 0.15s ease;
+  }
+
+  .command-palette-item:hover,
+  .command-palette-item.selected {
+    background: var(--color-surface-3);
+  }
+
+  .command-palette-item-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-content-3);
+    flex-shrink: 0;
+  }
+
+  .command-palette-item-label {
+    flex: 1;
+    font-size: 14px;
+  }
+
+  .command-palette-item-external {
+    width: 14px;
+    height: 14px;
+    color: var(--color-content-3);
+  }
+
+  /* Footer */
+  .command-palette-footer {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-ui);
+    background: var(--color-surface-2);
+  }
+
+  .command-palette-footer-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-content-3);
+  }
+
+  .command-palette-footer kbd {
+    padding: 2px 6px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-ui);
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+</style>
+
+<!-- Pagefind UI Script -->
+<script src="/pagefind/pagefind-ui.js" is:inline></script>
+
+<script>
+  class CommandPalette {
+    private backdrop: HTMLElement;
+    private commandsMode: HTMLElement;
+    private searchMode: HTMLElement;
+    private tabCommands: HTMLElement;
+    private tabSearch: HTMLElement;
+    private closeBtn: HTMLElement;
+    private currentMode: 'command' | 'search' = 'command';
+    private pagefindUI: any = null;
+
+    constructor() {
+      this.backdrop = document.getElementById('command-palette-backdrop')!;
+      this.commandsMode = document.getElementById('commands-mode')!;
+      this.searchMode = document.getElementById('search-mode')!;
+      this.tabCommands = document.getElementById('tab-commands')!;
+      this.tabSearch = document.getElementById('tab-search')!;
+      this.closeBtn = document.getElementById('close-palette')!;
+
+      this.init();
+    }
+
+    private init() {
+      this.setupKeyboardShortcuts();
+      this.setupEventListeners();
+    }
+
+    private setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        const isTypingContext = ['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName);
+
+        // "/" → Open command mode
+        if (e.key === '/' && !e.metaKey && !e.ctrlKey && !isTypingContext) {
+          e.preventDefault();
+          this.open('command');
+        }
+
+        // Ctrl/Cmd + K → Open search mode
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          this.open('search');
+        }
+
+        // ESC → Close
+        if (e.key === 'Escape' && this.backdrop.classList.contains('open')) {
+          this.close();
+        }
+      });
+    }
+
+    private setupEventListeners() {
+      // Close on backdrop click
+      this.backdrop.addEventListener('click', (e) => {
+        if (e.target === this.backdrop) {
+          this.close();
+        }
+      });
+
+      // Close button
+      this.closeBtn.addEventListener('click', () => {
+        this.close();
+      });
+
+      // Tab switching
+      this.tabCommands.addEventListener('click', () => {
+        this.switchMode('command');
+      });
+
+      this.tabSearch.addEventListener('click', () => {
+        this.switchMode('search');
+      });
+
+      // Command items click
+      this.commandsMode.addEventListener('click', (e) => {
+        const item = (e.target as HTMLElement).closest('.command-palette-item') as HTMLElement;
+        if (item) {
+          this.executeItem(item);
+        }
+      });
+    }
+
+    private open(mode: 'command' | 'search') {
+      this.backdrop.classList.add('open');
+      this.switchMode(mode);
+
+      // Initialize Pagefind UI on first search mode open
+      if (mode === 'search' && !this.pagefindUI) {
+        this.initPagefind();
+      }
+    }
+
+    private close() {
+      this.backdrop.classList.remove('open');
+    }
+
+    private switchMode(mode: 'command' | 'search') {
+      this.currentMode = mode;
+
+      // Update tabs
+      if (mode === 'command') {
+        this.tabCommands.classList.add('active');
+        this.tabSearch.classList.remove('active');
+        this.commandsMode.classList.add('active');
+        this.searchMode.classList.remove('active');
+      } else {
+        this.tabSearch.classList.add('active');
+        this.tabCommands.classList.remove('active');
+        this.searchMode.classList.add('active');
+        this.commandsMode.classList.remove('active');
+
+        // Initialize Pagefind if not already
+        if (!this.pagefindUI) {
+          this.initPagefind();
+        }
+      }
+    }
+
+    private initPagefind() {
+      if (typeof window.PagefindUI !== 'undefined') {
+        this.pagefindUI = new window.PagefindUI({ 
+          element: "#pagefind-container",
+          showSubResults: true,
+          showImages: false,
+          resetStyles: false,
+          autofocus: true,
+          showEmptyFilters: true
+        });
+        console.log('[CommandPalette] Pagefind UI initialized');
+      } else {
+        console.error('[CommandPalette] PagefindUI not loaded');
+      }
+    }
+
+    private executeItem(item: HTMLElement) {
+      const type = item.dataset.type;
+      const action = item.dataset.action;
+      const href = item.dataset.href;
+
+      if (type === 'action') {
+        this.handleAction(action!);
+      } else if (href) {
+        window.location.href = href;
+        this.close();
+      }
+    }
+
+    private handleAction(action: string) {
+      switch (action) {
+        case 'theme':
+          // Toggle theme using data-theme
+          const html = document.documentElement;
+          const pageDarkTheme = html.getAttribute('data-dark-theme') || 'dark';
+          const pageLightTheme = html.getAttribute('data-light-theme') || 'light';
+          const currentTheme = html.getAttribute('data-theme');
+          const newTheme = currentTheme === pageDarkTheme ? pageLightTheme : pageDarkTheme;
+          
+          html.setAttribute('data-theme', newTheme);
+          localStorage.setItem('data-theme', newTheme);
+          
+          this.close();
+          break;
+        case 'search':
+          this.switchMode('search');
+          break;
+        default:
+          console.warn('[CommandPalette] Unknown action:', action);
+      }
+    }
+  }
+
+  declare global {
+    interface Window {
+      __commandPalette?: CommandPalette;
+    }
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => new CommandPalette());
+  } else {
+    new CommandPalette();
+  }
+
+  // Reinitialize on view transitions
+  document.addEventListener('astro:page-load', () => new CommandPalette());
+  // const initPalette = () => {
+  //   if (!window.__commandPalette) {
+  //     window.__commandPalette = new CommandPalette();
+  //   }
+  // };
+
+  // if (document.readyState === 'loading') {
+  //   document.addEventListener('DOMContentLoaded', initPalette);
+  // } else {
+  //   initPalette();
+  // }
+
+  // document.addEventListener('astro:page-load', initPalette);
+</script>

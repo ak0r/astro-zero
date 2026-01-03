@@ -58,9 +58,8 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 
     <!-- Header -->
     <div class="animate mb-8">
-      <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-filter="collection[content]" content="gallery" />
       <meta data-pagefind-meta="title[content]" content={title} />
-      <!-- <meta data-pagefind-meta="description[content]" content={post.data.description} /> -->
       <meta data-pagefind-sort="date[content]" content={date.toISOString()} />
 
       <h1 class="text-4xl font-bold text-content mb-4">

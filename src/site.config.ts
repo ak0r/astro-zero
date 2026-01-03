@@ -7,7 +7,7 @@ export const siteConfig: SiteConfig = {
   author: "John Doe",
   defaultTheme: "light",
   availableThemes: ["light", "dark"],
-  scrollToTop: false,
+  scrollToTop: true,
   profilePicture: {
     enabled: false,
     image: "",
@@ -42,22 +42,30 @@ export const siteConfig: SiteConfig = {
     ],
   },
   commandPaletteConfig: {
-    enabled: false,
+    enabled: true,
     search: {
-      enabled: false,
-      placeholder: "",
-      enabledCollections: []
+      enabled: true,
+      placeholder: "Search posts, galleries, projects...",
+      enabledCollections: ["posts", "gallery", "pages"]
     },
     quickActions: {
-      enabled: false,
-      actions: []
+      enabled: true,
+      actions: [
+        { id: "theme", label: "Toggle theme", icon: "sun" },
+        { id: "search", label: "Search content", icon: "search" },
+      ]
     },
     navigation: {
-      enabled: false,
-      links: []
+      enabled: true,
+      links: [
+        { title: "Home", url: "/", icon: "home" },
+        { title: "Posts", url: "/posts", icon: "pencil" },
+        { title: "Projects", url: "/projects", icon: "briefcase" },
+        { title: "Gallery", url: "/gallery", icon: "library-photo" },
+      ],
     },
     social: {
-      enabled: false
+      enabled: true
     }
   },
   tableOfContents: {

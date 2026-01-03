@@ -7,14 +7,14 @@ import "@/styles/global.css";
 // Components
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
-// import ScrollToTop from "@/components/widgets/ScrollToTop.astro";
+import ScrollToTop from "@/components/widgets/ScrollToTop.astro";
 import ImageGalleryManager from '@/components/common/ImageGalleryManager.astro';
 import ThemeManager from '@/components/common/ThemeManager.astro';
 import ScrollScript from '@/components/scripts/ScrollScript.astro';
 import AnimationScript from '@/components/scripts/AnimationScript.astro';
 import CollapsibleCalloutsScript from '@/components/scripts/CollapsibleCalloutsScript.astro';
-// import CommandPalette from '@/components/widgets/CommandPalette.astro';
-// import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
+import CommandPalette from '@/components/widgets/CommandPalette.astro';
+import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
 
 export interface Props {
   bodyClass?: string;
@@ -88,13 +88,13 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     <Footer />
 
     <!-- Widgets -->
-    <!-- {siteConfig.scrollToTop && <ScrollToTop />} -->
+    {siteConfig.scrollToTop && <ScrollToTop />}
 
     <ImageGalleryManager />
     
-    <!-- {siteConfig.commandPaletteConfig.enabled && <CommandPalette />} -->
+    {siteConfig.commandPaletteConfig.enabled && <CommandPalette />}
     
-    <!-- {siteConfig.commandPaletteConfig.search.enabled && <PagefindSearch />} -->
+    {siteConfig.commandPaletteConfig.search.enabled && <PagefindSearch />}
 
     <!-- Scripts -->
     <ScrollScript />

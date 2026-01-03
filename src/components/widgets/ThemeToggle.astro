@@ -1,0 +1,94 @@
+---
+// ThemeToggle.astro
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<button
+  id="theme-toggle"
+  class={`p-2 text-content-3 hover:bg-surface-2/50 rounded-lg transition-colors duration-200 ${className}`}
+  aria-label="Toggle theme"
+  type="button"
+>
+  <span class="sun-icon">
+    <Icon name="sun" class="size-5" />
+  </span>
+  <span class="moon-icon">
+    <Icon name="moon" class="size-5" />
+  </span>
+</button>
+
+<script>
+  function initThemeToggle() {
+    const button = document.getElementById('theme-toggle');
+    if (!button) return;
+
+    const sunIcon = button.querySelector('.sun-icon') as HTMLElement;
+    const moonIcon = button.querySelector('.moon-icon') as HTMLElement;
+    
+    const pageDarkTheme = document.documentElement.getAttribute('data-dark-theme') || 'dark';
+    const pageLightTheme = document.documentElement.getAttribute('data-light-theme') || 'light';
+
+    const updateIcon = () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      
+      if (currentTheme === pageDarkTheme) {
+        // In dark mode, show sun (to switch to light)
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        // In light mode, show moon (to switch to dark)
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+    };
+
+    const toggleTheme = () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === pageDarkTheme ? pageLightTheme : pageDarkTheme;
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('data-theme', newTheme);
+      updateIcon();
+    };
+
+    // Initialize icon state
+    updateIcon();
+
+    // Add click handler
+    button.addEventListener('click', toggleTheme);
+
+    // Watch for theme changes (from other sources)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          updateIcon();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+  }
+
+  // Run on initial load
+  document.addEventListener('DOMContentLoaded', initThemeToggle);
+
+  // Re-run on Astro page transitions
+  document.addEventListener('astro:after-swap', initThemeToggle);
+</script>
+
+<style>
+  /* Hide both icons initially */
+  .sun-icon,
+  .moon-icon {
+    display: none;
+  }
+</style>
