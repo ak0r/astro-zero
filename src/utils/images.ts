@@ -1,9 +1,10 @@
 
-import type { ImageInfo, OpenGraphImage, ResolvedImage } from "@/types";
+import type { ImageInfo, OpenGraphImage } from "@/types";
 import { siteConfig } from "@/site.config";
 import type { CollectionEntry } from "astro:content";
 
 const imageExt = /\.(png|jpe?g|webp|avif|gif|svg)$/i;
+export type ResolvedImage = ImageMetadata | string | null;
 
 // Remove Obsidian-style brackets from a string
 export function stripObsidianBrackets(value: string): string {
@@ -70,4 +71,58 @@ export function getImagesInDirectory(dirPath: string): ImageMetadata[] {
 // NEW: Get cover image using resolveImage
 export function resolveCoverImage(imagePath: string | undefined): ResolvedImage | null {
   return resolveImage(imagePath);
+}
+
+
+export function resolveImageFromPath(
+  raw: string | undefined,
+  opts?: {
+    /** Directory of the current content file, e.g. "posts/post-1" */
+    baseDir?: string;
+  }
+): ResolvedImage {
+  if (!raw || typeof raw !== "string") return null;
+
+  const cleaned = stripObsidianBrackets(raw).trim();
+  if (!cleaned) return null;
+
+  /* -------------------------------------------------- */
+  /* 1. External URLs                                   */
+  /* -------------------------------------------------- */
+
+  if (/^(https?:)?\/\//i.test(cleaned)) {
+    return cleaned;
+  }
+
+  /* -------------------------------------------------- */
+  /* 2. Resolve relative paths (./image.jpg)            */
+  /* -------------------------------------------------- */
+
+  let resolvedPath = cleaned.replace(/^\/+/, "");
+
+  if (resolvedPath.startsWith("./")) {
+    if (!opts?.baseDir) {
+      // No context → safest fallback
+      return `/${resolvedPath.slice(2)}`;
+    }
+    resolvedPath = `${opts.baseDir}/${resolvedPath.slice(2)}`;
+  }
+
+  /* -------------------------------------------------- */
+  /* 3. Astro content images                            */
+  /* -------------------------------------------------- */
+
+  if (imageExt.test(resolvedPath)) {
+    const contentPath = `/src/content/${resolvedPath}`;
+
+    if (contentPath in contentImages) {
+      return contentImages[contentPath] as ImageMetadata;
+    }
+  }
+
+  /* -------------------------------------------------- */
+  /* 4. Static public fallback                          */
+  /* -------------------------------------------------- */
+
+  return `/${resolvedPath}`;
 }

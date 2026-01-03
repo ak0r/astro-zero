@@ -1,0 +1,8 @@
+.badge {
+    @apply inline-flex items-center px-2 py-1 text-xs text-content-3 font-mono  
+      rounded-full border border-ui hover:bg-surface-2/50 transition-colors;
+}
+
+.btn {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm border border-ui transition-all duration-300
+}

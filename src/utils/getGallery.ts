@@ -10,6 +10,7 @@ import {
 } from '@/utils/entries';
 import type { ResolvedImage } from '@/types';
 import { getImagesInDirectory, resolveImage, stripObsidianBrackets } from '@/utils/images';
+import type { ImageMetadata } from "astro";
 
 export type Gallery = CollectionEntry<'gallery'>;
 
@@ -137,7 +138,7 @@ export async function getGalleryImageCount(
 export async function getGalleryCoverImage(
   gallery: Gallery,
   galleryDir?: string
-): Promise<ResolvedImage | null> {
+): Promise<ImageMetadata | null> {
   const dir = galleryDir || extractGalleryDir(gallery.filePath);
   const imageDir = gallery.data.imageDir || './attachments';
   
@@ -146,13 +147,13 @@ export async function getGalleryCoverImage(
     const resolved = resolveImage(gallery.data.cover);
     
     if (resolved?.kind === 'astro') {
-      return resolved;
+      return resolved.image;
     }
   }
   
   // Fallback: return first image
   const images = await getGalleryImages(dir, imageDir);
-  const resolved = resolveImage(images[0].filename)
+  const resolved = resolveImage(images[0].path)
   return resolved || null;
 }
 /**

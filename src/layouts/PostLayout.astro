@@ -1,7 +1,7 @@
 ---
 import { render } from "astro:content";
 import type { Post } from '@/types';
-import { resolveImage } from '@/utils/images';
+import { resolveImageFromPath } from '@/utils/images';
 import { generatePostSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -18,7 +18,7 @@ import {
   getParentId, 
   getSeriesContext 
   } from '@/utils/getContent';
-import { formatDate, calculateReadingTime, getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import { formatDate, calculateReadingTime, getBreadcrumbsFromPath, getContentDir } from '@/utils/commonFunctions';
 import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 import IconWrapper from "@/components/common/IconWrapper.astro";
 import SeriesPosts from "@/components/widgets/SeriesPosts.astro";
@@ -35,7 +35,7 @@ const seoData = generatePostSEO(post, Astro.url.href);
 // Filter posts based on environment
 const allPosts = await getAllPosts();
 const filteredPosts = filterEntriesBy(allPosts, 'category', post.data.category);
-const sortedPosts = sortPostsByDate(filteredPosts);
+const sortedPosts = sortPostsByDate(allPosts);
 const topLevelPosts = getTopLevelPosts(sortedPosts);
 
 // Get series context
@@ -67,7 +67,14 @@ if (Array.isArray(postImage)) {
   postImage = postImage[0];
 }
 
-const coverImage = resolveImage(postImage);
+const contentDir = post.filePath
+  ? getContentDir(post.filePath)
+  : undefined;
+
+const coverImage = resolveImageFromPath(postImage, {
+  baseDir: contentDir,
+});
+
 const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.data.title}`;
 
 // Generate breadcrumbs for the page
@@ -88,11 +95,11 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 
         <!-- Cover Image -->
         {coverImage && (
-          <div class="mb-10 breakout">
+          <div class="mb-10 breakout border border-ui rounded-lg">
             <ImageWrapper
               src={coverImage}
               alt={coverImageAlt}
-              class="w-full mb-4 rounded-lg border border-ui shadow-lg"
+              class="w-full rounded-lg not-prose aspect-3/2 border border-ui shadow-lg"
               fit="cover"
             />
           </div>
@@ -102,8 +109,8 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
           {post.data.title}
         </h1>
 
-        <div class="flex flex-wrap gap-2 text-sm font-mono text-content-3">
-          <div class="flex items-center self-start gap-2">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-mono text-content-3">
+          <div class="flex items-center gap-2">
             <IconWrapper name="calendar-week" size={16} />
             <time>{formatDate(post.data.date, 'full')}</time>
           </div>
@@ -121,14 +128,14 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
           {tags && (
             <>
               <span class="">&bull;</span>
+              <IconWrapper name="tag" size={16} />
               {tags.map(tag => (
-                <div class="flex gap-2 items-center self-start text-sm font-mono">
-                  <IconWrapper name="tag" size={16} />
+                <div class="badge not-prose flex gap-1 sm:gap-2 items-center self-start">
                   <a
                     href={`/posts/tag/${encodeURIComponent(tag)}`}
-                    class="badge internal-link"
+                    class="internal-link"
                   >
-                    {tag}
+                    #{tag}
                   </a>
                 </div>
               ))}

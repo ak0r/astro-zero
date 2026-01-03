@@ -18,12 +18,12 @@ const {
 
 // Separator icons/text
 const separators = {
-  chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>',
-  slash: '/',
-  arrow: '→',
+  chevron: 'chevron-right',
+  slash: 'slash',
+  arrow: 'arrow-right',
 };
 
-const separatorContent = separators[separator];
+const separatorIcon = separators[separator];
 
 // Build breadcrumb trail
 const breadcrumbs: BreadcrumbItem[] = [];
@@ -39,7 +39,7 @@ breadcrumbs.push(...items);
 
 <section 
   aria-label="Breadcrumb" 
-  class={`breadcrumb not-prose flex items-center gap-2 text-sm mb-4 ${customClass}`}
+  class={`breadcrumb not-prose flex items-center gap-2 text-sm ${customClass}`}
 >
   <ol class="flex items-center gap-2 flex-wrap">
     {breadcrumbs.map((item, index) => {
@@ -76,27 +76,15 @@ breadcrumbs.push(...items);
 
           {/* Separator (not for last item) */}
           {!isLast && (
-            <span 
-              class="text-content-3 separator" 
+            <span
+              class="separator text-content-3"
               aria-hidden="true"
-              set:html={separatorContent}
-            />
+            >
+              <Icon name={separatorIcon} class="size-4" />
+            </span>
           )}
         </li>
       );
     })}
   </ol>
 </section>
-
-<style>
-  .separator {
-    display: inline-flex;
-    align-items: center;
-    opacity: 0.5;
-  }
-
-  .separator svg {
-    width: 1rem;
-    height: 1rem;
-  }
-</style>

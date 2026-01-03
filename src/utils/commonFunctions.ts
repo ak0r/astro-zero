@@ -254,3 +254,12 @@ export function getBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
 
   return breadcrumbs;
 }
+
+/**
+ * Generate content directory from path
+ * Example: /posts/my-post
+ */
+
+export function getContentDir(filePath: string) {
+  return filePath.replace(/\/[^/]+$/, "");
+}
