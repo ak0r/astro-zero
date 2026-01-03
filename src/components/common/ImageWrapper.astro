@@ -46,7 +46,7 @@ const {
         loading={loading}
         decoding="auto"
         format="webp, avif"
-        class:list={[className, 'overflow-hidden relative']}
+        class:list={[className, 'relative']}
         layout={layout}
         fit={fit}
         position={position}
@@ -60,7 +60,7 @@ const {
     </figure>
   ) : (
     <figure class="">
-      <img src={src.url} alt={alt} class:list={[className, 'overflow-hidden relative']} loading={loading} />
+      <img src={src.url} alt={alt} class:list={[className, 'overflow-hidden relative']} loading={loading} {...rest} />
       {caption && (
         <figcaption class="mt-2 text-sm text-center text-content-subtle sm:text-base md:text-[1rem] leading-snug">
           {caption}

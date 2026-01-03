@@ -1,0 +1,154 @@
+---
+import { getAllGalleries, getGalleryImages, extractGalleryDir } from '@/utils/getGallery';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/Container.astro';
+import SEO from '@/components/common/SEO.astro';
+import { resolveImage } from '@/utils/images';
+import { Picture } from 'astro:assets';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import Lightbox from '@/components/common/Lightbox.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+
+export const getStaticPaths = (async () => {
+  const galleries = await getAllGalleries();
+  
+  return galleries.map((gallery) => ({
+    params: { slug: gallery.data.slug || gallery.id },
+    props: { gallery },
+  }));
+}) satisfies GetStaticPaths;
+
+const { gallery } = Astro.props;
+const { title, description, date, tags } = gallery.data;
+
+const galleryDir = extractGalleryDir(gallery.filePath);
+
+// Get all images for this gallery
+const images = await getGalleryImages(galleryDir, gallery.data.imageDir);
+
+
+// SEO data
+const seoData = {
+  title: title,
+  description: description || `Photo gallery: ${title}`,
+  canonical: Astro.url.href,
+};
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+---
+
+<BaseLayout>
+  <!-- <SEO data={seoData} slot="head" /> -->
+  
+  <Container class="py-8">
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
+    </div>
+
+    <!-- Header -->
+    <div class="animate mb-8">
+      <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-meta="title[content]" content={title} />
+      <!-- <meta data-pagefind-meta="description[content]" content={post.data.description} /> -->
+      <meta data-pagefind-sort="date[content]" content={date.toISOString()} />
+
+      <h1 class="text-4xl font-bold text-content mb-4">
+        {title}
+      </h1>
+      
+      {description && (
+        <p class="text-lg text-content-3 mb-4">
+          {description}
+        </p>
+      )}
+      
+      <!-- Metadata -->
+      <div class="flex flex-wrap items-center gap-4 text-sm text-content-3">
+        <span>{images.length} {images.length === 1 ? 'image' : 'images'}</span>
+        
+        {tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <a 
+                href={`/gallery/tag/${tag}`}
+                class="badge px-2 py-1 text-xs text-content-3 rounded border border-ui hover:bg-surface-2/50 transition-colors"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+    
+    <!-- Image Grid -->
+    {images.length > 0 ? (
+      <div class="animate non-prose image-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {images.map((img, index) => (
+          <button
+            type="button"
+            class="gallery-image-button img-container group relative not-prose inline-block rounded-lg border border-ui shadow-lg overflow-hidden mb-3 cursor-zoom-in"
+            onclick={`window.dispatchEvent(new CustomEvent('openLightbox', { detail: { index: ${index}, button: this } }))`}
+          >
+            <Picture
+              src={img.image}
+              alt={img.filename}
+              widths={[300, 400, 500]}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              formats={['webp', 'avif']}
+              class="block w-full h-full aspect-4/5 object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+              data-lightbox="gallery"
+              data-caption={img.filename}
+            />
+            
+            <!-- Hover Overlay (no bg-black) -->
+            <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+              </svg>
+            </div>
+          </button>
+        ))}
+      </div>
+    ) : (
+      <div class="animate text-center py-24">
+        <p class="text-lg text-content-muted">
+          No images found in this gallery.
+        </p>
+      </div>
+    )}
+  </Container>
+  <!-- Lightbox Component -->
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  .gallery-image-button {
+    border: none;
+    padding: 0;
+    background: none;
+  }
+  
+  .gallery-image-button:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  
+  /* Fix black overlay issue */
+  .gallery-image-button img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Ensure Picture component renders properly */
+  .gallery-image-button picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

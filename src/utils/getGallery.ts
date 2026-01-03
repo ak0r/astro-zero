@@ -8,6 +8,7 @@ import {
   getEntriesByTag,
   getFeaturedEntries,
 } from '@/utils/entries';
+import type { ResolvedImage } from '@/types';
 import { getImagesInDirectory, resolveImage, stripObsidianBrackets } from '@/utils/images';
 
 export type Gallery = CollectionEntry<'gallery'>;
@@ -136,7 +137,7 @@ export async function getGalleryImageCount(
 export async function getGalleryCoverImage(
   gallery: Gallery,
   galleryDir?: string
-): Promise<GalleryImage | null> {
+): Promise<ResolvedImage | null> {
   const dir = galleryDir || extractGalleryDir(gallery.filePath);
   const imageDir = gallery.data.imageDir || './attachments';
   
@@ -144,25 +145,15 @@ export async function getGalleryCoverImage(
   if (gallery.data.cover) {
     const resolved = resolveImage(gallery.data.cover);
     
-    // If it's an Astro-optimized image, find it in the gallery images
     if (resolved?.kind === 'astro') {
-      const images = await getGalleryImages(dir, imageDir);
-      
-      // Extract just the filename from the resolved path
-      const resolvedFilename = resolved.image.src.split('/').pop()?.split('?')[0] || '';
-      
-      const coverImage = images.find(img => 
-        img.filename.includes(resolvedFilename) || 
-        img.image.src === resolved.image.src
-      );
-      
-      if (coverImage) return coverImage;
+      return resolved;
     }
   }
   
-  // // Fallback: return first image
-  // const images = await getGalleryImages(dir, imageDir);
-  // return images[0] || null;
+  // Fallback: return first image
+  const images = await getGalleryImages(dir, imageDir);
+  const resolved = resolveImage(images[0].filename)
+  return resolved || null;
 }
 /**
  * Gallery statistics
