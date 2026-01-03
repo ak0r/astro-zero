@@ -1,9 +1,14 @@
 ---
 import Container from "@/components/layout/Container.astro"
 import BaseLayout from "@/layouts/BaseLayout.astro"
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
+
+const seoData = generateIndexSEO('home', Astro.url.href);
 
 ---
 <BaseLayout>
+  <SEO data={seoData} slot="seo" />
   <Container>
     <section class="animate mb-12">
       <h1 class="text-4xl font-bold mb-4">Welcome to My Blog</h1>

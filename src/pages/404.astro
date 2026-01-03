@@ -6,26 +6,24 @@ import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 import LinkWrapper from '@/components/common/LinkWrapper.astro';
 import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
 import { get404Content } from '@/utils/page-sections';
+import PageHeader from '@/components/layout/PageHeader.astro';
 
 // Load optional 404 content sections
 const sections = await get404Content();
 
 // Generate breadcrumbs for the page
-const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+const breadcrumbs = getBreadcrumbsFromPath('/404');
 ---
 
 <BaseLayout>
   <Container class="py-8">
-    
-    <!-- Breadcrumbs -->
-    <div class="animate mb-8">
-      <Breadcrumbs items={breadcrumbs} class="my-6" />
-    </div>
+    <PageHeader
+      title="404"
+      description="Page Not Found"
+      breadcrumb={'/404'}
+    />
 
-    <!-- ============================================================ -->
-    <!-- 404 MESSAGE (Optional from 404-message.md OR default) -->
-    <!-- ============================================================ -->
-    <div class="min-h-[40vh] flex flex-col items-center justify-center py-12 gap-6">
+    <div class="min-h-[20vh] flex flex-col items-center justify-center py-8 my-16 gap-6">
       <Icon name="file-off" size={60} class="text-content-3 shrink-0 mb-4" />
       {sections.message ? (
         <div class="animate max-w-2xl text-center">
@@ -33,16 +31,11 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
         </div>
       ) : (
         <div class="animate text-center">
-          <h2 class="text-4xl font-bold text-content mb-2">404</h2>
-          <h3 class="text-xl font-semibold text-content-3 mb-4">
-            Page Not Found
-          </h3>
           <p class="text-content-2 max-w-md mx-auto">
             The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
       )}
-
     </div>
 
     <!-- ============================================================ -->

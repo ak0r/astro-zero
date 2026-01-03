@@ -9,25 +9,32 @@ import { sortEntriesByDate } from '@/utils/entries';
 import { siteConfig } from '@/site.config';
 import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
 import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
 
 // Fetch galleries
 const allGalleries = await getCollection('gallery', ({ data }) => !data.draft);
 const sortedGalleries = sortEntriesByDate(allGalleries);
 const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
 
+
 // Generate breadcrumbs for the page
 const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+
+const seoData = generateIndexSEO('galleries', Astro.url.href);
 
 ---
 
 <BaseLayout>
+  
+  <SEO data={seoData} slot="seo" />
+
   <Container class="py-8">
-    
-    <Breadcrumbs items={breadcrumbs} class="my-6" />
     
     <PageHeader
       title="Photo Galleries"
       description="Photo collections from travels and adventures around the world."
+      breadcrumb={Astro.url.pathname}
     />
     
     <!-- Filter tabs (same as posts pages) -->

@@ -3,12 +3,14 @@ import { getAllGalleries, getGalleryImages, extractGalleryDir } from '@/utils/ge
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
+import { generateGallerySEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
 import { resolveImage, resolveImageFromPath } from '@/utils/images';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
 import Lightbox from '@/components/common/Lightbox.astro';
 import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
+import PageHeader from '@/components/layout/PageHeader.astro';
 
 export const getStaticPaths = (async () => {
   const galleries = await getAllGalleries();
@@ -38,39 +40,27 @@ const resolvedImages = await Promise.all(
 );
 
 // SEO data
-const seoData = {
-  title: title,
-  description: description || `Photo gallery: ${title}`,
-  canonical: Astro.url.href,
-};
+const seoData = generateGallerySEO(gallery, Astro.url.href);
 
 // Generate breadcrumbs for the page
 const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 ---
 
 <BaseLayout>
-  <!-- <SEO data={seoData} slot="head" /> -->
+  <SEO data={seoData} slot="head" />
   
   <Container class="py-8">
-    <div class="animate">
-      <Breadcrumbs items={breadcrumbs} class="my-6" />
-    </div>
+    <PageHeader
+      title={title}
+      description={description}
+      breadcrumb={Astro.url.pathname}
+    />
 
     <!-- Header -->
     <div class="animate mb-8">
       <meta data-pagefind-filter="collection[content]" content="gallery" />
       <meta data-pagefind-meta="title[content]" content={title} />
       <meta data-pagefind-sort="date[content]" content={date.toISOString()} />
-
-      <h1 class="text-4xl font-bold text-content mb-4">
-        {title}
-      </h1>
-      
-      {description && (
-        <p class="text-lg text-content-3 mb-4">
-          {description}
-        </p>
-      )}
       
       <!-- Metadata -->
       <div class="flex flex-wrap items-center gap-4 text-sm text-content-3">

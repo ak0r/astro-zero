@@ -11,8 +11,6 @@ import {
   getPostsByYearSorted 
 } from '@/utils/getContent';
 import { filterEntriesBy } from '@/utils/entries';
-import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
-import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
 
 export async function getStaticPaths() {
   return [
@@ -50,18 +48,14 @@ const filterTabs = [
   { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
 ];
 
-// Generate breadcrumbs for the page
-const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 ---
 
 <BaseLayout>
   <Container class="py-8">
-    
-    <Breadcrumbs items={breadcrumbs} class="my-6" />
-
     <PageHeader
       title={titles[category]}
       description={descriptions[category]}
+      breadcrumb={Astro.url.pathname}
     />
     
     <FilterTabs tabs={filterTabs} class="mb-12" />
@@ -75,6 +69,5 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
         />
       ))}
     </div>
-    
   </Container>
 </BaseLayout>

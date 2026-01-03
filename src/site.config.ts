@@ -2,7 +2,7 @@ import type { SiteConfig } from "./types";
 
 export const siteConfig: SiteConfig = {
   siteURL: "https://ordinary-astro.pages.dev",
-  title: "Ordinary",
+  title: "Zero",
   description: "The Obsidian CMS based AstroJS theme",
   author: "John Doe",
   defaultTheme: "light",
@@ -10,8 +10,8 @@ export const siteConfig: SiteConfig = {
   scrollToTop: true,
   profilePicture: {
     enabled: false,
-    image: "",
-    alt: "",
+    image: "/profile.png",
+    alt: "John Doe",
     size: "sm",
     url: undefined,
     placement: "footer",

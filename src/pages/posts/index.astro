@@ -7,8 +7,9 @@ import YearGroup from '@/components/content/YearGroup.astro';
 import { getAllPosts, getTopLevelPosts, sortPostsByDate, getPostsByYearSorted } from '@/utils/getContent';
 import { getAllGalleries } from '@/utils/getGallery';
 import { siteConfig } from '@/site.config';
-import { getBreadcrumbsFromPath } from '@/utils/commonFunctions';
-import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
+
 
 // Fetch all posts and galleries
 const allPosts = await getAllPosts();
@@ -23,16 +24,17 @@ const groupedPosts = await getPostsByYearSorted(allContent);
 
 const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
 
-// Generate breadcrumbs for the page
-const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+const seoData = generateIndexSEO('posts', Astro.url.href);
 ---
 
 <BaseLayout>
+  <SEO data={seoData} slot="seo" />
   <Container class="py-8">
-    <Breadcrumbs items={breadcrumbs} class="my-6" />
+
     <PageHeader
       title="Thinking out loud."
       description="This is my personal blog, a space where I share my thoughts, ideas and other interesting things I come across."
+      breadcrumb={Astro.url.pathname}
     />
     
     <FilterTabs tabs={indexPageFilters} class="mb-12" />

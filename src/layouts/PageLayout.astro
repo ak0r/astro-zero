@@ -1,80 +1,49 @@
 ---
 import { render } from 'astro:content';
 import type { Page } from "@/types";
-
-// import { generatePageSEO } from '@/utils/seo';
+import { generatePageSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
 import Container from '@/components/layout/Container.astro';
-// import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
-// import { getBreadcrumbsFromPath } from '@/utils/breadcrumbs';
 import PageHeader from '@/components/layout/PageHeader.astro';
 
-// export interface Props {
-//   page: Page;
-// }
-
-// const { page } = Astro.props;
-
-interface Props {
-  title: string;
-  description?: string;
-  lastUpdated?: Date;
-  showLastUpdated?: boolean;
+export interface Props {
+  page: Page;
 }
 
-const { title, description, lastUpdated, showLastUpdated = true } = Astro.props;
+const { page } = Astro.props;
 
 // Auto-generate breadcrumb from current path
-const breadcrumb = Astro.url.pathname;
+const currentPath = Astro.url.pathname;
 
 // Process the page content
-// const { Content, headings } = await render(page);
-// const pageTitle = page.data.title;
-// const pageDesc = page.data.description;
+const { Content, headings } = await render(page);
+const pageTitle = page.data.title;
+const pageDesc = page.data.description;
 
 // Generate SEO data
-// const seoData = generatePageSEO(page, Astro.url.href);
-
-// Generate breadcrumbs for the page
-// const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+const seoData = generatePageSEO(page, Astro.url.href);
 
 ---
 
 <BaseLayout>
   <!-- SEO -->
-  <!-- <SEO data={seoData} slot="seo" /> -->
+  <SEO data={seoData} slot="seo" />
 
   <Container class="py-8">
-    <!-- Back to previous -->
-    <div class="animate">
-      <!-- <BackToPrevious href="/">Back to Homepage</BackToPrevious> -->
-       <!-- <Breadcrumbs items={breadcrumbs} class="my-6" /> -->
-    </div>
-
-    <!-- Page Title -->
-    <!-- <div class="animate mb-8">
-      <h1 class="text-3xl font-bold text-content-primary mb-2">{pageTitle}</h1>
-      <p class="text-content-muted">
-        ${pageDesc}
-      </p>
-    </div> -->
-
     <PageHeader
-      breadcrumb={breadcrumb}
-      title={title}
-      description={description}
-      lastUpdated={lastUpdated}
-      showLastUpdated={showLastUpdated}
+      breadcrumb={currentPath}
+      title={pageTitle}
+      description={pageDesc}
     />
 
     <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
       <meta data-pagefind-meta="collection[content]" content="pages" />
-      <meta data-pagefind-meta="title[content]" content={title} />
+      <meta data-pagefind-meta="title[content]" content={pageTitle} />
 
       <!-- Article content -->
       <div class="" id="page-content">
-        <!-- <Content /> -->
+        <Content />
         <slot />
       </div>
     </article>
