@@ -6,3 +6,31 @@
 .btn {
   @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm border border-ui transition-all duration-300
 }
+
+/* Breakout - moderately wider */
+.breakout {
+  @apply sm:-mx-24;
+}
+
+/* Breakout-wide - full viewport */
+.breakout-wide {
+  @apply w-screen;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.card {
+  @apply p-4 border border-ui rounded-lg transition-colors;
+}
+
+.card:hover {
+  @apply bg-surface-2/50;
+}
+
+.card-primary {
+ @apply p-4 border border-primary/50 rounded-lg bg-primary/20; 
+}
+
+.card-primary:hover {
+  @apply bg-primary/50;
+}

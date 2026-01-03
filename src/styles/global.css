@@ -21,8 +21,8 @@
   --color-surface-2: var(--color-surface-2);
   
   --color-content: var(--color-content);
-  --color-content-2: var(--color-content-1);
-  --color-content-3: var(--color-content-2);
+  --color-content-2: var(--color-content-2);
+  --color-content-3: var(--color-content-3);
   
   --color-ui: var(--color-ui);
   --color-ui-2: var(--color-ui-2);
@@ -48,17 +48,5 @@
     @apply m-0 font-primary bg-surface text-content leading-relaxed antialiased text-base ;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Breakout - moderately wider */
-  .breakout {
-    @apply sm:-mx-24;
-  }
-
-  /* Breakout-wide - full viewport */
-  .breakout-wide {
-    @apply w-screen;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
   }
 }

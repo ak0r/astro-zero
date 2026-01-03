@@ -11,84 +11,79 @@ interface Props {
 
 const { prevEntry, nextEntry, parentEntry } = Astro.props;
 
-const isSubpost = !!parentEntry;
-const gridClass = isSubpost ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
+const isSubpost = Boolean(parentEntry);
 
-// Helper function to get the base path from collection
-const getBasePath = (entry: Post): string => {
-  return entry.collection === 'posts' ? '/posts' : '/galleries';
-};
+const getBasePath = (entry: Post): string =>
+  entry.collection === 'posts' ? '/posts' : '/galleries';
+
+// count how many nav items we will actually render
+const navCount =
+  (prevEntry ? 1 : 0) +
+  (nextEntry ? 1 : 0) +
+  (parentEntry ? 1 : 0);
+
+const gridClass =
+  navCount === 3
+    ? 'sm:grid-cols-3'
+    : navCount === 2
+    ? 'sm:grid-cols-2'
+    : 'sm:grid-cols-1';
 ---
 <section class="mt-12 pt-8 border-t border-ui not-prose">
   <nav class={`grid grid-cols-1 gap-4 ${gridClass}`}>
-    <!-- Previous Entry -->
-    {prevEntry ? (
+
+    <!-- Previous -->
+    {prevEntry && (
       <LinkWrapper
         href={`${getBasePath(prevEntry)}/${prevEntry.id}`}
-        class="internal-link post-nav group flex justify-start items-center gap-4 p-2 rounded-lg border border-ui transition-all"
-        aria-disabled={!prevEntry}
+        class="internal-link post-nav group flex items-center gap-4 card"
       >
         <IconWrapper
           name="arrow-left"
           class="shrink-0 size-5 text-content-3 transition-transform group-hover:-translate-x-1"
         />
-        <div class="flex flex-col items-start overflow-hidden text-left text-wrap">
+        <div class="flex flex-col overflow-hidden text-left">
           <div class="text-xs mb-1 text-content-3">
             {isSubpost ? 'Previous Subpost' : 'Previous Post'}
           </div>
-          <div class="w-full text-left text-sm text-content-2 text-balance text-ellipsis">
-            {
-              prevEntry.data.title || 
-              (isSubpost ? 'No older subposts' : "You're at the oldest post!")
-            }
-          </div>
-        </div>
-      </LinkWrapper>
-    ) : (
-      <div class="h-full"></div>
-    )}
-    
-    <!-- Parent Entry -->
-    {isSubpost && (
-      <LinkWrapper
-        href={`${getBasePath(parentEntry)}/${parentEntry.id}`}
-        class="internal-link post-nav group flex size-full items-center justify-center gap-4 p-2 rounded-lg border border-ui transition-all"
-        aria-disabled={!parentEntry}
-      >
-        <IconWrapper
-          name="corner-left-up"
-          class="shrink-0 size-5 text-content-3 transition-transform group-hover:-translate-y-1"
-        />
-        <div class="flex flex-col items-center overflow-hidden text-center text-wrap">
-          <div class="text-xs mb-1 text-content-3">
-            Parent Post
-          </div>
-          <div class="w-full text-left text-sm text-content-2 text-ellipsis">
-            {
-              parentEntry.data.title || 'No parent post'
-            }
+          <div class="text-sm text-content-2 text-balance truncate">
+            {prevEntry.data.title}
           </div>
         </div>
       </LinkWrapper>
     )}
 
-    <!-- Next Entry -->
-    {nextEntry ? (
-      
+    <!-- Parent -->
+    {parentEntry && (
+      <LinkWrapper
+        href={`${getBasePath(parentEntry)}/${parentEntry.id}`}
+        class="internal-link post-nav group flex items-center justify-center gap-4 card"
+      >
+        <IconWrapper
+          name="corner-left-up"
+          class="shrink-0 size-5 text-content-3 transition-transform group-hover:-translate-y-1"
+        />
+        <div class="flex flex-col overflow-hidden text-center">
+          <div class="text-xs mb-1 text-content-3">Parent Post</div>
+          <div class="text-sm text-content-2 truncate">
+            {parentEntry.data.title}
+          </div>
+        </div>
+      </LinkWrapper>
+    )}
+
+    <!-- Next -->
+    {nextEntry && (
       <LinkWrapper
         href={`${getBasePath(nextEntry)}/${nextEntry.id}`}
-        class="internal-link post-nav group flex justify-end items-center gap-4 p-2 rounded-lg border border-ui transition-all"
-        aria-disabled={!nextEntry}
+        class="internal-link post-nav group flex items-center justify-end gap-4 card"
       >
-        <div class="flex flex-col items-end overflow-hidden text-right text-wrap">
+        <div class="flex flex-col overflow-hidden text-right">
           <div class="text-xs mb-1 text-content-3">
             {isSubpost ? 'Next Subpost' : 'Next Post'}
           </div>
-          <div class="w-full text-right text-sm text-content-2 text-balance text-ellipsis">
-            {
-              nextEntry.data.title || 
-              (isSubpost ? 'No newer subposts' : "You're at the newest post!")
-            }
+          <div class="text-sm text-content-2 text-balance truncate">
+            {nextEntry.data.title}
           </div>
         </div>
         <IconWrapper
@@ -96,8 +91,7 @@ const getBasePath = (entry: Post): string => {
           class="shrink-0 size-5 text-content-3 transition-transform group-hover:translate-x-1"
         />
       </LinkWrapper>
-    ) : (
-      <div class="h-full"></div>
     )}
+
   </nav>
 </section>

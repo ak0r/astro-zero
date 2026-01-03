@@ -28,7 +28,7 @@ function getPartLabel(post: Post, index: number) {
 ---
 
 <details class={`series-widget not-prose ${className}`} close>
-  <summary class="flex items-center justify-between cursor-pointer p-4 border border-ui rounded-lg hover:bg-surface-2/50 transition-colors group">
+  <summary class="flex items-center justify-between cursor-pointer card group">
     <div class="flex items-center gap-3">
       <IconWrapper name="book" size={20} class="text-primary shrink-0" />
       <div>
@@ -53,7 +53,7 @@ function getPartLabel(post: Post, index: number) {
         return (
           <li>
             {isCurrent ? (
-              <div class="flex items-start gap-3 p-3 rounded-md bg-primary/10 border border-primary/20">
+              <div class="flex flex-row gap-2 items-start card-primary">
                 <IconWrapper name="arrow-right" size={16} class="text-primary shrink-0 mt-0.5" />
                 <div class="flex-1 min-w-0">
                   <div class="text-xs text-primary/70 mb-0.5">{label}</div>
@@ -63,9 +63,9 @@ function getPartLabel(post: Post, index: number) {
             ) : (
               <a 
                 href={`/posts/${slug}`}
-                class="flex items-start gap-3 p-3 rounded-md transition-colors hover:bg-surface-2/50 text-content-3 hover:text-content"
+                class="flex flex-row gap-2 items-start content-center align-middle card"
               >
-                <IconWrapper name="circle" size={16} class="text-content-4 flex-shrink-0 mt-0.5" />
+                <IconWrapper name="circle" size={16} class="text-content-4 shrink-0 mt-0.5" />
                 <div class="flex-1 min-w-0">
                   <div class="text-xs text-content-3 mb-0.5">{label}</div>
                   <div class="text-sm">{post.data.title}</div>

@@ -35,18 +35,18 @@ if (featured) {
     <IconWrapper 
       name={icon} 
       size={20} 
-      class={`mt-1 flex-shrink-0 ${featured ? 'text-primary' : 'text-content-3'}`}
+      class={`mt-1 shrink-0 ${featured ? 'text-primary' : 'text-content-3 text-base'}`}
     />
   )}
   
   <div class="flex-1 flex items-baseline justify-between gap-4">
-    <span class="text-content-2 group-hover:text-content-1 transition-colors">
+    <span class="text-content-2 group-hover:text-primary-2 transition-colors">
       {title}
     </span>
     <div class="hidden sm:block h-px flex-1 bg-ui"></div>
     <time 
       datetime={date.toISOString()}
-      class="text-sm text-content-3 font-mono whitespace-nowrap"
+      class="text-xs text-content-3 font-mono whitespace-nowrap"
     >
       {formatDate(date, 'monthDay')}
     </time>

@@ -82,40 +82,6 @@ const projectsCollection = defineCollection({
   }),
 });
 
-
-// Define schema for docs
-const docsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
-  schema: z.object({
-    title: z.string().default('Untitled Documentation'),
-    slug: z.string().optional(),
-    description: z.string().nullable().optional().default('No description provided'),
-    date: z.coerce.date().default(() => new Date()),
-    category: z.string().nullable().optional().default('General'),
-    tags: z.array(z.string()).nullable().optional(),
-    series: z.string().nullable().optional(),
-    seriesOrder: z.number().nullable().optional(),
-    order: z.number().default(0),
-    lastUpdated: z.coerce.date().optional(),
-    version: z.string().nullable().optional(),
-    cover: z.any().nullable().optional().transform((val) => {
-      // Handle various Obsidian syntax formats
-      if (Array.isArray(val)) {
-        // Handle array format from [[...]] syntax - take first element
-        return val[0] || null;
-      }
-      if (typeof val === 'string') {
-        // Handle string format - return as-is
-        return val;
-      }
-      return null;
-    }),
-    coverAlt: z.string().nullable().optional(),
-    draft: z.boolean().optional(),
-    featured: z.boolean().optional(),
-  }),
-});
-
 // Define schema for gallery
 const galleryCollection = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/gallery' }),
@@ -140,6 +106,5 @@ export const collections = {
   posts: postsCollection,
   pages: pagesCollection,
   projects: projectsCollection,
-  docs: docsCollection,
   gallery: galleryCollection,
 };

@@ -1,0 +1,108 @@
+---
+import { siteConfig } from '@/site.config';
+import Container from '@/components/layout/Container.astro';
+import Icon from '@/components/common/IconWrapper.astro';
+
+const currentYear = new Date().getFullYear();
+
+const socialLinks = (siteConfig.navigation.social || []).filter(
+  (s) => s && s.url && s.icon
+);
+
+const footerEnabled = siteConfig.footer.enabled;
+const showSocial = siteConfig.footer.showSocialIconsInFooter && socialLinks.length > 0;
+const showProfile =
+  siteConfig.profilePicture.enabled &&
+  siteConfig.profilePicture.placement === 'footer';
+
+const profile = siteConfig.profilePicture;
+const footerContent = siteConfig.footer.content.replace(
+  '{author}',
+  siteConfig.author
+);
+
+const getProfileClasses = (size: string, style: string) => {
+  const sizeMap = {
+    sm: 'h-8',
+    md: 'h-12',
+    lg: 'h-16',
+  };
+
+  const styleMap = {
+    circle: 'rounded-full object-cover border-2 border-primary-200 dark:border-primary-700',
+    square: 'rounded-lg object-cover border-2 border-primary-200 dark:border-primary-700',
+    none: 'object-contain',
+  };
+
+  return `${sizeMap[size] ?? sizeMap.md} ${styleMap[style] ?? styleMap.none}`;
+};
+---
+<footer class="animate mt-16">
+  <Container>
+
+    <!-- Profile -->
+    {showProfile && (
+      <div class="mb-4">
+        {profile.url ? (
+          <a
+            href={profile.url}
+            class="inline-block hover:opacity-80 transition-opacity"
+            target={profile.url.startsWith('http') ? '_blank' : undefined}
+            rel={profile.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            <img
+              src={profile.image}
+              alt={profile.alt}
+              class={getProfileClasses(profile.size, profile.style)}
+            />
+          </a>
+        ) : (
+          <img
+            src={profile.image}
+            alt={profile.alt}
+            class={getProfileClasses(profile.size, profile.style)}
+          />
+        )}
+      </div>
+    )}
+
+    <!-- Footer row -->
+    {(footerEnabled || showSocial) && (
+      <div
+        class={[
+          'text-center',
+          footerEnabled && showSocial && 'md:flex md:items-center md:justify-between',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <!-- Footer text -->
+        {footerEnabled && (
+          <p
+            class="text-sm text-content-3"
+            set:html={footerContent}
+          />
+        )}
+
+        <!-- Social links -->
+        {showSocial && (
+          <div class="not-prose mt-4 md:mt-0 flex justify-center md:justify-end items-center gap-4">
+            {socialLinks.map((social) => (
+              <a
+                href={social.url}
+                title={social.title}
+                class="text-content-3 hover:text-content transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon name={social.icon} class="size-5" />
+                <span class="sr-only">{social.title}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+  </Container>
+</footer>

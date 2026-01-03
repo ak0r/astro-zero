@@ -23,8 +23,8 @@ export const siteConfig: SiteConfig = {
   navigation: {
     pages: [
       { title: "Posts", url: "/posts/" },
+      { title: "Galleries", url: "/galleries/" },
       { title: "Projects", url: "/projects/" },
-      { title: "Docs", url: "/docs/" },
       { title: "About", url: "/about/" },
       { title: "GitHub", url: "https://github.com/ak0r" },
     ],
@@ -65,9 +65,9 @@ export const siteConfig: SiteConfig = {
     depth: 0
   },
   footer: {
-    enabled: false,
-    content: "",
-    showSocialIconsInFooter: false
+    enabled: true,
+    content: "© {author}. Built with the Zero theme.",
+    showSocialIconsInFooter: true
   },
   contentDisplay: {
     dateFormat: "long",
