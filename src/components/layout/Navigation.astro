@@ -5,26 +5,25 @@ import { siteConfig } from '@/site.config';
 const currentPath = Astro.url.pathname;
 ---
 
-<ul class="not-prose flex flex-col md:flex-row gap-6 text-lg md:text-base font-mono sm:font-medium">
-  {siteConfig.navigation.pages.map(page => {
-    const isActive =
-      currentPath === page.url ||
-      currentPath.startsWith(page.url);
+<!-- <ul class="not-prose flex flex-col md:flex-row gap-6 text-lg md:text-base font-mono sm:font-medium"> -->
+{siteConfig.navigation.pages.map(page => {
+  const isActive =
+    currentPath === page.url ||
+    currentPath.startsWith(page.url);
 
-    return (
-      <li>
-        <LinkWrapper
-          href={page.url}
-          class:list={[
-            'transition-colors',
-            isActive
-              ? 'text-primary font-semibold'
-              : 'text-content-3',
-          ]}
-        >
-          /{page.title.toLowerCase()}
-        </LinkWrapper>
-      </li>
-    );
-  })}
-</ul>
+  return (
+    <LinkWrapper
+      href={page.url}
+      class:list={[
+        'transition-colors',
+        isActive
+          ? 'text-primary font-semibold'
+          : 'text-content-3',
+      ]}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      /{page.title.toLowerCase()}
+    </LinkWrapper>
+  );
+})}
+<!-- </ul> -->

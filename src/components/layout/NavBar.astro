@@ -1,0 +1,72 @@
+---
+import { siteConfig } from '@/site.config';
+import Container from '@/components/layout/Container.astro';
+import Icon from '@/components/common/IconWrapper.astro';
+import ThemeToggle from '@/components/widgets/ThemeToggle.astro';
+import Navigation from './Navigation.astro';
+
+const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'header';
+
+---
+<header class="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm">
+  <Container>
+    <nav class="mt-4 not-prose relative w-full border border-ui bg-surface/70 backdrop-blur-lg rounded-lg flex flex-wrap md:flex-nowrap items-center justify-between p-3  ">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="group flex-none rounded-lg text-xl inline-block focus:outline-hidden">
+          <!-- { showProfilePicture && <Avatar /> } -->
+          <span class="font-semibold text-3xl link-animate">
+            {siteConfig.title}
+          </span>
+        </a>
+      </div>
+
+      <!-- Button group menu toggle -->
+      <div class="flex items-center gap-1 md:order-4 md:ms-4">
+        <!-- Theme toggle (always visible) -->
+        <ThemeToggle />
+
+        <!-- Command palette -->
+        {siteConfig.commandPaletteConfig.enabled && (
+          <button
+            id="command-palette-trigger"
+            class="btn-icon flex items-center text-sm"
+            aria-label="Open command palette"
+            onclick="window.dispatchEvent(new CustomEvent('command-palette:open', { detail: { mode: 'command' } }))"
+          >
+            <Icon name="command" size={16} class="shrink-0" />
+            <kbd class="sm:inline text-sm font-medium">
+              K
+            </kbd>
+          </button>
+        )}
+
+        <div class="md:hidden">
+          <!-- Toggle Button -->
+          <button type="button" 
+            class="hs-collapse-toggle flex justify-center items-center size-9.5 btn-icon" 
+            id="hs-navbar-header-floating-collapse" 
+            aria-expanded="false" 
+            aria-controls="hs-navbar-header-floating" 
+            aria-label="Toggle navigation" 
+            data-hs-collapse="#hs-navbar-header-floating">
+            <span id="menu-icon" class="hs-collapse-open:hidden">
+              <Icon name="menu-2" size={16} class="shrink-0" />
+            </span>
+            <span id="close-icon" class="hs-collapse-open:block hidden">
+              <Icon name="x" size={16} class="shrink-0" />
+            </span>
+          </button>
+          <!-- End Toggle Button -->
+        </div>
+      </div>
+
+      <!-- Collapse -->
+      <div id="hs-navbar-header-floating" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow md:block" aria-labelledby="hs-navbar-header-floating-collapse">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-3 mt-3 md:mt-0 py-2 md:py-0 md:ps-7 text-lg md:text-base font-mono sm:font-medium">
+          <Navigation />
+        </div>
+      </div>
+    </nav>
+  </Container>
+</header>

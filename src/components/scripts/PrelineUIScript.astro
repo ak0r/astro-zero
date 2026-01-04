@@ -1,0 +1,17 @@
+---
+
+---
+<script>
+  // Import and auto-initialize Preline Collapse
+  import { HSCollapse } from '@preline/collapse';
+  
+  // Initialize on page load
+  window.addEventListener('load', () => {
+    HSCollapse.autoInit();
+  });
+  
+  // Re-initialize after navigation (for view transitions)
+  document.addEventListener('astro:page-load', () => {
+    HSCollapse.autoInit();
+  });
+</script>

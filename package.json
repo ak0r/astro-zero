@@ -15,6 +15,7 @@
     "@astrojs/mdx": "^4.3.13",
     "@iconify-json/tabler": "^1.2.25",
     "@pagefind/default-ui": "^1.4.0",
+    "@preline/collapse": "^3.2.3",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.6",
     "astro-expressive-code": "^0.41.5",

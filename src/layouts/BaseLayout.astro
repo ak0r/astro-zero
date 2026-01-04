@@ -13,8 +13,10 @@ import ThemeManager from '@/components/common/ThemeManager.astro';
 import ScrollScript from '@/components/scripts/ScrollScript.astro';
 import AnimationScript from '@/components/scripts/AnimationScript.astro';
 import CollapsibleCalloutsScript from '@/components/scripts/CollapsibleCalloutsScript.astro';
+import PrelineUI from '@/components/scripts/PrelineUIScript.astro';
 import CommandPalette from '@/components/widgets/CommandPalette.astro';
 import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
+import NavBar from '@/components/layout/NavBar.astro';
 
 export interface Props {
   bodyClass?: string;
@@ -77,7 +79,8 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     </noscript>
 
     <!-- Header -->
-    <Header />
+    <!-- <Header /> -->
+    <NavBar />
 
     <!-- Main content -->
     <main id="main-content">
@@ -100,6 +103,7 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     <ScrollScript />
     <AnimationScript />
     <CollapsibleCalloutsScript />
+    <PrelineUI />
 
     <!-- Additional page-specific scripts -->
     <slot name="scripts" />
