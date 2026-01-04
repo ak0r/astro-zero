@@ -1,53 +1,92 @@
 @layer components {
 
+/* ================================
+  Badges, Buttons, Links
+  ================================ */
+
 .badge {
-    @apply inline-flex items-center px-2 py-1 text-xs text-content-3 font-mono  
-      rounded-full border border-ui hover:bg-surface-2/50 transition-colors;
+  @apply inline-flex items-center py-1 px-2 text-xs text-content-3 font-mono rounded-full bg-surface-2/30 transition-colors duration-300;
 }
 
+.badge-outline {
+  @apply inline-flex items-center py-1 px-2 text-xs text-content-3 font-mono rounded-full border border-ui transition-colors duration-300;
+}
+
+.badge:hover,
+.badge-outline:hover {
+  @apply bg-surface-2/50;
+}
+
+.badge-primary {
+  @apply inline-flex items-center py-1 px-2 text-xs text-content-3 font-mono rounded-full border border-primary/50 bg-primary/20 transition-colors duration-300;
+}
+
+.badge-primary:hover {
+  @apply bg-primary/30;
+}
+
+
 .btn {
-  @apply inline-flex items-center gap-2 p-2 rounded-md text-sm border border-ui transition-all duration-300
+  @apply inline-flex items-center gap-2 p-2 rounded-md border border-ui transition-all duration-300;
+  @apply hover:bg-surface-2;
 }
 
 .btn-ghost {
-  @apply inline-flex items-center gap-2 p-2 rounded-md text-sm transition-all duration-300
+  @apply inline-flex items-center gap-2 p-2 rounded-md transition-all duration-300;
+  @apply hover:bg-surface-2;
 }
 
-.btn:hover{
-  @apply bg-surface-2;
+.btn-icon {
+  @apply rounded-sm border gap-2 p-2 border-ui transition-colors hover:bg-surface-2 text-content-3 hover:text-content-2 cursor-pointer;
 }
 
-.btn-ghost:hover{
-  @apply bg-surface-2;
+.link-animate {
+  @apply relative before:absolute before:bottom-0.5 before:start-0 before:-z-1 before:w-full before:h-1 before:bg-primary-2 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100;
 }
 
-/* Breakout - moderately wider */
+/* ================================
+  Containers
+  ================================ */
+
 .breakout {
   @apply sm:-mx-24;
 }
 
-/* Breakout-wide - full viewport */
 .breakout-wide {
   @apply w-screen;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 }
 
-.card {
-  @apply p-4 border border-ui rounded-lg transition-colors;
-}
 
-.card:hover {
-  @apply bg-surface-2/50;
+/* ================================
+   Cards
+   ================================ */
+
+.card {
+  @apply flex p-4 border border-ui shadow-2xs rounded-lg transition duration-300;
+  @apply hover:shadow-md;
+  @apply focus:outline-hidden focus:shadow-md;
 }
 
 .card-primary {
- @apply p-4 border border-primary/50 rounded-lg bg-primary/20; 
+ @apply flex p-4 rounded-lg border border-primary/50 bg-primary/20 transition duration-300;
+ @apply hover:bg-primary/30 hover:shadow-md;
+ @apply focus:outline-hidden focus:shadow-md;
 }
 
-.card-primary:hover {
-  @apply bg-primary/50;
+.card-ghost {
+  @apply flex p-4 rounded-lg transition duration-300;
+  @apply hover:bg-surface-2/50;
+  @apply focus:outline-hidden focus:bg-surface-2/50;
 }
+
+.blog-card {
+  @apply flex p-2 h-full border border-ui transition duration-300 rounded-xl;
+  @apply hover:border-transparent hover:shadow-lg;
+  @apply focus:outline-hidden focus:border-transparent focus:shadow-lg;
+}
+
 
 /* ================================
    Image Masonry Grid

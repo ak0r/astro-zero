@@ -1,0 +1,166 @@
+---
+import type { Post, Docs, Project } from '@/types';
+import Icon from '@/components/common/IconWrapper.astro';
+import Arrow from '@/components/common/AnimatedArrow.astro';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import { isValidDate, getFormattedDate } from '@/utils/commonFunctions';
+import { resolveImage } from '@/utils/images';
+import { siteConfig, getPostCardAspectRatio } from '@/site.config';
+
+interface Props {
+  entry: Post | Docs | Project;
+  showImages?: boolean;
+  showDescription?: boolean;
+  showTags?: boolean;
+  showMeta?: boolean;
+  featured?: boolean;
+  context?: 'featured' | 'recent' | 'posts' | 'tags' | 'docs';
+  eager?: boolean;
+}
+
+const {
+  entry,
+  showImages = true,
+  showDescription = true,
+  showTags = true,
+  showMeta = true,
+  featured = false,
+  context = 'posts',
+  eager = false,
+} = Astro.props;
+
+const { title, description, date } = entry.data;
+const collection = entry.collection;
+
+// Process image
+let entryImage = entry.data.image;
+if (Array.isArray(entryImage)) {
+  entryImage = entryImage[0];
+}
+const coverImage = resolveImage(entryImage);
+const coverImageAlt = entry.data.imageAlt || `Featured image for: ${title}`;
+
+// Type-specific data
+const tags = 'tags' in entry.data ? entry.data.tags : null;
+const series = 'series' in entry.data ? entry.data.series : null;
+const seriesOrder = 'seriesOrder' in entry.data ? entry.data.seriesOrder : null;
+const isFeatured = 'featured' in entry.data ? entry.data.featured : false;
+const version = 'version' in entry.data ? entry.data.version : null;
+const status = 'status' in entry.data ? entry.data.status : null;
+
+// Determine if we should show the cover image
+const shouldShowCoverImage = showImages && coverImage && !entry.data.hideCoverImage;
+
+// Card styling
+const cardClass = featured ? 'featured-card' : 'content-card';
+const titleSize = featured ? 'text-lg' : 'text-base';
+---
+
+<article
+  class={`group ${cardClass} relative blog-card h-full flex flex-col`}
+  role="article"
+>
+  <a href={`/${collection}/${entry.id}`} class="block h-full flex flex-col">
+    {/* Cover Image */}
+    {shouldShowCoverImage && (
+      <div
+        class="overflow-hidden rounded-t-lg"
+        style={collection === 'posts'
+          ? `aspect-ratio: ${getPostCardAspectRatio()};`
+          : 'aspect-ratio: 16/9;'}
+      >
+        <ImageWrapper
+          src={coverImage}
+          alt={coverImageAlt}
+          fit="cover"
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading={eager ? 'eager' : 'lazy'}
+        />
+      </div>
+    )}
+
+    {/* Content */}
+    <div class="p-4 sm:p-5 flex-grow flex flex-col">
+      {/* Badges Row */}
+      {showMeta && (series || isFeatured || version || status) && (
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          {/* Featured Badge */}
+          {isFeatured && (
+            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-white rounded">
+              <Icon name="star" class="size-3" />
+              Featured
+            </span>
+          )}
+
+          {/* Series Badge */}
+          {series && (
+            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-surface-2 text-content-3 rounded border border-ui">
+              <Icon name="list" class="size-3" />
+              {series}
+              {seriesOrder && (
+                <span class="text-content-3">#{seriesOrder}</span>
+              )}
+            </span>
+          )}
+
+          {/* Version Badge (Docs) */}
+          {version && (
+            <span class="text-xs text-content-3 font-mono bg-surface-2 px-2 py-1 rounded">
+              v{version}
+            </span>
+          )}
+
+          {/* Status Badge (Projects) */}
+          {status && (
+            <span class="text-xs text-content-3 bg-surface-2 px-2 py-1 rounded border border-ui capitalize">
+              {status}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Meta Info */}
+      {showMeta && date && isValidDate(date) && (
+        <div class="text-xs text-content-3 mb-2">
+          <time datetime={date.toISOString()}>{getFormattedDate(date)}</time>
+        </div>
+      )}
+
+      {/* Title */}
+      <h3
+        class={`font-semibold text-content mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight ${titleSize}`}
+      >
+        {title}
+      </h3>
+
+      {/* Description */}
+      {showDescription && description && (
+        <p class="text-sm text-content-3 line-clamp-3 leading-relaxed mb-4">
+          {description}
+        </p>
+      )}
+
+      {/* Tags */}
+      {showTags && tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-4">
+          {tags.slice(0, 3).map((tag) => (
+            <span class="badge">
+              #{tag}
+            </span>
+          ))}
+          {tags.length > 3 && (
+            <span class="text-xs text-content-3">+{tags.length - 3}</span>
+          )}
+        </div>
+      )}
+
+      {/* Footer with Arrow */}
+      <div class="mt-auto pt-4 border-t border-ui flex items-center justify-between">
+        <span class="text-sm text-content-3">
+          Read {collection === 'docs' ? 'note' : collection === 'projects' ? 'details' : 'more'}
+        </span>
+        <Arrow direction="right" size="5" position="relative" class="text-content-3" />
+      </div>
+    </div>
+  </a>
+</article>

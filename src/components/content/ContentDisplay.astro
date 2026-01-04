@@ -1,0 +1,133 @@
+---
+import type { Post, Docs, Project } from '@/types';
+import { getEntriesByYearSorted } from '@/utils/entries';
+import ContentCard from '@/components/content/ContentCard.astro';
+import ContentListItem from '@/components/content/ContentListItem.astro';
+
+interface Props {
+  entries: Post[] | Docs[] | Project[];
+  display?: 'list' | 'card' | 'grid';
+  groupByYear?: boolean;
+  title?: string;
+  description?: string;
+  showImages?: boolean;
+  showDescription?: boolean;
+  showTags?: boolean;
+  showMeta?: boolean;
+  cardContext?: 'featured' | 'recent' | 'posts' | 'tags' | 'docs';
+  class?: string;
+}
+
+const {
+  entries,
+  display = 'list',
+  groupByYear = false,
+  title,
+  description,
+  showImages = false,
+  showDescription = display !== 'list',
+  showTags = display !== 'list',
+  showMeta = true, // Always show meta (includes date) unless explicitly disabled
+  cardContext = 'posts',
+  class: customClass = '',
+} = Astro.props;
+
+// Handle grouping
+const groupedEntries = groupByYear ? getEntriesByYearSorted(entries) : null;
+const showGrouped = groupByYear && groupedEntries && groupedEntries.length > 0;
+
+// Display class based on mode
+const displayClass = {
+  list: 'space-y-2',
+  card: 'grid grid-cols-1 gap-6',
+  grid: 'grid grid-cols-1 md:grid-cols-2 gap-6',
+}[display];
+
+// Determine if using list item or card
+const useListItem = display === 'list';
+const isCompact = display === 'list';
+---
+
+<section class={`animate not-prose ${customClass}`}>
+  {/* Section Header */}
+  {(title || description) && (
+    <div class="mb-6">
+      {title && (
+        <h2 class="text-xl font-bold text-content mb-2">
+          {title}
+        </h2>
+      )}
+      {description && (
+        <p class="text-content-3">
+          {description}
+        </p>
+      )}
+    </div>
+  )}
+
+  {/* Content Display */}
+  {showGrouped ? (
+    /* Grouped by Year */
+    <div class="space-y-8">
+      {groupedEntries.map(([year, yearEntries]) => (
+        <div>
+          {/* Year Heading */}
+          <h3
+            class="text-2xl font-semibold text-content-3 mb-4"
+            data-pagefind-filter="year"
+          >
+            {year}
+          </h3>
+
+          {/* Entries for this year */}
+          <div class={displayClass}>
+            {yearEntries.map((entry) =>
+              useListItem ? (
+                <ContentListItem
+                  entry={entry}
+                  compact={isCompact}
+                  showDescription={showDescription}
+                  showTags={showTags}
+                  showMeta={showMeta}
+                />
+              ) : (
+                <ContentCard
+                  entry={entry}
+                  showImages={showImages}
+                  showDescription={showDescription}
+                  showTags={showTags}
+                  showMeta={showMeta}
+                  context={cardContext}
+                />
+              )
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    /* Flat Display */
+    <div class={displayClass}>
+      {entries.map((entry) =>
+        useListItem ? (
+          <ContentListItem
+            entry={entry}
+            compact={isCompact}
+            showDescription={showDescription}
+            showTags={showTags}
+            showMeta={showMeta}
+          />
+        ) : (
+          <ContentCard
+            entry={entry}
+            showImages={showImages}
+            showDescription={showDescription}
+            showTags={showTags}
+            showMeta={showMeta}
+            context={cardContext}
+          />
+        )
+      )}
+    </div>
+  )}
+</section>

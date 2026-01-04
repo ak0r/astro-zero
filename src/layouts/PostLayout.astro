@@ -124,10 +124,10 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
               <span class="">&bull;</span>
               <IconWrapper name="tag" size={16} />
               {tags.map(tag => (
-                <div class="badge not-prose flex gap-1 sm:gap-2 items-center self-start">
+                <div class="not-prose flex gap-1 sm:gap-2 self-start">
                   <a
                     href={`/posts/tag/${encodeURIComponent(tag)}`}
-                    class="internal-link"
+                    class="internal-link badge-outline"
                   >
                     #{tag}
                   </a>
@@ -144,7 +144,7 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
           seriesPosts={seriesPosts}
           currentPostId={post.id}
           seriesTitle={parentPost?.data.title}
-          class="mb-8"
+          class="my-8"
         />
       )}
     </div>

@@ -3,18 +3,73 @@ import Container from "@/components/layout/Container.astro"
 import BaseLayout from "@/layouts/BaseLayout.astro"
 import { generateIndexSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
+import { getHomeContent } from '@/utils/page-sections';
+import { getAllPosts, getTopLevelPosts, sortPostsByDate } from "@/utils/getContent";
+import ContentDisplay from "@/components/content/ContentDisplay.astro";
 
-const seoData = generateIndexSEO('home', Astro.url.href);
+// Fetch all posts and galleries
+const allPosts = await getAllPosts();
+const parentPosts = await getTopLevelPosts(allPosts);
+const sortedPosts = await sortPostsByDate(parentPosts);
+
+// Load optional content sections
+const sections = await getHomeContent();
+
+const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
 
 ---
 <BaseLayout>
   <SEO data={seoData} slot="seo" />
   <Container>
-    <section class="animate mb-12">
-      <h1 class="text-4xl font-bold mb-4">Welcome to My Blog</h1>
-      <p class="text-lg text-content-2">
-        Insights, tutorials, and stories about web development and technology.
-      </p>
-    </section>
+    <!-- ============================================================ -->
+    <!-- HERO SECTION (Optional from home-hero.md) -->
+    <!-- ============================================================ -->
+    {sections.hero ? (
+      <section class="animate mb-12">
+        <sections.hero.Content />
+      </section>
+    ) : (
+      <section class="animate mb-12">
+        <h1 class="text-4xl font-bold mb-4">Welcome to My Blog</h1>
+        <p class="text-lg text-content-subtle">
+          Insights, tutorials, and stories about web development and technology.
+        </p>
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- INTRO SECTION (Optional from home-intro.md) -->
+    <!-- ============================================================ -->
+    {sections.intro && (
+      <section class="animate mb-12 prose max-w-none">
+        <sections.intro.Content />
+      </section>
+    )}
+    
+    <ContentDisplay
+      entries={sortedPosts.slice(0, 4)}
+      display="grid"
+      showImages
+      class="mb-12"
+    />
+
+    <!-- ============================================================ -->
+    <!-- ABOUT SECTION (Optional from home-about.md) -->
+    <!-- ============================================================ -->
+    {sections.about && (
+      <section class="animate mb-12 prose max-w-none">
+        <sections.about.Content />
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- CTA SECTION (Optional from home-cta.md) -->
+    <!-- ============================================================ -->
+    {sections.cta && (
+      <section class="animate mb-12">
+        <sections.cta.Content />
+      </section>
+    )}
+
   </Container>
 </BaseLayout>

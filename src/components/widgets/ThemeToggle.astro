@@ -11,15 +11,15 @@ const { class: className = '' } = Astro.props;
 
 <button
   id="theme-toggle"
-  class={`btn-ghost text-content-3 ${className}`}
+  class={`flex items-center btn-icon text-sm ${className}`}
   aria-label="Toggle theme"
   type="button"
 >
   <span class="sun-icon">
-    <Icon name="sun"  size={16} />
+    <Icon name="sun" size={16} class="shrink-0" />
   </span>
   <span class="moon-icon">
-    <Icon name="moon"  size={16} />
+    <Icon name="moon" size={16} class="shrink-0" />
   </span>
 </button>
 

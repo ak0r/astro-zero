@@ -1,0 +1,141 @@
+---
+import type { Post, Docs, Project } from '@/types';
+import Icon from '@/components/common/IconWrapper.astro';
+import { isValidDate, getFormattedDate } from '@/utils/commonFunctions';
+import Arrow from '@/components/common/AnimatedArrow.astro';
+
+interface Props {
+  entry: Post | Docs | Project;
+  showDescription?: boolean;
+  showTags?: boolean;
+  showMeta?: boolean;
+  compact?: boolean;
+}
+
+const {
+  entry,
+  showDescription = true,
+  showTags = true,
+  showMeta = true,
+  compact = false,
+} = Astro.props;
+
+const entryDate = entry.data.date;
+const collection = entry.collection;
+
+// Type-specific data
+const tags = 'tags' in entry.data ? entry.data.tags : null;
+const series = 'series' in entry.data ? entry.data.series : null;
+const seriesOrder = 'seriesOrder' in entry.data ? entry.data.seriesOrder : null;
+const featured = 'featured' in entry.data ? entry.data.featured : false;
+---
+
+<a
+  href={`/${collection}/${entry.id}`}
+  class={`group flex items-center transition-all ${
+    compact
+      ? 'space-x-6 text-content-primary hover:text-accent'
+      : 'gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-ui-primary bg-surface-primary hover:bg-surface-subtle hover:border-accent'
+  }`}
+>
+  <article class="flex-1 min-w-0">
+    {compact ? (
+      /* Simple mode - just date and title on one line */
+      <div class="flex flex-row align-middle items-center space-x-6">
+        {showMeta && entryDate && isValidDate(entryDate) && (
+          <time
+            datetime={entryDate.toISOString()}
+            class="inline-block font-mono text-sm text-content-muted shrink-0"
+          >
+            {getFormattedDate(entryDate, 'short')}
+          </time>
+        )}
+        <span class="text-base sm:text-lg font-semibold break-words">
+          {entry.data.title}
+        </span>
+      </div>
+    ) : (
+      /* Enhanced mode - full list item */
+      <>
+        {/* Header Row */}
+        <div class="flex items-start justify-between gap-3 mb-2">
+          {/* Title and Badges */}
+          <div class="flex-1 min-w-0">
+            {/* Badges */}
+            {showMeta && (series || featured) && (
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                {/* Featured Badge */}
+                {featured && (
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-accent text-white rounded">
+                    <Icon name="star" class="size-3" />
+                    <span class="hidden sm:inline">Featured</span>
+                  </span>
+                )}
+
+                {/* Series Badge */}
+                {series && (
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-surface-raised text-content-subtle rounded border border-ui-primary">
+                    <Icon name="list" class="size-3" />
+                    <span class="hidden sm:inline">{series}</span>
+                    {seriesOrder && (
+                      <span class="text-content-muted">part #{seriesOrder}</span>
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Title */}
+            <h3 class="font-semibold text-content-primary group-hover:text-accent transition-colors line-clamp-1 mb-2">
+              {entry.data.title}
+            </h3>
+          </div>
+
+          {/* Date */}
+          {showMeta && entryDate && isValidDate(entryDate) && (
+            <time
+              datetime={entryDate.toISOString()}
+              class="flex-shrink-0 text-xs text-content-muted hidden sm:block"
+            >
+              {entryDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </time>
+          )}
+        </div>
+
+        {/* Description */}
+        {showDescription && entry.data.description && (
+          <p class="text-sm text-content-muted line-clamp-2 leading-relaxed mb-2">
+            {entry.data.description}
+          </p>
+        )}
+
+        {/* Tags */}
+        {showTags && tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            {tags.slice(0, 4).map((tag) => (
+              <span class="inline-block px-2 py-0.5 text-xs text-content-subtle bg-surface-raised rounded">
+                {tag}
+              </span>
+            ))}
+            {tags.length > 4 && (
+              <span class="inline-block text-xs text-content-muted">
+                +{tags.length - 4}
+              </span>
+            )}
+          </div>
+        )}
+      </>
+    )}
+  </article>
+
+  {/* Arrow Icon - only for enhanced mode */}
+  {!compact && (
+    <div class="flex-shrink-0 pt-1 text-content-muted group-hover:text-accent transition-colors">
+      <Arrow direction="right" size="5" position="relative" />
+    </div>
+  )}
+</a>

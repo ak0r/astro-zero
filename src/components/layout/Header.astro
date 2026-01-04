@@ -18,14 +18,14 @@ const getHeaderProfilePictureClasses = (style: string) => {
 ---
 <header
   id="main-header"
-  class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg"
+  class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg border-b border-ui/50"
 >
   <Container>
     <div class="not-prose flex items-center h-24">
 
       <!-- LEFT: Logo -->
-      <div class="flex items-center flex-shrink-0">
-        <a href="/" class="hover:opacity-75 transition-opacity">
+      <div class="flex items-center group shrink-0">
+        <a href="/" class="group flex focus:outline-hidden">
           {showProfilePicture ? (
             <img
               src={profilePicture.image}
@@ -33,7 +33,7 @@ const getHeaderProfilePictureClasses = (style: string) => {
               class={getHeaderProfilePictureClasses(profilePicture.style)}
             />
           ) : (
-            <span class="font-semibold text-2xl">
+            <span class="font-semibold text-2xl link-animate">
               {siteConfig.title}
             </span>
           )}
@@ -55,12 +55,12 @@ const getHeaderProfilePictureClasses = (style: string) => {
         {siteConfig.commandPaletteConfig.enabled && (
           <button
             id="command-palette-trigger"
-            class="btn-ghost flex items-center sm:gap-2 text-content-3"
+            class="btn-icon flex items-center text-sm"
             aria-label="Open command palette"
             onclick="window.dispatchEvent(new CustomEvent('command-palette:open', { detail: { mode: 'command' } }))"
           >
             <Icon name="command" size={16} class="shrink-0" />
-            <kbd class="hidden sm:inline text-sm font-medium">
+            <kbd class="sm:inline text-sm font-medium">
               K
             </kbd>
           </button>
@@ -69,15 +69,15 @@ const getHeaderProfilePictureClasses = (style: string) => {
         <!-- Mobile menu -->
         <button
           id="mobile-menu-toggle"
-          class="md:hidden btn"
+          class="md:hidden btn-icon flex items-center text-sm"
           aria-label="Toggle navigation"
           aria-expanded="false"
         >
           <span id="menu-icon">
-            <Icon name="menu" size={16} />
+            <Icon name="menu-2" size={16} class="shrink-0" />
           </span>
           <span id="close-icon" class="hidden">
-            <Icon name="x" size={16} />
+            <Icon name="x" size={16} class="shrink-0" />
           </span>
         </button>
 
@@ -91,7 +91,7 @@ const getHeaderProfilePictureClasses = (style: string) => {
   class="
     fixed inset-0 z-40
     bg-surface
-    p-6 pt-24
+    p-6 pt-30
     translate-x-full
     transition-transform duration-300 ease-in-out
     md:hidden
