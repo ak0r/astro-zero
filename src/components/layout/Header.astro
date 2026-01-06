@@ -18,30 +18,23 @@ const getHeaderProfilePictureClasses = (style: string) => {
 ---
 <header
   id="main-header"
-  class="sticky top-0 z-50 bg-surface/50 backdrop-blur-lg border-b border-ui/50"
+  class="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm"
 >
   <Container>
-    <div class="not-prose flex items-center h-24">
+    <nav class="not-prose flex flex-wrap md:flex-nowrap relative w-full rounded-lg items-center justify-between border border-ui bg-surface/70 backdrop-blur-lg mt-4 p-3">
 
       <!-- LEFT: Logo -->
       <div class="flex items-center group shrink-0">
         <a href="/" class="group flex focus:outline-hidden">
-          {showProfilePicture ? (
-            <img
-              src={profilePicture.image}
-              alt={profilePicture.alt}
-              class={getHeaderProfilePictureClasses(profilePicture.style)}
-            />
-          ) : (
-            <span class="font-semibold text-2xl link-animate">
-              {siteConfig.title}
-            </span>
-          )}
+          <!-- { showProfilePicture && <Avatar /> } -->
+          <span class="font-semibold text-3xl link-animate">
+            {siteConfig.title}
+          </span>
         </a>
       </div>
 
       <!-- CENTER: Desktop Navigation -->
-      <div class="hidden md:flex flex-1 justify-center">
+      <div class="hidden md:flex flex-1 py-2 md:gap-3 md:items-center md:justify-center">
         <Navigation />
       </div>
 
@@ -82,7 +75,7 @@ const getHeaderProfilePictureClasses = (style: string) => {
         </button>
 
       </div>
-    </div>
+    </nav>
   </Container>
 </header>
 
@@ -91,10 +84,12 @@ const getHeaderProfilePictureClasses = (style: string) => {
   class="
     fixed inset-0 z-40
     bg-surface
-    p-6 pt-30
+    p-6 pt-30 text-lg
     translate-x-full
+    h-screen
     transition-transform duration-300 ease-in-out
     md:hidden
+    flex flex-col gap-6
   "
 >
   <Navigation />
