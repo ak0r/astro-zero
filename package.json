@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "ASTRO_CONTENT_COLLECTION_CACHE=false node scripts/sync-attachments.js && astro dev",
-    "build": "node scripts/sync-attachments.js && astro build && npx pagefind --source dist && cp -r dist/pagefind public/",
+    "build": "node scripts/sync-attachments.js && astro build && npx pagefind --site dist && cp -r dist/pagefind public/",
     "preview": "astro preview",
     "astro": "astro",
     "sync-attachments": "node scripts/sync-attachments.js",

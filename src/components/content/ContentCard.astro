@@ -5,7 +5,6 @@ import Arrow from '@/components/common/AnimatedArrow.astro';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
 import { isValidDate, getFormattedDate } from '@/utils/commonFunctions';
 import { resolveImage } from '@/utils/images';
-import { siteConfig, getPostCardAspectRatio } from '@/site.config';
 
 interface Props {
   entry: Post | Docs | Project;
@@ -66,7 +65,7 @@ const titleSize = featured ? 'text-lg' : 'text-base';
       <div
         class="overflow-hidden rounded-t-lg"
         style={collection === 'posts'
-          ? `aspect-ratio: ${getPostCardAspectRatio()};`
+          ? `aspect-ratio: 3/2;`
           : 'aspect-ratio: 16/9;'}
       >
         <ImageWrapper
