@@ -15,10 +15,8 @@ const currentPath = Astro.url.pathname;
     <LinkWrapper
       href={page.url}
       class:list={[
-        'transition-colors',
-        isActive
-          ? 'text-primary font-semibold'
-          : 'text-content-3',
+        'group link-animate',
+        isActive && 'text-primary font-semibold'
       ]}
       aria-current={isActive ? 'page' : undefined}
     >

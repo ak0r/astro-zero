@@ -17,16 +17,16 @@ const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profi
 
       <!-- LEFT: Logo -->
       <div class="flex items-center group shrink-0">
-        <a href="/" class="group flex focus:outline-hidden">
+        <a href="/" class="group flex focus:outline-hidden link-animate">
           <!-- { showProfilePicture && <Avatar /> } -->
-          <span class="font-semibold text-3xl link-animate">
+          <span class="font-semibold text-3xl">
             {siteConfig.title}
           </span>
         </a>
       </div>
 
       <!-- CENTER: Desktop Navigation -->
-      <div class="hidden md:flex flex-1 py-2 md:gap-3 md:items-center md:justify-center">
+      <div class="hidden md:text-base md:flex flex-1 py-2 md:gap-3 md:items-center md:justify-center text-content-3">
         <Navigation />
       </div>
 
@@ -40,13 +40,13 @@ const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profi
         {siteConfig.commandPaletteConfig.enabled && (
           <button
             id="command-palette-trigger"
-            class="btn-icon flex items-center text-sm"
+            class="btn-icon h-10 flex items-center text-sm"
             aria-label="Open command palette"
             onclick="window.dispatchEvent(new CustomEvent('command-palette:open', { detail: { mode: 'command' } }))"
           >
             <Icon name="command" size={16} class="shrink-0" />
-            <kbd class="sm:inline text-sm font-medium">
-              K
+            <kbd class="hidden sm:inline text-sm font-medium">
+              + K
             </kbd>
           </button>
         )}
@@ -54,7 +54,7 @@ const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profi
         <!-- Mobile menu -->
         <button
           id="mobile-menu-toggle"
-          class="md:hidden btn-icon flex items-center text-sm"
+          class="md:hidden btn-icon h-10 flex items-center text-sm"
           aria-label="Toggle navigation"
           aria-expanded="false"
         >
@@ -80,7 +80,7 @@ const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profi
     translate-x-full
     h-screen
     transition-transform duration-300 ease-in-out
-    md:hidden
+    md:hidden not-prose
     flex flex-col gap-6
   "
 >
