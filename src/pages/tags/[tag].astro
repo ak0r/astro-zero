@@ -1,0 +1,145 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/Container.astro';
+import PageHeader from '@/components/layout/PageHeader.astro';
+import { getAllPosts, getPostsByTag, getTopLevelPosts, sortPostsByDate, getUniquePostTags } from '@/utils/getContent';
+import { getAllGalleries, getGalleriesByTag, sortGalleriesByDate, getUniqueGalleryTags } from '@/utils/getGallery';
+import { getEntriesByYearSorted, sortEntriesByDate } from '@/utils/entries';
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
+import YearGroup from '@/components/content/YearGroup.astro';
+
+export const getStaticPaths = (async () => {
+  const allPosts = await getAllPosts();
+  const allGalleries = await getAllGalleries();
+  
+  const postTags = getUniquePostTags(allPosts);
+  const galleryTags = getUniqueGalleryTags(allGalleries);
+  
+  const allTags = [...new Set([...postTags, ...galleryTags])];
+  
+  return allTags.map(tag => ({
+    params: { tag },
+  }));
+}) satisfies GetStaticPaths;
+
+const { tag } = Astro.params;
+
+// Fetch all content with this tag
+const allPosts = await getAllPosts();
+const allGalleries = await getAllGalleries();
+
+const taggedPosts = getPostsByTag(allPosts, tag);
+const topLevelPosts = getTopLevelPosts(taggedPosts);
+const taggedGalleries = getGalleriesByTag(allGalleries, tag);
+const sortedPosts = await sortPostsByDate(topLevelPosts);
+const sortedGalleries = await sortGalleriesByDate(taggedGalleries);
+
+// Combine and sort by date
+const allContent = sortEntriesByDate([...topLevelPosts, ...taggedGalleries]);
+
+const groupedPosts = await getEntriesByYearSorted(allContent);
+
+// Group by year
+const contentByYear = allContent.reduce((acc, entry) => {
+  const year = entry.data.date.getFullYear().toString();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(entry);
+  return acc;
+}, {} as Record<string, typeof allContent>);
+
+const years = Object.keys(contentByYear).sort((a, b) => parseInt(b) - parseInt(a));
+
+const filterTabs = [
+  { label: 'All', href: '/tags', icon: 'tags' },
+  { label: 'Travel', href: '/tags', icon: 'plane' },
+  { label: 'Tech', href: '/tags', icon: 'code' },
+  { label: 'Galleries', href: '/tags', icon: 'library-photo' },
+];
+
+const totalCount = allContent.length;
+const postCount = sortedPosts.length;
+const galleryCount = sortedGalleries.length;
+
+const seoData = generateIndexSEO('tags', Astro.url.href, { tag });
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  <Container class="py-4 sm:py-8">
+    
+    <PageHeader
+      title={`Tagged "${tag}"`}
+      description={`${postCount} post${postCount !== 1 ? 's' : ''} and ${galleryCount} ${galleryCount !== 1 ? 'galleries' : 'gallery'}`}
+      breadcrumb={Astro.url.pathname}
+    />
+    
+    <!-- Back to all tags -->
+    <div class="mb-8">
+      <a href="/tags" class="internal-link not-prose link text-sm">
+        ← Back to all tags
+      </a>
+    </div>
+    <div class="flex flex-col gap-16">
+      {groupedPosts.map(([year, posts]) => (
+        <YearGroup 
+          year={parseInt(year)} 
+          entries={posts}
+          showCategory
+        />
+      ))}
+    </div>    
+  </Container>
+  
+  <!-- Client-side filtering (filters content items) -->
+  <script>
+    function setupContentFiltering() {
+      const filterButtons = document.querySelectorAll('.filter-tabs a');
+      const contentItems = document.querySelectorAll('.content-entry');
+      
+      filterButtons.forEach((button, index) => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Update active state
+          filterButtons.forEach(btn => {
+            btn.classList.remove('bg-surface-2', 'text-content');
+            btn.classList.add('text-content-3');
+          });
+          button.classList.remove('text-content-3');
+          button.classList.add('bg-surface-2', 'text-content');
+          
+          // Determine filter
+          const filters = ['all', 'travel', 'tech', 'gallery'];
+          const filter = filters[index];
+          
+          // Filter content
+          contentItems.forEach(item => {
+            const category = item.getAttribute('data-category');
+            
+            if (filter === 'all' || category === filter) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+          
+          // Hide empty year groups
+          document.querySelectorAll('.year-group').forEach(yearGroup => {
+            const visibleItems = yearGroup.querySelectorAll('.content-entry:not([style*="display: none"])');
+            yearGroup.style.display = visibleItems.length > 0 ? '' : 'none';
+          });
+        });
+      });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupContentFiltering);
+    } else {
+      setupContentFiltering();
+    }
+    
+    document.addEventListener('astro:page-load', setupContentFiltering);
+  </script>
+</BaseLayout>

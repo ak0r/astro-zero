@@ -47,8 +47,9 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
     )}
     
     <ContentDisplay
+      title="Recent Posts"
       entries={sortedPosts.slice(0, 4)}
-      display="card"
+      display="grid"
       showImages
       class="mb-12"
     />

@@ -1,0 +1,157 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/Container.astro';
+import PageHeader from '@/components/layout/PageHeader.astro';
+import FilterTabs from '@/components/layout/FilterTabs.astro';
+import IconWrapper from '@/components/common/IconWrapper.astro';
+import { getAllPosts, getUniquePostTags } from '@/utils/getContent';
+import { getAllGalleries, getUniqueGalleryTags } from '@/utils/getGallery';
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
+
+// Fetch all content
+const allPosts = await getAllPosts();
+const allGalleries = await getAllGalleries();
+
+// Build comprehensive tag list with metadata
+const tagMap = new Map();
+
+// Add post tags
+allPosts.forEach(post => {
+  post.data.tags?.forEach(tag => {
+    if (!tagMap.has(tag)) {
+      tagMap.set(tag, { name: tag, categories: new Set(), count: 0 });
+    }
+    const tagData = tagMap.get(tag);
+    tagData.categories.add(post.data.category);
+    tagData.count++;
+  });
+});
+
+// Add gallery tags
+allGalleries.forEach(gallery => {
+  gallery.data.tags?.forEach(tag => {
+    if (!tagMap.has(tag)) {
+      tagMap.set(tag, { name: tag, categories: new Set(), count: 0 });
+    }
+    const tagData = tagMap.get(tag);
+    tagData.categories.add('gallery');
+    tagData.count++;
+  });
+});
+
+// Convert to array and sort by count
+const allTags = Array.from(tagMap.values())
+  .map(tag => ({
+    name: tag.name,
+    categories: Array.from(tag.categories),
+    count: tag.count,
+  }))
+  .sort((a, b) => b.count - a.count);
+
+// Calculate font sizes for tag cloud effect
+const maxCount = Math.max(...allTags.map(t => t.count));
+const minCount = Math.min(...allTags.map(t => t.count));
+
+const getFontSize = (count: number) => {
+  if (maxCount === minCount) return 'text-base';
+  const ratio = (count - minCount) / (maxCount - minCount);
+  if (ratio > 0.75) return 'text-2xl';
+  if (ratio > 0.5) return 'text-xl';
+  if (ratio > 0.25) return 'text-lg';
+  return 'text-base';
+};
+
+const filterTabs = [
+  { label: 'All', href: '/tags', icon: 'tags' },
+  { label: 'Travel', href: '/tags', icon: 'plane' },
+  { label: 'Tech', href: '/tags', icon: 'code' },
+  { label: 'Galleries', href: '/tags', icon: 'library-photo' },
+];
+
+const seoData = generateIndexSEO('tags', Astro.url.href);
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  <Container class="py-4 sm:py-8">
+    <PageHeader
+      title="Tags"
+      description="Browse all content by topic"
+      breadcrumb={Astro.url.pathname}
+    />
+    
+    <!-- Filter Tabs -->
+    <FilterTabs tabs={filterTabs} class="mb-12" />
+    
+    <!-- Tag Summary -->
+    <div class="mb-8 text-sm text-content-3">
+      {allTags.length} {allTags.length === 1 ? 'tag' : 'tags'} total
+    </div>
+    
+    <!-- Tag Cloud (NO category badges here) -->
+    <div class="flex flex-wrap gap-3" data-tag-container>
+      {allTags.map(tag => (
+        <a 
+          href={`/tags/${tag.name}`}
+          class="tag-item badge-ghost inline-flex items-center gap-2 transition-all hover:scale-105"
+          data-categories={tag.categories.join(',')}
+        >
+          {/* <IconWrapper name="tag" size={14} class="flex-shrink-0" /> */}
+          <span class="font-medium">{tag.name}</span>
+          <span class="text-xs text-content-4 font-mono">
+            {tag.count}
+          </span>
+        </a>
+      ))}
+    </div>
+    
+  </Container>
+  
+  <!-- Client-side filtering -->
+  <script>
+    function setupTagFiltering() {
+      const filterButtons = document.querySelectorAll('.filter-tabs a');
+      const tagItems = document.querySelectorAll('.tag-item');
+      
+      filterButtons.forEach((button, index) => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Update active state
+          filterButtons.forEach(btn => {
+            btn.classList.remove('bg-surface-2', 'text-content');
+            btn.classList.add('text-content-3');
+          });
+          button.classList.remove('text-content-3');
+          button.classList.add('bg-surface-2', 'text-content');
+          
+          // Determine filter
+          const filters = ['all', 'travel', 'tech', 'gallery'];
+          const filter = filters[index];
+          
+          // Filter tags
+          tagItems.forEach(item => {
+            const categories = item.getAttribute('data-categories')?.split(',') || [];
+            
+            if (filter === 'all' || categories.includes(filter)) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+    
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupTagFiltering);
+    } else {
+      setupTagFiltering();
+    }
+    
+    // Re-initialize after Astro navigation
+    document.addEventListener('astro:page-load', setupTagFiltering);
+  </script>
+</BaseLayout>

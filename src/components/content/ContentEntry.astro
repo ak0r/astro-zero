@@ -1,52 +1,77 @@
 ---
+import type { Post, Gallery } from '@/types';
 import IconWrapper from '@/components/common/IconWrapper.astro';
 import { formatDate } from '@/utils/commonFunctions';
-import type { Post, Gallery } from '@/types';
 
 interface Props {
   entry: Post | Gallery;
-  showIcon?: boolean;
+  showCategory?: boolean;
 }
 
-const { entry, showIcon = true } = Astro.props;
+const { entry, showCategory = false } = Astro.props;
 const { title, date, category, featured } = entry.data;
-const slug = entry.collection === 'gallery' 
+
+const isGallery = entry.collection === 'gallery';
+const slug = isGallery 
   ? `galleries/${entry.id.replace(/\.(md|mdx)$/, '')}`
   : `posts/${entry.id.replace(/\.(md|mdx)$/, '').replace('/index', '')}`;
 
+
 // Determine icon
 let icon = 'file-text';
+let iconColor = 'text-content-3';
+
 if (featured) {
   icon = 'star';
+  iconColor = 'text-primary';
+} else if (isGallery) {
+  icon = 'library-photo';
+  iconColor = 'text-purple-500';
 } else if (category === 'travel') {
   icon = 'plane';
+  iconColor = 'text-orange-500';
 } else if (category === 'tech') {
   icon = 'code';
-} else if (category === 'gallery') {
-  icon = 'library-photo';
+  iconColor = 'text-blue-500';
 }
+
+// Category badge config (ONLY shown when showCategory is true)
+const categoryBadges = {
+  travel: { label: 'Travel', class: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+  tech: { label: 'Tech', class: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+  gallery: { label: 'Gallery', class: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
+};
+
+const badge = isGallery 
+  ? categoryBadges.gallery 
+  : categoryBadges[category] || { label: category, class: 'bg-surface-muted text-content-3 border-ui' };
 ---
 
 <a 
   href={`/${slug}`}
-  class="post-entry group flex items-start gap-3 py-2 transition-colors hover:text-content-1"
+  class="content-entry group flex items-start gap-3 py-2 transition-colors hover:text-content-1"
+  data-category={isGallery ? 'gallery' : category}
 >
-  {showIcon && (
-    <IconWrapper 
-      name={icon} 
-      size={20} 
-      class={`mt-1 shrink-0 ${featured ? 'text-primary' : 'text-content-3 text-base'}`}
-    />
-  )}
+  <IconWrapper 
+    name={icon} 
+    size={20} 
+    class={`${iconColor} flex-shrink-0 mt-0.5`}
+  />
   
-  <div class="flex-1 flex items-baseline justify-between gap-4">
-    <span class="text-content-2 group-hover:text-primary-2 transition-colors">
-      {title}
-    </span>
-    <div class="hidden sm:block h-px flex-1 bg-ui"></div>
+  <div class="flex-1 flex items-center justify-between gap-4 min-w-0">
+    <div class="flex items-center gap-2 flex-wrap min-w-0">
+      <span class="text-content-2 group-hover:text-content-1 transition-colors truncate">
+        {title}
+      </span>
+      {showCategory && (
+        <span class={`text-xs px-2 py-0.5 rounded border flex-shrink-0 ${badge.class}`}>
+          {badge.label}
+        </span>
+      )}
+    </div>
     <time 
       datetime={date.toISOString()}
-      class="text-xs text-content-3 font-mono whitespace-nowrap"
+      class="text-sm text-content-3 font-mono whitespace-nowrap flex-shrink-0"
     >
       {formatDate(date, 'monthDay')}
     </time>
