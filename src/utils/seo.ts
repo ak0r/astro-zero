@@ -156,7 +156,7 @@ export function generatePageSEO(
     ? siteConfig.title 
     : `${page.data.title} | ${siteConfig.title}`;
   const description = page.data.description || siteConfig.description;
-  const ogImage = generateOGImage(page.data.image, page.data.imageAlt);
+  const ogImage = getDefaultOGImage();
 
   return {
     title,

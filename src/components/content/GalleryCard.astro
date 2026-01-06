@@ -1,8 +1,6 @@
 ---
-import { Picture } from 'astro:assets';
 import type { Gallery } from '@/types';
 import { formatDate } from '@/utils/commonFunctions';
-import { resolveImage } from '@/utils/images';
 import IconWrapper from '@/components/common/IconWrapper.astro';
 import { getGalleryCoverImage, getGalleryImageCount, extractGalleryDir } from '@/utils/getGallery';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
@@ -16,7 +14,6 @@ const { title, date, location, cover, coverAlt, featured } = gallery.data;
 const galleryDir = extractGalleryDir(gallery.filePath);
 
 // Get cover image and image count
-// const coverImage = await resolveImage(cover);
 const coverImage = await getGalleryCoverImage(gallery, galleryDir);
 const imageCount = await getGalleryImageCount(galleryDir, gallery.data.imageDir);
 

@@ -1,0 +1,23 @@
+---
+import { getAllPages } from '@/utils/getPages';
+import type { Page } from "@/types";
+import PageLayout from '@/layouts/PageLayout.astro';
+
+export async function getStaticPaths() {
+  // filter pages based on environment
+  const allPages = await getAllPages();
+  // Generate paths
+  return allPages.map(page => ({
+    params: { id: page.id },
+    props: { page }
+  }));
+};
+
+export interface Props {
+  page: Page;
+}
+
+const { page } = Astro.props;
+
+---
+<PageLayout page={page} />

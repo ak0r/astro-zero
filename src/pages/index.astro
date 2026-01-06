@@ -6,14 +6,30 @@ import SEO from '@/components/common/SEO.astro';
 import { getHomeContent } from '@/utils/page-sections';
 import { getAllPosts, getTopLevelPosts, sortPostsByDate } from "@/utils/getContent";
 import ContentDisplay from "@/components/content/ContentDisplay.astro";
+import { getContentDir } from "@/utils/commonFunctions";
+import { resolveImageFromPath } from '@/utils/images';
+import { getEntry } from 'astro:content';
+import { siteConfig } from '@/site.config';
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
 
 // Fetch all posts and galleries
 const allPosts = await getAllPosts();
 const parentPosts = await getTopLevelPosts(allPosts);
 const sortedPosts = await sortPostsByDate(parentPosts);
 
+const entry = await getEntry('pages', 'home-about');
+
 // Load optional content sections
 const sections = await getHomeContent();
+const { hero, intro, about, cta } = sections;
+
+const contentDir = entry
+  ? getContentDir(entry.filePath)
+  : undefined;
+  
+const aboutImage = about ? about.data.cover ? await resolveImageFromPath(about.data.cover, {
+  baseDir: contentDir,
+}) : null : null;
 
 const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
 
@@ -21,53 +37,76 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
 <BaseLayout>
   <SEO data={seoData} slot="seo" />
   <Container class="py-6 sm:py-12">
+
     <!-- ============================================================ -->
     <!-- HERO SECTION (Optional from home-hero.md) -->
     <!-- ============================================================ -->
-    {sections.hero ? (
-      <section class="animate mb-12">
+    {sections.hero && (
+      <section class="my-12 max-w-none">
+        {sections.hero.data.title && 
+          <h1 class="text-4xl font-bold mb-4">{hero.data.title}</h1>
+        }
         <sections.hero.Content />
-      </section>
-    ) : (
-      <section class="animate mb-12">
-        <h1 class="text-4xl font-bold mb-4">Welcome to My Blog</h1>
-        <p class="text-lg text-content-subtle">
-          Insights, tutorials, and stories about web development and technology.
-        </p>
       </section>
     )}
 
     <!-- ============================================================ -->
     <!-- INTRO SECTION (Optional from home-intro.md) -->
     <!-- ============================================================ -->
+    
     {sections.intro && (
-      <section class="animate mb-12 prose max-w-none">
+      <section class="my-12 max-w-none">
+        {sections.intro.data.title && 
+          <h2 class="text-xl font-bold mb-4">{intro.data.title}</h2>
+        }
         <sections.intro.Content />
       </section>
     )}
-    
-    <ContentDisplay
-      title="Recent Posts"
-      entries={sortedPosts.slice(0, 4)}
-      display="grid"
-      showImages
-      class="mb-12"
-    />
 
     <!-- ============================================================ -->
     <!-- ABOUT SECTION (Optional from home-about.md) -->
     <!-- ============================================================ -->
     {sections.about && (
-      <section class="animate mb-12 prose max-w-none">
+      <section class="flex flex-col my-12 max-w-none">
+        {sections.about.data.title && 
+          <h2 class="text-xl font-bold mb-4">{about.data.title}</h2>
+        }
         <sections.about.Content />
+        {aboutImage && (
+          <div class="mb-10 breakout border border-ui rounded-lg">
+            <ImageWrapper
+              src={aboutImage}
+              alt={siteConfig.author}
+              class="w-full rounded-lg not-prose aspect-3/2 border border-ui shadow-lg"
+              fit="cover"
+            />
+          </div>
+        )}
       </section>
     )}
+    
+    <!-- ============================================================ -->
+    <!-- Recent Posts -->
+    <!-- ============================================================ -->
+
+    <ContentDisplay
+      title="Recent Posts"
+      entries={sortedPosts.slice(0, 4)}
+      display="grid"
+      showImages
+      class="my-12"
+    />
+
+
 
     <!-- ============================================================ -->
     <!-- CTA SECTION (Optional from home-cta.md) -->
     <!-- ============================================================ -->
     {sections.cta && (
-      <section class="animate mb-12">
+      <section class="my-12 max-w-none">
+        {sections.cta.data.title && 
+          <h2 class="text-xl font-bold mb-4">{cta.data.title}</h2>
+        }
         <sections.cta.Content />
       </section>
     )}
