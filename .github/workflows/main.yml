@@ -1,0 +1,31 @@
+name: Fetch Content Updates
+
+on:
+  repository_dispatch:
+    types: [content-updated]
+  workflow_dispatch:
+
+jobs:
+  pull_content_updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout site repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update content submodule
+        run: |
+          git submodule update --remote src/content
+
+      - name: Commit and push if changed
+        run: |
+          git config user.email "hey@amitkul.in"
+          git config user.name "Amit K"
+
+          git add src/content
+          git commit -m "[Workflow] Update content submodule" || exit 0
+          git push
