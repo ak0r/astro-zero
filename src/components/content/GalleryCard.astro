@@ -23,7 +23,7 @@ const slug = gallery.id.replace(/\.(md|mdx)$/, '');
 
 <a 
   href={`/galleries/${slug}`}
-  class="gallery-card group block"
+  class="gallery-card group block not-prose"
 >
   <!-- Cover Image -->
   <div class="relative img-container not-prose inline-block rounded-lg border border-ui shadow-lg overflow-hidden mb-3">
@@ -33,8 +33,9 @@ const slug = gallery.id.replace(/\.(md|mdx)$/, '');
           src={coverImage}
           alt={title}
           class="block w-full h-full aspect-4/5 transition-all group-hover:scale-105 duration-300"
-          fit="fill"
+          fit="cover"
           layout="constrained"
+          loading='eager'
         />
       </div>
     ) : (
@@ -61,14 +62,19 @@ const slug = gallery.id.replace(/\.(md|mdx)$/, '');
       </div>
     )}
   </div>
-  
+  <div>
+    <!-- Title -->
+    <h3 class="text-lg font-semibold text-content mb-4 group-hover:underline">
+      {title}
+    </h3>
+  </div>
   <!-- Metadata below image -->
   <div class="flex items-center justify-between text-sm">
     <time 
       datetime={date.toISOString()}
       class="text-content-3 font-mono"
     >
-      {formatDate(date, 'monthDay')}
+      {formatDate(date, "full")}
     </time>
     <span class="text-content-3 font-mono">{imageCount} images</span>
   </div>

@@ -49,7 +49,7 @@ const badge = isGallery
 
 <a 
   href={`/${slug}`}
-  class="content-entry group flex items-start gap-3 py-2 transition-colors hover:text-content-1"
+  class="content-entry group link-card flex items-start gap-3 py-2 transition-colors not-prose"
   data-category={isGallery ? 'gallery' : category}
 >
   <IconWrapper 
@@ -60,7 +60,7 @@ const badge = isGallery
   
   <div class="flex-1 flex items-center justify-between gap-4 min-w-0">
     <div class="flex items-center gap-2 flex-wrap min-w-0">
-      <span class="text-content-2 group-hover:text-content-1 transition-colors truncate">
+      <span class="text-content-2 link-animate transition-colors truncate">
         {title}
       </span>
       {showCategory && (

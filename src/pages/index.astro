@@ -36,13 +36,13 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
 ---
 <BaseLayout>
   <SEO data={seoData} slot="seo" />
-  <Container class="py-6 sm:py-12">
+  <Container class="py-6 sm:py-12 flex flex-col space-y-4">
 
     <!-- ============================================================ -->
     <!-- HERO SECTION (Optional from home-hero.md) -->
     <!-- ============================================================ -->
     {sections.hero && (
-      <section class="my-12 max-w-none">
+      <section class="my-4 max-w-none">
         {sections.hero.data.title && 
           <h1 class="text-4xl font-bold mb-4">{hero.data.title}</h1>
         }
@@ -55,7 +55,7 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
     <!-- ============================================================ -->
     
     {sections.intro && (
-      <section class="my-12 max-w-none">
+      <section class="my-4 max-w-none">
         {sections.intro.data.title && 
           <h2 class="text-xl font-bold mb-4">{intro.data.title}</h2>
         }
@@ -67,7 +67,7 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
     <!-- ABOUT SECTION (Optional from home-about.md) -->
     <!-- ============================================================ -->
     {sections.about && (
-      <section class="flex flex-col my-12 max-w-none">
+      <section class="flex flex-col my-4 max-w-none">
         {sections.about.data.title && 
           <h2 class="text-xl font-bold mb-4">{about.data.title}</h2>
         }
@@ -94,7 +94,7 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
       entries={sortedPosts.slice(0, 4)}
       display="grid"
       showImages
-      class="my-12"
+      class="my-4"
     />
 
 
@@ -103,7 +103,7 @@ const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
     <!-- CTA SECTION (Optional from home-cta.md) -->
     <!-- ============================================================ -->
     {sections.cta && (
-      <section class="my-12 max-w-none">
+      <section class="my-4 max-w-none">
         {sections.cta.data.title && 
           <h2 class="text-xl font-bold mb-4">{cta.data.title}</h2>
         }

@@ -81,7 +81,17 @@
   @apply focus:outline-hidden focus:bg-surface-2/50;
 }
 
+.link-card {
+  @apply p-2 rounded-lg;
+}
+
 .blog-card {
+  @apply flex p-2 h-full border border-ui transition duration-300 rounded-xl;
+  @apply hover:border-transparent hover:shadow-lg;
+  @apply focus:outline-hidden focus:border-transparent focus:shadow-lg;
+}
+
+.gallery-card {
   @apply flex p-2 h-full border border-ui transition duration-300 rounded-xl;
   @apply hover:border-transparent hover:shadow-lg;
   @apply focus:outline-hidden focus:border-transparent focus:shadow-lg;

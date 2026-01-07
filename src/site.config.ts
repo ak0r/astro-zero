@@ -1,17 +1,17 @@
 import type { SiteConfig } from "./types";
 
 export const siteConfig: SiteConfig = {
-  siteURL: "https://ordinary-astro.pages.dev",
-  title: "Zero",
+  siteURL: "https://amitkul.in",
+  title: "Amit K",
   description: "The Obsidian CMS based AstroJS theme",
-  author: "John Doe",
+  author: "Amit K",
   defaultTheme: "light",
   availableThemes: ["light", "dark"],
   scrollToTop: true,
   profilePicture: {
     enabled: false,
     image: "/profile.png",
-    alt: "John Doe",
+    alt: "Amit K",
     size: "sm",
     url: undefined,
     placement: "footer",
@@ -24,15 +24,20 @@ export const siteConfig: SiteConfig = {
     pages: [
       { title: "Posts", url: "/posts/" },
       { title: "Galleries", url: "/galleries/" },
-      { title: "Projects", url: "/projects/" },
-      { title: "About", url: "/about/" },
-      { title: "GitHub", url: "https://github.com/ak0r" },
+      // { title: "Projects", url: "/projects/" },
+      // { title: "About", url: "/about/" },
+      // { title: "GitHub", url: "https://github.com/ak0r" },
     ],
     social: [
       {
         title: "X",
         url: "https://x.com/trekography",
         icon: "brand-x",
+      },
+      {
+        title: "Instagram",
+        url: "https://instagram.com/trekography",
+        icon: "brand-instagram",
       },
       {
         title: "GitHub",
@@ -74,7 +79,7 @@ export const siteConfig: SiteConfig = {
   },
   footer: {
     enabled: true,
-    content: "© {author}. Built with the Zero theme.",
+    content: `© {author}. Made with 💚 and (too much) 🧉 using <a href="https://github.com/ak0r/astro-zero" target="_blank">Astro Zero</a> theme.`,
     showSocialIconsInFooter: true
   },
   contentDisplay: {
@@ -131,6 +136,6 @@ export const siteConfig: SiteConfig = {
       { label: 'Tech', href: '/posts/tech', icon: 'code' },
       { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
     ],
-    abouutPageFilters: undefined
+    aboutPageFilters: undefined
   }
 }

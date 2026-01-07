@@ -326,6 +326,6 @@ export interface SiteConfig {
 
   pageFilters: {
     indexPageFilters?: FilterTab[];
-    abouutPageFilters?: FilterTab[];
+    aboutPageFilters?: FilterTab[];
   }
 }

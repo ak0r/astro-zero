@@ -1,13 +1,13 @@
 ---
-import type { Post, Docs, Project } from '@/types';
+import type { Post, Project } from '@/types';
 import Icon from '@/components/common/IconWrapper.astro';
 import Arrow from '@/components/common/AnimatedArrow.astro';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
-import { isValidDate, getFormattedDate } from '@/utils/commonFunctions';
-import { resolveImage } from '@/utils/images';
+import { isValidDate, getFormattedDate, getContentDir } from '@/utils/commonFunctions';
+import { resolveImageFromPath } from '@/utils/images';
 
 interface Props {
-  entry: Post | Docs | Project;
+  entry: Post | Project;
   showImages?: boolean;
   showDescription?: boolean;
   showTags?: boolean;
@@ -32,12 +32,19 @@ const { title, description, date } = entry.data;
 const collection = entry.collection;
 
 // Process image
-let entryImage = entry.data.image;
+let entryImage = entry.data.cover;
 if (Array.isArray(entryImage)) {
   entryImage = entryImage[0];
 }
-const coverImage = resolveImage(entryImage);
-const coverImageAlt = entry.data.imageAlt || `Featured image for: ${title}`;
+
+const contentDir = entry.filePath
+  ? getContentDir(entry.filePath)
+  : undefined;
+
+const coverImage = resolveImageFromPath(entryImage, {
+  baseDir: contentDir,
+});
+const coverImageAlt = entry.data.coverAlt || `Featured image for: ${title}`;
 
 // Type-specific data
 const tags = 'tags' in entry.data ? entry.data.tags : null;
@@ -48,7 +55,7 @@ const version = 'version' in entry.data ? entry.data.version : null;
 const status = 'status' in entry.data ? entry.data.status : null;
 
 // Determine if we should show the cover image
-const shouldShowCoverImage = showImages && coverImage && !entry.data.hideCoverImage;
+const shouldShowCoverImage = showImages && coverImage;
 
 // Card styling
 const cardClass = featured ? 'featured-card' : 'content-card';
@@ -59,11 +66,11 @@ const titleSize = featured ? 'text-lg' : 'text-base';
   class={`group ${cardClass} relative blog-card h-full flex flex-col`}
   role="article"
 >
-  <a href={`/${collection}/${entry.id}`} class="block h-full flex flex-col">
+  <a href={`/${collection}/${entry.id}`} class="block h-full flex-col">
     {/* Cover Image */}
     {shouldShowCoverImage && (
       <div
-        class="overflow-hidden rounded-t-lg"
+        class="overflow-hidden rounded-lg"
         style={collection === 'posts'
           ? `aspect-ratio: 3/2;`
           : 'aspect-ratio: 16/9;'}
@@ -79,7 +86,7 @@ const titleSize = featured ? 'text-lg' : 'text-base';
     )}
 
     {/* Content */}
-    <div class="p-4 sm:p-5 flex-grow flex flex-col">
+    <div class="p-4 sm:p-5 grow flex flex-col">
       {/* Badges Row */}
       {showMeta && (series || isFeatured || version || status) && (
         <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -156,7 +163,7 @@ const titleSize = featured ? 'text-lg' : 'text-base';
       {/* Footer with Arrow */}
       <div class="mt-auto pt-4 border-t border-ui flex items-center justify-between">
         <span class="text-sm text-content-3">
-          Read {collection === 'docs' ? 'note' : collection === 'projects' ? 'details' : 'more'}
+          Read {collection === 'projects' ? 'details' : 'more'}
         </span>
         <Arrow direction="right" size="5" position="relative" class="text-content-3" />
       </div>
