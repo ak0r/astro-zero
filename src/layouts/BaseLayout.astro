@@ -17,6 +17,7 @@ import PrelineUI from '@/components/scripts/PrelineUIScript.astro';
 import CommandPalette from '@/components/widgets/CommandPalette.astro';
 import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
 import NavBar from '@/components/layout/NavBar.astro';
+import GLightbox from '@/components/scripts/GLightbox.astro';
 
 export interface Props {
   bodyClass?: string;
@@ -63,8 +64,7 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     
     <!-- Twitter Widgets Script -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    <!-- <link href="/pagefind/pagefind-ui.css" rel="stylesheet" /> -->
-    <!-- <script src="/pagefind/pagefind-ui.js" is:inline /> -->
+
   </head>
 
   <body class={`min-h-screen ${bodyClass}`}>
@@ -104,11 +104,10 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     <AnimationScript />
     <CollapsibleCalloutsScript />
     <PrelineUI />
+    <GLightbox />
 
     <!-- Additional page-specific scripts -->
     <slot name="scripts" />
 
-    <!-- GLightbox initialization -->
-    <script type="module" src="/src/scripts/glightbox-init.ts"></script>
   </body>
 </html>

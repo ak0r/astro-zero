@@ -16,7 +16,7 @@
 
   .glightbox-container .gslide-description {
     max-width: 90%;
-    color: var(--color-surface-2/20);
+    color: var(--color-surface-2)/20;
     font-size: 0.875rem;
   }.glightbox-container .gslide-image img {
     max-width: 95%;

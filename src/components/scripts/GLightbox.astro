@@ -1,0 +1,49 @@
+---
+// Glighntbox Initialization Script
+// import 'glightbox/dist/css/glightbox.min.css';
+---
+<script>
+  import GLightbox from 'glightbox';
+  import 'glightbox/dist/css/glightbox.min.css';
+
+  let lightbox = null;
+
+  function initGLightbox() {
+    if (lightbox) {
+      try {
+        lightbox.destroy();
+      } catch (e) {}
+    }
+
+    setTimeout(() => {
+      const elements = document.querySelectorAll('.glightbox');
+      
+      if (elements.length > 0) {
+        lightbox = GLightbox({
+          selector: '.glightbox',
+          touchNavigation: true,
+          closeButton: true,
+          loop: true,
+          autoplayVideos: false,
+          preload: true,
+          openEffect: 'fade',
+          closeEffect: 'fade',
+          slideEffect: 'fade',
+          dragAutoSnap: true,
+          cssEffects: {
+            fade: { in: 'fadeIn', out: 'fadeOut' }
+          }
+        });
+      }
+    }, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGLightbox);
+  } else {
+    initGLightbox();
+  }
+
+  document.addEventListener('astro:page-load', initGLightbox);
+  document.addEventListener('astro:after-swap', initGLightbox);
+</script>
