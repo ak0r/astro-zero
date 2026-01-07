@@ -86,7 +86,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
         {resolvedImages.map((img, index) => (
           <button
             type="button"
-            class="gallery-image-button img-container group relative not-prose inline-block rounded-lg border border-ui shadow-lg overflow-hidden mb-3 cursor-zoom-in"
+            class="gallery-image-button img-container group relative not-prose inline-block rounded-lg ring ring-ui shadow-lg overflow-hidden mb-3 cursor-zoom-in"
             onclick={`window.dispatchEvent(
               new CustomEvent('openLightbox', {
                 detail: { index: ${index}, button: this }
@@ -96,8 +96,8 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
             <ImageWrapper
               src={img}
               alt={title}
-              class="block w-full h-full non-prose aspect-4/5 shadow-lg rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
+              class="block w-full h-full non-prose aspect-4/5 border border-ui shadow-lg rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="eager"
               data-lightbox="gallery"
               data-caption={title}
             />

@@ -9,97 +9,88 @@ import { siteConfig } from '@/site.config';
     }
   }
 
- function createMasonryLayout(container, items) {
-  // Get column count from CSS or set default
-  let columnCount = 3;
-  
-  if (window.innerWidth <= 640) columnCount = 1;
-  else if (window.innerWidth <= 1024) columnCount = 2;
-  
-  // Clear container
-  container.innerHTML = '';
-  container.style.display = 'flex';
-  container.style.gap = '1rem';
-  container.style.alignItems = 'flex-start';
-  
-  // Create columns
-  const columns = [];
-  for (let i = 0; i < columnCount; i++) {
-    const column = document.createElement('div');
-    column.style.display = 'flex';
-    column.style.flexDirection = 'column';
-    column.style.gap = '1rem';
-    column.style.flex = '1';
-    column.style.minWidth = '0'; // Important for flex sizing
-    columns.push(column);
-    container.appendChild(column);
+  function createMasonryLayout(container, items) {
+    // Get column count from CSS or set default
+    let columnCount = 3;
+    
+    if (window.innerWidth <= 640) columnCount = 1;
+    else if (window.innerWidth <= 1024) columnCount = 2;
+    
+    // Clear container
+    container.innerHTML = '';
+    container.style.display = 'flex';
+    container.style.gap = '1rem';
+    container.style.alignItems = 'flex-start';
+    
+    // Create columns
+    const columns = [];
+    for (let i = 0; i < columnCount; i++) {
+      const column = document.createElement('div');
+      column.style.display = 'flex';
+      column.style.flexDirection = 'column';
+      column.style.gap = '1rem';
+      column.style.flex = '1';
+      column.style.minWidth = '0';
+      columns.push(column);
+      container.appendChild(column);
+    }
+    
+    // Initially distribute items round-robin
+    items.forEach((item, index) => {
+      const columnIndex = index % columnCount;
+      columns[columnIndex].appendChild(item);
+    });
+    
+    // Function to redistribute based on actual heights
+    function redistributeItems() {
+      const allItems = Array.from(container.querySelectorAll('.image-item'));
+      
+      // Clear columns
+      columns.forEach(col => col.innerHTML = '');
+      
+      // Get column heights helper
+      const getColumnHeights = () => columns.map(col => col.offsetHeight || 0);
+      
+      // Add each item to shortest column
+      allItems.forEach(item => {
+        const heights = getColumnHeights();
+        const shortestIndex = heights.indexOf(Math.min(...heights));
+        columns[shortestIndex].appendChild(item);
+      });
+    }
+    
+    // Wait for all images to load
+    const images = container.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise((resolve) => {
+        if (img.complete && img.naturalHeight !== 0) {
+          resolve();
+        } else {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          setTimeout(() => resolve(), 5000);
+        }
+      });
+    });
+    
+    Promise.all(imageLoadPromises).then(() => {
+      redistributeItems();
+      setTimeout(() => redistributeItems(), 100);
+    });
+    
+    window.addEventListener('load', () => {
+      setTimeout(() => redistributeItems(), 200);
+    }, { once: true });
   }
-  
-  // Initially distribute items round-robin
-  items.forEach((item, index) => {
-    const columnIndex = index % columnCount;
-    columns[columnIndex].appendChild(item);
-  });
-  
-  // Function to redistribute based on actual heights
-  function redistributeItems() {
-    const allItems = Array.from(container.querySelectorAll('.image-item'));
-    
-    // Clear columns
-    columns.forEach(col => col.innerHTML = '');
-    
-    // Get column heights helper
-    const getColumnHeights = () => columns.map(col => {
-      const height = col.offsetHeight || 0;
-      return height;
-    });
-    
-    // Add each item to shortest column
-    allItems.forEach(item => {
-      const heights = getColumnHeights();
-      const shortestIndex = heights.indexOf(Math.min(...heights));
-      columns[shortestIndex].appendChild(item);
-    });
-  }
-  
-  // Wait for all images to load
-  const images = container.querySelectorAll('img');
-  const imageLoadPromises = Array.from(images).map(img => {
-    return new Promise((resolve) => {
-      if (img.complete && img.naturalHeight !== 0) {
-        resolve();
-      } else {
-        img.onload = () => resolve();
-        img.onerror = () => resolve(); // Resolve even on error
-        
-        // Fallback timeout
-        setTimeout(() => resolve(), 5000);
-      }
-    });
-  });
-  
-  // Redistribute after all images load
-  Promise.all(imageLoadPromises).then(() => {
-    redistributeItems();
-    
-    // Do one more redistribution after a short delay to catch any late renders
-    setTimeout(() => redistributeItems(), 100);
-  });
-  
-  // Also redistribute on window load (catches very late images)
-  window.addEventListener('load', () => {
-    setTimeout(() => redistributeItems(), 200);
-  }, { once: true });
-}
 
-  // Modify your existing initializeImageGalleries function
   function initializeImageGalleries() {
-    const contentElement = document.querySelector('.md-content');
+    const contentElement = document.querySelector('.md-content, article, .prose');
     if (!contentElement) return;
 
     const paragraphs = contentElement.querySelectorAll('p');
 
     paragraphs.forEach((paragraph, paraIndex) => {
+      // Find images that are NOT already wrapped in links
       const images = Array.from(paragraph.querySelectorAll('img'))
         .filter(img => !img.closest('a'));
 
@@ -114,6 +105,7 @@ import { siteConfig } from '@/site.config';
         galleryContainer.className = 'image-grid image-grid-masonry my-2';
       }
 
+      // Handle captions for single images
       let nonImageContent = [];
       if (imageCount === 1) {
         nonImageContent = Array.from(paragraph.childNodes).filter(node => {
@@ -133,8 +125,7 @@ import { siteConfig } from '@/site.config';
             const hasItalic = next.querySelector('em, i');
             const hasLinks = next.querySelector('a');
             const isHeading = next.querySelector('h1,h2,h3,h4,h5,h6');
-            const hasOnlyText =
-              next.textContent.trim() !== '' && next.children.length <= 2;
+            const hasOnlyText = next.textContent.trim() !== '' && next.children.length <= 2;
 
             if ((hasItalic || hasLinks || hasOnlyText) && !isHeading) {
               nonImageContent = Array.from(next.childNodes);
@@ -144,44 +135,32 @@ import { siteConfig } from '@/site.config';
         }
       }
 
-      // Collect image items
+      // Collect image items with lightbox links
       const imageItems = [];
       
       images.forEach((img) => {
         const imageItem = document.createElement('div');
-        imageItem.className = 'image-item';
+        imageItem.className = 'image-item ring ring-ui shadow-lg rounded-lg';
 
         const link = document.createElement('a');
         const resolvedSrc = img.currentSrc || img.src;
         link.href = resolvedSrc;
-        link.setAttribute('data-type', 'image');
-
-        if (resolvedSrc.startsWith('http')) {
-          link.setAttribute('data-src', resolvedSrc);
-        }
-        
         link.className = 'glightbox group block relative';
         link.setAttribute('data-gallery', `gallery-${paraIndex}`);
-        link.setAttribute('data-description', img.alt || '');
+        link.setAttribute('data-description', img.alt || img.getAttribute('data-caption') || '');
 
         const imgClone = img.cloneNode(true);
         imgClone.src = resolvedSrc;
         imgClone.alt = img.alt || '';
-        
-        // Remove lazy loading for masonry calculations
         imgClone.loading = 'eager';
         imgClone.decoding = 'sync';
-        
-        imgClone.className =
-          'w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:shadow-lg group-hover:scale-[1.02] not-prose';
+        imgClone.className = 'w-full h-full object-cover border border-ui rounded-lg shadow-lg not-prose';
 
         const overlay = document.createElement('div');
-        overlay.className =
-          'absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center';
+        overlay.className = 'absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-lg flex items-center justify-center';
 
         const zoomIcon = document.createElement('div');
-        zoomIcon.className =
-          'w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300';
+        zoomIcon.className = 'w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300';
         zoomIcon.innerHTML = `
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -208,6 +187,7 @@ import { siteConfig } from '@/site.config';
       container.className = 'image-container';
       container.appendChild(galleryContainer);
 
+      // Add caption if exists
       if (nonImageContent.length > 0) {
         const captionContainer = document.createElement('div');
         captionContainer.className = 'image-caption-container';
@@ -223,6 +203,38 @@ import { siteConfig } from '@/site.config';
 
       paragraph.parentNode.replaceChild(container, paragraph);
     });
+    
+    // NOW wrap any remaining standalone images (not in galleries)
+    const standaloneImages = contentElement.querySelectorAll('img:not([data-lightbox-processed])');
+    
+    standaloneImages.forEach((img) => {
+      // Skip if already wrapped in a link
+      if (img.closest('a')) {
+        img.setAttribute('data-lightbox-processed', 'true');
+        return;
+      }
+      
+      // Wrap with lightbox link
+      const wrapper = document.createElement('a');
+      wrapper.href = img.src;
+      wrapper.className = 'glightbox';
+      wrapper.setAttribute('data-gallery', 'standalone');
+      wrapper.setAttribute('data-description', img.alt || img.getAttribute('data-caption') || '');
+      
+      img.parentNode.insertBefore(wrapper, img);
+      wrapper.appendChild(img);
+      img.setAttribute('data-lightbox-processed', 'true');
+    });
+    
+    // Initialize GLightbox
+    if (typeof GLightbox !== 'undefined') {
+      GLightbox({
+        selector: '.glightbox',
+        touchNavigation: true,
+        loop: true,
+        autoplayVideos: true,
+      });
+    }
     
     // Handle window resize
     let resizeTimeout;

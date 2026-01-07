@@ -8,8 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "sync-attachments": "node scripts/sync-attachments.js",
-    "sync-content": "git submodule update --remote && echo '✅ Content synced from remote'",
-    "sync-content:init": "git submodule update --init --recursive && echo '✅ Submodule initialized'"
+    "sync-content": "git submodule update --init --remote src/content && echo '✅ Content synced'"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
