@@ -132,7 +132,7 @@ export function generateHomeSEO(url: string): SEOData {
   const ogImage = getDefaultOGImage();
   
   return {
-    title: siteConfig.title, // "Amit K | Tech, Travel & Everything In Between"
+    title: `${siteConfig.branding.tagline} | ${siteConfig.title}`, // "Tech, Travel & Everything In Between | Amit K"
     description: siteConfig.description,
     canonical: url,
     ogImage,

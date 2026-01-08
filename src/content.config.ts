@@ -91,6 +91,7 @@ const galleryCollection = defineCollection({
     description: z.string().nullable().optional().default('No description provided'),
     category: z.enum(['gallery']).default('gallery'),
     date: z.coerce.date().default(() => new Date()),
+    lastUpdated: z.coerce.date().optional().nullable(),
     imageDir: z.string().optional(),
     cover: z.string().default('cover.jpg'),
     coverAlt: z.string().nullable().optional(),

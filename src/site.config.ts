@@ -3,7 +3,7 @@ import type { SEOConfig, SiteConfig } from "./types";
 export const siteConfig: SiteConfig = {
   siteURL: import.meta.env.SITE || "https://amitkul.in",
   title: "Amit K",
-  description: "Building systems by day, exploring streets around the world whenever possible. Technical experiments, travel stories, and photography from both worlds. Tech articles, travel guides, and photo galleries.",
+  description: "Building systems by day, exploring streets around the world whenever possible.Sharing tech articles, travel guides, and photo galleries.",
   author: "Amit K",
   defaultTheme: "light",
   availableThemes: ["light", "dark"],
