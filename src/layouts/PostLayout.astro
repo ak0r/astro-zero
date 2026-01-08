@@ -126,7 +126,7 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
               {tags.map(tag => (
                 <div class="not-prose flex gap-1 sm:gap-2 self-start">
                   <a
-                    href={`/posts/tag/${encodeURIComponent(tag)}`}
+                    href={`/tags/${encodeURIComponent(tag)}`}
                     class="internal-link badge-outline"
                   >
                     #{tag}

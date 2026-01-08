@@ -114,8 +114,44 @@ export interface SEOData {
     title?: string;
     description?: string;
     image?: string;
+    site?: string;
+    creator?: string;
   };
   keywords?: string[];
+  author?: string;
+}
+
+// SEO Configuration Types
+export interface SEOConfig {
+    
+  // Title configuration
+  titleTemplate: string; // e.g., "%s | Amit K"
+  titleSeparator: string; // e.g., " | "
+  
+  // Default meta
+  defaultOgImageAlt: string;
+  keywords: string[];
+  author: string;
+  
+  // Social media
+  twitter?: {
+    site?: string; // @username
+    creator?: string; // @username
+  };
+  
+  // Sections configuration
+  sections: {
+    posts: SectionSEO;
+    galleries: SectionSEO;
+    about: SectionSEO;
+    tags: SectionSEO;
+    now: SectionSEO;
+  };
+}
+
+export interface SectionSEO {
+  title: string;
+  description: string;
 }
 
 // ============================================================================
@@ -203,18 +239,20 @@ export interface CommandPaletteConfig {
 // SITE CONFIGURATION
 // ============================================================================
 
-// export type AspectRatio = 
-//   | "16:9" 
-//   | "4:3"
-//   | "3:2"
-//   | "og"
-//   | "square"
-//   | "golden"
-//   | "custom";
-
 export const ASPECT_RATIOS = ['16:9', '4:3', '3:2', '4:5', 'square'] as const;
 export type AspectRatio = typeof ASPECT_RATIOS[number];
 
+// Branding Configuration
+export interface BrandingConfig {
+  logoText: string;
+  logoImage?: string;
+  tagline: string;
+  avatar: {
+    enabled: boolean;
+    image: string;
+    placement: 'header' | 'footer';
+  };
+}
 
 export interface SiteConfig {
   // Basic Info
@@ -222,6 +260,8 @@ export interface SiteConfig {
   title: string;
   description: string;
   author: string;
+  
+  branding: BrandingConfig;
   language?: string;
   defaultOgImageAlt?: string;
   
@@ -230,16 +270,8 @@ export interface SiteConfig {
   availableThemes: ["light", "dark"];
   scrollToTop: boolean;
   
-  // Profile Picture
-  profilePicture: {
-    enabled: boolean;
-    image: string;
-    alt: string;
-    size: "sm" | "md" | "lg";
-    url?: string;
-    placement: "footer" | "header";
-    style: "circle" | "square" | "none";
-  };
+  // SEO
+  seoConfig: SEOConfig;
 
   // Layout
   layout: {

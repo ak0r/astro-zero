@@ -1,0 +1,28 @@
+---
+import { siteConfig } from '@/site.config';
+import Avatar from '@/components/widgets/Avatar.astro';
+
+const avatarEnabled = siteConfig.branding.avatar.enabled;
+const hasLogoImage = siteConfig.branding.logoImage && siteConfig.branding.logoImage.length > 0;
+---
+<div class="flex items-center group shrink-0">
+  <a href="/" class="group flex focus:outline-hidden items-center">
+  
+    {avatarEnabled && <Avatar currentPlacement="header" />}
+    
+    {/* Show logo image or text (only if avatar is NOT enabled) */}
+    {!avatarEnabled && (
+      hasLogoImage ? (
+        <img 
+          src={siteConfig.branding.logoImage} 
+          alt={siteConfig.branding.logoText}
+          class="h-10 w-auto"
+        />
+      ) : (
+        <span class="font-semibold text-3xl">
+          {siteConfig.branding.logoText}
+        </span>
+      )
+    )}
+  </a>
+</div>

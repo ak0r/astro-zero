@@ -3,9 +3,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
-import IconWrapper from '@/components/common/IconWrapper.astro';
-import { getAllPosts, getUniquePostTags } from '@/utils/getContent';
-import { getAllGalleries, getUniqueGalleryTags } from '@/utils/getGallery';
+import { getAllPosts } from '@/utils/getContent';
+import { getAllGalleries } from '@/utils/getGallery';
 import { generateIndexSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
 

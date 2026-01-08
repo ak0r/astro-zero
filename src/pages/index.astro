@@ -1,7 +1,7 @@
 ---
 import Container from "@/components/layout/Container.astro"
 import BaseLayout from "@/layouts/BaseLayout.astro"
-import { generateIndexSEO } from '@/utils/seo';
+import { generateHomeSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
 import { getHomeContent } from '@/utils/page-sections';
 import { getAllPosts, getTopLevelPosts, sortPostsByDate } from "@/utils/getContent";
@@ -31,7 +31,7 @@ const aboutImage = about ? about.data.cover ? await resolveImageFromPath(about.d
   baseDir: contentDir,
 }) : null : null;
 
-const seoData = generateIndexSEO('home', Astro.url.href, {customTitle: 'Home'});
+const seoData = generateHomeSEO(Astro.url.href);
 
 ---
 <BaseLayout>

@@ -4,9 +4,7 @@ import Container from '@/components/layout/Container.astro';
 import Icon from '@/components/common/IconWrapper.astro';
 import Navigation from '@/components/layout/Navigation.astro';
 import ThemeToggle from '@/components/widgets/ThemeToggle.astro';
-import Avatar from '@/components/widgets/Avatar.astro';
-
-const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'header';
+import Branding from '@/components/widgets/Branding.astro';
 ---
 <header
   id="main-header"
@@ -16,14 +14,7 @@ const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profi
     <nav class="not-prose flex flex-wrap md:flex-nowrap relative w-full rounded-lg items-center justify-between border border-ui bg-surface/70 backdrop-blur-lg mt-4 px-2 sm:px-6 py-3">
 
       <!-- LEFT: Logo -->
-      <div class="flex items-center group shrink-0">
-        <a href="/" class="group flex focus:outline-hidden link-animate">
-          <!-- { showProfilePicture && <Avatar /> } -->
-          <span class="font-semibold text-3xl">
-            {siteConfig.title}
-          </span>
-        </a>
-      </div>
+      <Branding />
 
       <!-- CENTER: Desktop Navigation -->
       <div class="hidden md:text-base md:flex flex-1 py-2 md:gap-3 md:items-center md:justify-center text-content-3">

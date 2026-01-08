@@ -5,7 +5,6 @@ import Icon from '@/components/common/IconWrapper.astro';
 import Avatar from '@/components/widgets/Avatar.astro';
 
 const currentYear = new Date().getFullYear();
-const showProfilePicture = siteConfig.profilePicture.enabled && siteConfig.profilePicture.placement === 'footer';
 
 const socialLinks = (siteConfig.navigation.social || []).filter(
   (s) => s && s.url && s.icon
@@ -26,8 +25,6 @@ const footerContent = siteConfig.footer.content.replace(
 <footer class="animate my-16">
   <Container>
 
-  <!-- { showProfilePicture && <Avatar /> } -->
-
     <!-- Footer row -->
     {(footerEnabled) && (
       <div
@@ -38,6 +35,8 @@ const footerContent = siteConfig.footer.content.replace(
           .filter(Boolean)
           .join(' ')}
       >
+        <Avatar currentPlacement="footer" />
+        
         <!-- Footer text -->
         <p
           class="text-sm text-content-3 order-2"

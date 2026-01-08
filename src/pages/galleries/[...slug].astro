@@ -70,7 +70,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
           <div class="flex flex-wrap gap-2 not-prose">
             {tags.map((tag) => (
               <a 
-                href={`/gallery/tag/${tag}`}
+                href={`/tags/${tag}`}
                 class="badge"
               >
                 #{tag}

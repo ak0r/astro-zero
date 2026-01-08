@@ -1,5 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
-import type { SEOData, OpenGraphImage, ResolvedImage, Post } from '@/types';
+import type { SEOData, OpenGraphImage, ResolvedImage, Post, Gallery } from '@/types';
 import { siteConfig } from '@/site.config';
 import { resolveImage } from './images';
 
@@ -8,12 +8,9 @@ import { resolveImage } from './images';
  */
 function stripObsidianBrackets(imagePath: string): string {
   if (!imagePath) return imagePath;
-  
-  // Remove double brackets if present: [[image.png]] -> image.png
   if (imagePath.startsWith('[[') && imagePath.endsWith(']]')) {
     return imagePath.slice(2, -2);
   }
-  
   return imagePath;
 }
 
@@ -25,286 +22,63 @@ function resolvedImageToUrl(resolved: ResolvedImage): string {
     case 'remote':
       return resolved.url;
     case 'astro':
-      // Astro ImageMetadata has a src property
       return resolved.image.src;
     case 'static':
       return resolved.url;
     default:
-      return '/og-image.png'; // Fallback
+      return '/og-default.png';
   }
 }
 
 /**
- * Process image for OG tags
+ * Build page title with template
+ * For homepage, returns main title as-is
+ * For other pages, applies template: "Page Title | Amit K"
  */
-export function processOGImage(image: string | string[] | undefined, imageAlt?: string): OpenGraphImage {
-  if (!image) {
-    return getDefaultOGImage();
+function buildTitle(pageTitle: string | null = null): string {
+  // If no page title provided, return site title (for homepage)
+  if (!pageTitle) {
+    return siteConfig.title;
   }
-
-  // Handle array of images
-  let imagePath = Array.isArray(image) ? image[0] : image;
   
-  // Strip Obsidian wikilink brackets: [[/posts/attachments/img.png]] -> /posts/attachments/img.png
-  imagePath = stripObsidianBrackets(imagePath);
-  
-  // Resolve image path (returns ResolvedImage object)
-  const resolvedImage = resolveImage(imagePath);
-  
-  // Handle null/undefined result
-  if (!resolvedImage) {
-    return getDefaultOGImage();
+  // If page title already includes site branding, don't duplicate
+  if (pageTitle.includes(siteConfig.branding.logoText)) {
+    return pageTitle;
   }
+  
+  // Apply template: replace %s with page title
+  return siteConfig.seoConfig.titleTemplate.replace('%s', pageTitle);
+}
 
-  // Convert ResolvedImage to URL string
-  const imageUrl = resolvedImageToUrl(resolvedImage);
-
-  // Make absolute URL for OG tags (required by social platforms)
-  const absoluteUrl = imageUrl.startsWith('http') 
-    ? imageUrl 
-    : new URL(imageUrl, siteConfig.siteURL).href;
-
+/**
+ * Get default OG image
+ */
+export function getDefaultOGImage(): OpenGraphImage {
   return {
-    url: absoluteUrl,
-    alt: imageAlt || siteConfig.defaultOgImageAlt || siteConfig.title,
+    url: new URL('/og/default.png', siteConfig.siteURL).href,
+    alt: siteConfig.seoConfig.defaultOgImageAlt,
     width: 1200,
     height: 630,
   };
 }
 
 /**
- * Generate SEO data for home page
+ * Get OG image for specific page type
  */
-export function generateHomeSEO(url: string): SEOData {
+export function getPageOGImage(
+  page: 'default' | 'posts' | 'galleries' | 'about' | 'tags'
+): OpenGraphImage {
   return {
-    title: siteConfig.title,
-    description: siteConfig.description,
-    canonical: url,
-    ogImage: getDefaultOGImage(),
-    ogType: 'website',
-    noIndex: false,
+    url: new URL(`/og/${page}.png`, siteConfig.siteURL).href,
+    alt: siteConfig.seoConfig.defaultOgImageAlt,
+    width: 1200,
+    height: 630,
   };
 }
 
 /**
- * Generate SEO data for blog post
- */
-export function generatePostSEO(
-  post: CollectionEntry<'posts'>,
-  url: string
-): SEOData {
-  const title = `${post.data.title} | ${siteConfig.title}`;
-  const description = post.data.description || siteConfig.description;
-  const ogImage = generateOGImage(post, post.data.coverAlt);
-
-  return {
-    title,
-    description,
-    canonical: url,
-    ogImage,
-    ogType: 'article',
-    publishedTime: post.data.date?.toISOString(),
-    tags: post.data.tags,
-    noIndex: post.data.draft || false,
-    keywords: post.data.tags,
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      image: ogImage.url,
-    },
-  };
-}
-
-/**
- * Generate SEO data for gallery
- */
-export function generateGallerySEO(
-  gallery: CollectionEntry<'gallery'>,
-  url: string
-): SEOData {
-  const title = `${gallery.data.title} | ${siteConfig.title}`;
-  const description = gallery.data.description || 
-    (gallery.data.location ? `Photo gallery from ${gallery.data.location}` : siteConfig.description);
-  const ogImage = generateOGImage(gallery, gallery.data.coverAlt);
-
-  return {
-    title,
-    description,
-    canonical: url,
-    ogImage,
-    ogType: 'article',
-    publishedTime: gallery.data.date?.toISOString(),
-    noIndex: gallery.data.draft || false,
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      image: ogImage.url,
-    },
-  };
-}
-
-/**
- * Generate SEO data for page
- */
-export function generatePageSEO(
-  page: CollectionEntry<'pages'>,
-  url: string
-): SEOData {
-  const title = page.data.title === siteConfig.title 
-    ? siteConfig.title 
-    : `${page.data.title} | ${siteConfig.title}`;
-  const description = page.data.description || siteConfig.description;
-  const ogImage = getDefaultOGImage();
-
-  return {
-    title,
-    description,
-    canonical: url,
-    ogImage,
-    ogType: 'website',
-    noIndex: page.data.noindex || false,
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      image: ogImage.url,
-    },
-  };
-}
-
-/**
- * Generate SEO data for index/archive pages
- * Handles posts index, tag archives, docs index, etc.
- */
-export function generateIndexSEO(
-  type: 'home' | 'posts' | 'tags' | 'docs' | 'galleries' | 'about',
-  url: string,
-  options?: {
-    tag?: string;
-    page?: number;
-    customTitle?: string;
-    customDescription?: string;
-  }
-): SEOData {
-  const { tag, page, customTitle, customDescription } = options || {};
-  
-  const baseConfig = {
-    home: {
-      title: `${siteConfig.title}`,
-      description: `${siteConfig.description}`,
-      ogPage: 'default' as const,
-    },
-    posts: {
-      title: 'Posts',
-      description: `Browse all blog posts on ${siteConfig.title}`,
-      ogPage: 'posts' as const,
-    },
-    galleries: {
-      title: 'Photo Galleries',
-      description: `Browse photo galleries on ${siteConfig.title}`,
-      ogPage: 'galleries' as const,
-    },
-    tags: {
-      title: tag ? `Posts tagged "${tag}"` : 'Tags',
-      description: tag 
-        ? `Browse all posts tagged with ${tag}`
-        : `Browse posts by tags`,
-      ogPage: 'tags' as const,
-    },
-    docs: {
-      title: 'Documentation',
-      description: `Browse documentation`,
-      ogPage: 'default' as const,
-    },
-    about: {
-      title: 'About',
-      description: siteConfig.description,
-      ogPage: 'about' as const,
-    },
-  };
-
-  const config = baseConfig[type];
-  
-  let title = customTitle || config.title;
-  if (page && page > 1) {
-    title = `${title} - Page ${page}`;
-  }
-  title = `${title} | ${siteConfig.title}`;
-
-  let description = customDescription || config.description;
-  if (page && page > 1) {
-    description = `${description} - Page ${page}`;
-  }
-
-  return {
-    title,
-    description,
-    canonical: url,
-    ogImage: getPageOGImage(config.ogPage), // ← Always use default for index pages
-    ogType: 'website',
-    noIndex: false,
-    keywords: tag ? [tag] : undefined,
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      image: getDefaultOGImage().url,
-    },
-  };
-}
-
-/**
- * Generate SEO data for docs
- */
-export function generateDocSEO(
-  doc: CollectionEntry<'docs'>,
-  url: string
-): SEOData {
-  const title = `${doc.data.title} | Docs | ${siteConfig.title}`;
-  const description = doc.data.description || siteConfig.description;
-  const ogImage = processOGImage(doc.data.image, doc.data.imageAlt);
-
-  return {
-    title,
-    description,
-    canonical: url,
-    ogImage,
-    ogType: 'article',
-    noIndex: doc.data.noindex || false,
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      image: ogImage.url,
-    },
-  };
-}
-
-/**
- * Generate robots meta content
- */
-export function generateRobotsMeta(noIndex?: boolean): string {
-  if (noIndex) {
-    return 'noindex, nofollow';
-  }
-  return 'index, follow';
-}
-
-/**
- * Format date for schema.org
- */
-export function formatSchemaDate(date: Date | string | undefined): string | undefined {
-  if (!date) return undefined;
-  
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toISOString();
-}
-
-
-/**
- * Process image for OG tags with fallback hierarchy
+ * Generate OG image with fallback hierarchy
+ * Priority: 1. Cover image, 2. Generated OG, 3. Default
  */
 export function generateOGImage(
   entry: Post | Gallery,
@@ -313,7 +87,7 @@ export function generateOGImage(
   const collection = entry.collection;
   const slug = entry.id.replace(/\.(md|mdx)$/, '');
   
-  // Priority 1: Manual cover image (if exists and suitable)
+  // Priority 1: Manual cover image
   if (entry.data.cover) {
     const coverPath = Array.isArray(entry.data.cover) 
       ? entry.data.cover[0] 
@@ -337,7 +111,7 @@ export function generateOGImage(
     }
   }
   
-  // Priority 2: Generated OG image via astro-og-canvas
+  // Priority 2: Generated OG image
   const ogPath = collection === 'gallery' 
     ? `/og/galleries/${slug}.png`
     : `/og/posts/${slug}.png`;
@@ -351,27 +125,227 @@ export function generateOGImage(
 }
 
 /**
- * Get default OG image
+ * Generate SEO data for home page
+ * Uses main site title and description
  */
-export function getDefaultOGImage(): OpenGraphImage {
+export function generateHomeSEO(url: string): SEOData {
+  const ogImage = getDefaultOGImage();
+  
   return {
-    url: new URL('/og/default.png', siteConfig.siteURL).href,
-    alt: siteConfig.defaultOgImageAlt || siteConfig.title,
-    width: 1200,
-    height: 630,
+    title: siteConfig.title, // "Amit K | Tech, Travel & Everything In Between"
+    description: siteConfig.description,
+    canonical: url,
+    ogImage,
+    ogType: 'website',
+    noIndex: false,
+    keywords: siteConfig.seoConfig.keywords,
+    author: siteConfig.seoConfig.author,
+    twitter: {
+      card: 'summary_large_image',
+      title: siteConfig.title,
+      description: siteConfig.description,
+      image: ogImage.url,
+      site: siteConfig.seoConfig.twitter?.site,
+      creator: siteConfig.seoConfig.twitter?.creator,
+    },
   };
 }
 
 /**
- * Get OG image for specific page type
+ * Generate SEO data for blog post
  */
-export function getPageOGImage(
-  page: 'default' | 'posts' | 'galleries' | 'about' | 'tags'
-): OpenGraphImage {
+export function generatePostSEO(
+  post: CollectionEntry<'posts'>,
+  url: string
+): SEOData {
+  const title = buildTitle(post.data.title);
+  const description = post.data.description || siteConfig.description;
+  const ogImage = generateOGImage(post, post.data.coverAlt);
+  const category = post.data.category;
+
   return {
-    url: new URL(`/og/${page}.png`, siteConfig.siteURL).href,
-    alt: siteConfig.defaultOgImageAlt || siteConfig.title,
-    width: 1200,
-    height: 630,
+    title,
+    description,
+    canonical: url,
+    ogImage,
+    ogType: 'article',
+    publishedTime: post.data.date?.toISOString(),
+    modifiedTime: post.data.lastUpdated?.toISOString(),
+    tags: post.data.tags,
+    noIndex: post.data.draft || false,
+    keywords: post.data.tags ? [...post.data.tags, ...siteConfig.seoConfig.keywords] : siteConfig.seoConfig.keywords,
+    author: siteConfig.seoConfig.author,
+    articleSection: category,
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      image: ogImage.url,
+      site: siteConfig.seoConfig.twitter?.site,
+      creator: siteConfig.seoConfig.twitter?.creator,
+    },
   };
+}
+
+/**
+ * Generate SEO data for gallery
+ */
+export function generateGallerySEO(
+  gallery: CollectionEntry<'gallery'>,
+  url: string
+): SEOData {
+  const title = buildTitle(gallery.data.title);
+  const description = gallery.data.description || 
+    (gallery.data.location 
+      ? `Photo gallery from ${gallery.data.location}` 
+      : siteConfig.seoConfig.sections.galleries.description);
+  const ogImage = generateOGImage(gallery, gallery.data.coverAlt);
+
+  return {
+    title,
+    description,
+    canonical: url,
+    ogImage,
+    ogType: 'article',
+    publishedTime: gallery.data.date?.toISOString(),
+    modifiedTime: gallery.data.lastUpdated?.toISOString(),
+    noIndex: gallery.data.draft || false,
+    keywords: gallery.data.tags ? [...gallery.data.tags, ...siteConfig.seoConfig.keywords] : siteConfig.seoConfig.keywords,
+    author: siteConfig.seoConfig.author,
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      image: ogImage.url,
+      site: siteConfig.seoConfig.twitter?.site,
+      creator: siteConfig.seoConfig.twitter?.creator,
+    },
+  };
+}
+
+/**
+ * Generate SEO data for index/section pages
+ * Combines section title with site branding using template
+ */
+export function generateIndexSEO(
+  type: 'home' | 'posts' | 'galleries' | 'about' | 'tags',
+  url: string,
+  options?: {
+    tag?: string;
+    page?: number;
+    customTitle?: string;
+    customDescription?: string;
+  }
+): SEOData {
+  const { tag, page, customTitle, customDescription } = options || {};
+  
+  // Build title
+  let title: string;
+  if (type === 'home') {
+    title = siteConfig.title; // Full site title for homepage
+  } else if (customTitle) {
+    title = buildTitle(customTitle);
+  } else if (tag) {
+    title = buildTitle(`Posts tagged "${tag}"`);
+  } else {
+    const section = siteConfig.seoConfig.sections[type];
+    title = buildTitle(section?.title || type);
+  }
+  
+  // Add page number if applicable
+  if (page && page > 1) {
+    title = `${title} - Page ${page}`;
+  }
+  
+  // Build description
+  let description: string;
+  if (type === 'home') {
+    description = siteConfig.description; // Main site description for homepage
+  } else if (customDescription) {
+    description = customDescription;
+  } else if (tag) {
+    description = `Browse all content tagged with ${tag}`;
+  } else {
+    const section = siteConfig.seoConfig.sections[type];
+    description = section?.description || siteConfig.description;
+  }
+  
+  // Add page number to description if applicable
+  if (page && page > 1) {
+    description = `${description} - Page ${page}`;
+  }
+  
+  // Get appropriate OG image
+  const ogImage = type === 'home' 
+    ? getDefaultOGImage() 
+    : getPageOGImage(type);
+
+  return {
+    title,
+    description,
+    canonical: url,
+    ogImage,
+    ogType: 'website',
+    noIndex: false,
+    keywords: tag ? [tag, ...siteConfig.seoConfig.keywords] : siteConfig.seoConfig.keywords,
+    author: siteConfig.seoConfig.author,
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      image: ogImage.url,
+      site: siteConfig.seoConfig.twitter?.site,
+      creator: siteConfig.seoConfig.twitter?.creator,
+    },
+  };
+}
+
+/**
+ * Generate SEO data for static pages
+ */
+export function generatePageSEO(
+  page: CollectionEntry<'pages'>,
+  url: string
+): SEOData {
+  const title = page.data.title === siteConfig.title 
+    ? siteConfig.title 
+    : buildTitle(page.data.title);
+  const description = page.data.description || siteConfig.description;
+  const ogImage = getDefaultOGImage();
+
+  return {
+    title,
+    description,
+    canonical: url,
+    ogImage,
+    ogType: 'website',
+    noIndex: page.data.noindex || false,
+    keywords: siteConfig.seoConfig.keywords,
+    author: siteConfig.seoConfig.author,
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      image: ogImage.url,
+      site: siteConfig.seoConfig.twitter?.site,
+      creator: siteConfig.seoConfig.twitter?.creator,
+    },
+  };
+}
+
+
+/**
+ * Generate robots meta content
+ */
+export function generateRobotsMeta(noIndex?: boolean): string {
+  return noIndex ? 'noindex, nofollow' : 'index, follow';
+}
+
+/**
+ * Format date for schema.org
+ */
+export function formatSchemaDate(date: Date | string | undefined): string | undefined {
+  if (!date) return undefined;
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toISOString();
 }

@@ -3,7 +3,7 @@ import { Font } from 'astro:assets';
 import { generateThemeHash } from '@/utils/theme';
 import { siteConfig } from "@/site.config";
 import "@/styles/global.css";
-
+import { ClientRouter } from 'astro:transitions';
 // Components
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
@@ -47,21 +47,23 @@ const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, 
     <!-- Favicon -->
     <link rel="icon" href="/favicon.png" />
 
-    <!-- Preload fonts -->
-    <Font cssVariable="--font-primary" preload />
-    <Font cssVariable="--font-secondary" preload />
-    <Font cssVariable="--font-headings" preload />
-    <Font cssVariable="--font-code" preload />
-
-    <!-- Theme Manager -->
-    <ThemeManager />
-
     <!-- SEO slot - pages inject SEO component here -->
     <slot name="seo" />
 
     <!-- Additional head content -->
     <slot name="head" />
     
+    <!-- Preload fonts -->
+    <Font cssVariable="--font-primary" preload />
+    <Font cssVariable="--font-secondary" preload />
+    <Font cssVariable="--font-headings" preload />
+    <Font cssVariable="--font-code" preload />
+
+    <ClientRouter />
+
+    <!-- Theme Manager -->
+    <ThemeManager />
+
     <!-- Twitter Widgets Script -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 

@@ -1,18 +1,22 @@
 ---
 import { siteConfig } from '@/site.config';
-const profilePicture = siteConfig.profilePicture;
 
-const getHeaderProfilePictureClasses = (style: string) => {
-  switch (style) {
-    case 'circle': return 'w-8 h-8 rounded-full object-cover border-2 border-ui';
-    case 'square': return 'w-8 h-8 rounded-lg object-cover border-2 border-ui';
-    default: return 'h-8 object-contain';
-  }
-};
 
+const { enabled, image, placement } = siteConfig.branding.avatar;
+
+// Only render if enabled and in correct placement
+
+const { currentPlacement } = Astro.props;
+
+if (!enabled || placement !== currentPlacement) {
+  return null;
+}
 ---
-<img
-  src={profilePicture.image}
-  alt={profilePicture.alt}
-  class={getHeaderProfilePictureClasses(profilePicture.style)}
-/>
+
+<div class="avatar-wrapper ring-2 ring-ui rounded-full shadow-lg">
+  <img 
+    src={image} 
+    alt={`${siteConfig.author} avatar`}
+    class="rounded-full w-12 h-12 object-cover border border-ui hover:shadow-lg"
+  />
+</div>
