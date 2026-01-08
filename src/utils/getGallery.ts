@@ -8,8 +8,7 @@ import {
   getEntriesByTag,
   getFeaturedEntries,
 } from '@/utils/entries';
-import type { ResolvedImage } from '@/types';
-import { getImagesInDirectory, resolveImage, stripObsidianBrackets } from '@/utils/images';
+import { resolveImage } from '@/utils/images';
 import type { ImageMetadata } from "astro";
 
 export type Gallery = CollectionEntry<'gallery'>;

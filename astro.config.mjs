@@ -1,5 +1,7 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+
+import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import icon from 'astro-icon';
@@ -23,6 +25,8 @@ import remarkBreaks from 'remark-breaks';
 
 // https://astro.build/config
 export default defineConfig({
+
+  site: 'https://amitkul.in',
   vite: {
     plugins: [tailwindcss()]
   },
@@ -72,6 +76,7 @@ export default defineConfig({
       themes: ['everforest-light', 'everforest-dark'],
     }),
     mdx(),
+    sitemap(),
   ],
   markdown: {
     remarkPlugins: [

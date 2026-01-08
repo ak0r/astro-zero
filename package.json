@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.14",
+    "@astrojs/sitemap": "^3.6.1",
     "@iconify-json/tabler": "^1.2.25",
     "@pagefind/default-ui": "^1.4.0",
     "@preline/collapse": "^3.2.3",
     "@tailwindcss/vite": "^4.1.18",
+    "add": "^2.0.6",
     "astro": "^5.16.6",
     "astro-expressive-code": "^0.41.5",
     "astro-icon": "^1.1.5",
