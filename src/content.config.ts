@@ -1,7 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { POST_CATEGORIES } from '@/types';
-import { number } from 'astro:schema';
+import { POST_CATEGORIES } from '@/site.config';
 
 // Define schema for blog posts
 const postsCollection = defineCollection({
@@ -10,7 +9,7 @@ const postsCollection = defineCollection({
     title: z.string().default('Untitled Post'),
     slug: z.string().optional(),
     description: z.string().nullable().optional(),
-    category: z.enum(POST_CATEGORIES).default("travel"),
+    category: z.enum(POST_CATEGORIES as [string, ...string[]]).default("travel"),
     date: z.coerce.date().default(() => new Date()),
     lastUpdated: z.coerce.date().optional().nullable(),
     tags: z.array(z.string()).nullable().optional(),
@@ -29,7 +28,9 @@ const postsCollection = defineCollection({
       return null;
     }),
     coverAlt: z.string().nullable().optional(),
-    order: z.number().optional(),
+    order: z.number().optional(), // For custom ordering of tech sub posts
+    location: z.string().nullable().optional(), // For travel and gallery posts
+    imageDir: z.string().optional(), // For travel and gallery posts
   }),
 });
 
@@ -82,30 +83,9 @@ const projectsCollection = defineCollection({
   }),
 });
 
-// Define schema for gallery
-const galleryCollection = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/gallery' }),
-  schema: z.object({
-    title: z.string().default('Untitled Gallery'),
-    slug: z.string().optional(),
-    description: z.string().nullable().optional().default('No description provided'),
-    category: z.enum(['gallery']).default('gallery'),
-    date: z.coerce.date().default(() => new Date()),
-    lastUpdated: z.coerce.date().optional().nullable(),
-    imageDir: z.string().optional(),
-    cover: z.string().default('cover.jpg'),
-    coverAlt: z.string().nullable().optional(),
-    location: z.string().nullable().optional(),
-    tags: z.array(z.string()).nullable().optional().default([]),
-    draft: z.boolean().optional().default(false),
-    featured: z.boolean().optional().default(false),
-  }),
-});
-
 // Export collections
 export const collections = {
   posts: postsCollection,
   pages: pagesCollection,
   projects: projectsCollection,
-  gallery: galleryCollection,
 };

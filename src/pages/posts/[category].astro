@@ -8,21 +8,29 @@ import {
   getAllPosts, 
   sortPostsByDate, 
   getTopLevelPosts,
-  getPostsByYearSorted 
+  getPostsByYearSorted,
+  filterByCategory ,
+  getCategoryCounts
 } from '@/utils/getContent';
-import { filterEntriesBy } from '@/utils/entries';
+import { generateIndexSEO } from '@/utils/seo';
+import SEO from '@/components/common/SEO.astro';
+import { POST_CATEGORIES, siteConfig, type PostCategory } from '@/site.config';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
 
 export async function getStaticPaths() {
-  return [
-    { params: { category: 'travel' } },
-    { params: { category: 'tech' } },
-  ];
+  return POST_CATEGORIES.map(category => ({
+    params: { category },
+  }));
 }
 
 const { category } = Astro.params;
+const postCategory = category as PostCategory;
+const categoryConfig = siteConfig.categories[postCategory];
 
+// Get all posts for filter tabs
 const allPosts = await getAllPosts();
-const filteredPosts = filterEntriesBy(allPosts, 'category', category);
+const counts = getCategoryCounts(allPosts);
+const filteredPosts = filterByCategory(allPosts, postCategory);
 const sortedPosts = sortPostsByDate(filteredPosts);
 const topLevelPosts = getTopLevelPosts(sortedPosts);
 
@@ -30,44 +38,58 @@ const topLevelPosts = getTopLevelPosts(sortedPosts);
 const postsByYear = await getPostsByYearSorted(topLevelPosts);
 const nonEmptyYears = postsByYear.filter(([year, posts]) => posts.length > 0);
 
-// Page metadata
-const titles = {
-  travel: 'Travel',
-  tech: 'Tech',
-};
-
-const descriptions = {
-  travel: 'Adventures and explorations around the world.',
-  tech: 'Technical articles and coding insights.',
-};
-
-const filterTabs = [
-  { label: 'All', href: '/posts', icon: 'layout-grid' },
-  { label: 'Travel', href: '/posts/travel', icon: 'plane' },
-  { label: 'Tech', href: '/posts/tech', icon: 'code' },
-  { label: 'Galleries', href: '/galleries', icon: 'library-photo' },
+// Build filter tabs
+const tabs = [
+  {
+    label: 'All',
+    href: '/posts',
+    icon: 'layout-grid',
+    count: allPosts.length,
+  },
+  ...POST_CATEGORIES.map(cat => ({
+    label: siteConfig.categories[cat].title,
+    href: `/posts/${cat}`,
+    icon: siteConfig.categories[cat].icon,
+    iconColor: siteConfig.categories[cat].color,
+    count: counts[cat] || 0,
+    active: cat === postCategory,
+  })),
 ];
+
+// Determine display mode based on category
+const displayMode = categoryConfig.view === 'grid' ? 'grid' : 'list';
+const shouldGroupByYear = categoryConfig.view === 'list';
+
+// Page title
+const pageTitle = categoryConfig.title && `${categoryConfig.title} Posts` || "";
+const pageDescription = categoryConfig?.description && `${categoryConfig.description}` || "";
+
+// SEO
+const seoData = generateIndexSEO('posts', Astro.url.href, {
+  customTitle: `${pageTitle}`,
+  customDescription: `${pageDescription}`,
+});
 
 ---
 
 <BaseLayout>
+  <SEO data={seoData} slot="seo" />
   <Container class="py-4 sm:py-8">
     <PageHeader
-      title={titles[category]}
-      description={descriptions[category]}
+      title={pageTitle}
+      description={pageDescription}
       breadcrumb={Astro.url.pathname}
     />
     
-    <FilterTabs tabs={filterTabs} class="mb-12" />
+    <FilterTabs tabs={tabs} class="mb-8" />
     
-    <div class="flex flex-col gap-16">
-      {nonEmptyYears.map(([year, posts]) => (
-        <YearGroup 
-          year={parseInt(year)} 
-          entries={posts}
-          showIcon={true}
-        />
-      ))}
-    </div>
+    <ContentDisplay
+      entries={sortedPosts}
+      display={displayMode}
+      groupByYear={shouldGroupByYear}
+      showImages={categoryConfig.view === 'grid'}
+      showDescription={categoryConfig.view === 'grid'}
+      showTags={categoryConfig.view === 'grid'}
+    />
   </Container>
 </BaseLayout>

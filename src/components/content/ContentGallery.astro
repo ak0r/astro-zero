@@ -1,0 +1,73 @@
+---
+import { getGalleryImages, extractGalleryDir } from '@/utils/getGallery';
+import { resolveImageFromPath } from '@/utils/images';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import Lightbox from '@/components/common/Lightbox.astro';
+
+export interface Props {
+  gallery: Post;
+}
+
+const { gallery } = Astro.props;
+
+const { title, description, date, tags } = gallery.data;
+const galleryDir = extractGalleryDir(gallery.filePath);
+
+// Get all images for this gallery
+const images = await getGalleryImages(galleryDir, gallery.data.imageDir);
+
+const resolvedImages = await Promise.all(
+  images.map(async (img) => {
+    const resolved = await resolveImageFromPath(img.path);
+    return {
+      ...img.image,
+      resolved,
+    };
+  })
+);
+
+---
+
+{resolvedImages.length > 0 ? (
+  <div class="animate non-prose image-grid grid grid-cols-2 md:grid-cols-3 gap-4">
+    {resolvedImages.map((img, index) => (
+      <button
+        type="button"
+        class="gallery-image-button img-container group relative not-prose inline-block rounded-lg ring ring-ui shadow-lg overflow-hidden mb-3 cursor-zoom-in"
+        onclick={`window.dispatchEvent(
+          new CustomEvent('openLightbox', {
+            detail: { index: ${index}, button: this }
+          })
+        )`}
+      >
+        <ImageWrapper
+          src={img}
+          alt={title}
+          class="block w-full h-full non-prose aspect-4/5 border border-ui shadow-lg rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="eager"
+          data-lightbox="gallery"
+          data-caption={title}
+          loading="eager"
+        />
+
+        <div class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors duration-300">
+          <svg
+            class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+      </button>
+    ))}
+  </div>
+) : (
+  <div></div>
+)}

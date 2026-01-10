@@ -1,5 +1,6 @@
 import { getCollection } from 'astro:content';
-import type { Post, Page, Docs, Project } from '@/types';
+import { siteConfig, type PostCategory } from '@/site.config';
+import type { Post } from '@/types';
 import {
   filterDrafts,
   sortEntriesByDate,
@@ -24,11 +25,90 @@ import {
 } from './entries';
 
 /**
- * Get all posts, filtered by draft status
+ * Get all content (posts + galleries), filtered by draft status
  */
-export async function getAllPosts(): Promise<Post[]> {
-  const allPosts = await getCollection('posts');
-  return filterDrafts(allPosts);
+export async function getAllContent(includeDrafts = false): Promise<Post[]> {
+  const allContent = await getCollection('posts');
+  return includeDrafts ? allContent : filterDrafts(allContent);
+}
+
+/**
+ * Get all posts (alias for getAllContent for backward compatibility)
+ */
+export async function getAllPosts(includeDrafts = false): Promise<Post[]> {
+  return getAllContent(includeDrafts);
+}
+
+/**
+ * Get posts only (exclude galleries)
+ */
+export async function getPosts(includeDrafts = false): Promise<Post[]> {
+  const all = await getAllContent(includeDrafts);
+  return all.filter(p => p.data.category !== 'gallery');
+}
+
+/**
+ * Get galleries only
+ */
+export async function getGalleries(includeDrafts = false): Promise<Post[]> {
+  const all = await getAllContent(includeDrafts);
+  return all.filter(p => p.data.category === 'gallery');
+}
+
+/**
+ * Filter by category
+ */
+export function filterByCategory(
+  posts: Post[], 
+  category: PostCategory
+): Post[] {
+  return posts.filter(p => p.data.category === category);
+}
+
+/**
+ * Get posts by multiple categories
+ */
+export function filterByCategories(
+  posts: Post[],
+  categories: PostCategory[]
+): Post[] {
+  return posts.filter(p => categories.includes(p.data.category as PostCategory));
+}
+
+/**
+ * Group posts by category
+ */
+export function groupByCategory(posts: Post[]): Record<PostCategory, Post[]> {
+  return posts.reduce((acc, post) => {
+    const category = post.data.category as PostCategory;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(post);
+    return acc;
+  }, {} as Record<PostCategory, Post[]>);
+}
+
+/**
+ * Get category counts
+ */
+export function getCategoryCounts(posts: Post[]): Record<PostCategory, number> {
+  return posts.reduce((acc, post) => {
+    const category = post.data.category as PostCategory;
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {} as Record<PostCategory, number>);
+}
+
+/**
+ * Get unique tags by category
+ */
+export function getUniqueTagsByCategory(
+  posts: Post[], 
+  category: PostCategory
+): string[] {
+  const categoryPosts = filterByCategory(posts, category);
+  return getUniqueTags(categoryPosts);
 }
 
 /**
@@ -81,7 +161,6 @@ export function getAdjacentPosts(
 } {
   return getAdjacentEntriesWithSeries(posts, currentId);
 }
-
 
 /**
  * Get related posts based on tags
@@ -209,6 +288,7 @@ export function getTopLevelPosts(posts: Post[]): Post[] {
 
 /**
  * Get series context for current post
+ * Works for both regular posts and galleries
  */
 export function getSeriesContext(
   allPosts: Post[],
@@ -259,4 +339,53 @@ export function getSeriesContext(
     prevInSeries,
     nextInSeries,
   };
+}
+
+/**
+ * Get category configuration
+ */
+export function getCategoryConfig(category: PostCategory) {
+  return siteConfig.categories[category];
+}
+
+/**
+ * Get all categories that should show in navigation
+ */
+export function getNavCategories() {
+  return POST_CATEGORIES.filter(cat => siteConfig.categories[cat].showInNav);
+}
+
+/**
+ * Get category color
+ */
+export function getCategoryColor(category: PostCategory): string {
+  return siteConfig.categories[category].color || '#6b7280';
+}
+
+/**
+ * Get category icon
+ */
+export function getCategoryIcon(category: PostCategory): string | undefined {
+  return siteConfig.categories[category].icon;
+}
+
+/**
+ * Helper to check if post is gallery
+ */
+export function isGallery(post: Post): boolean {
+  return post.data.category === 'gallery';
+}
+
+/**
+ * Helper to check if post is travel
+ */
+export function isTravel(post: Post): boolean {
+  return post.data.category === 'travel';
+}
+
+/**
+ * Helper to check if post is tech
+ */
+export function isTech(post: Post): boolean {
+  return post.data.category === 'tech';
 }

@@ -6,18 +6,13 @@ import type { ImageMetadata } from "astro";
 // ============================================================================
 
 export type Post = CollectionEntry<"posts">;
-export type PostData = CollectionEntry<"posts">["data"];
 export type Page = CollectionEntry<"pages">;
-export type PageData = CollectionEntry<"pages">["data"];
 export type Project = CollectionEntry<"projects">;
-export type ProjectData = CollectionEntry<"projects">["data"];
-export type Gallery = CollectionEntry<"gallery">;
-export type GalleryData = CollectionEntry<"gallery">["data"];
 
-export const POST_CATEGORIES = ['travel', 'tech', 'gallery'] as const;
-export type PostCategory = typeof POST_CATEGORIES[number];
+// export const POST_CATEGORIES = ['travel', 'tech', 'gallery'] as const;
+// export type PostCategory = typeof POST_CATEGORIES[number];
 
-export type AllContentEntry = Post | Gallery;
+export type { PostCategory, POST_CATEGORIES } from '@/site.config';
 
 // ============================================================================
 // IMAGE TYPES
@@ -76,6 +71,15 @@ export interface Heading {
   depth: number;
   slug: string;
   text: string;
+}
+
+export interface CategoryConfig {
+  title: string;
+  description: string;
+  icon?: string;
+  color?: string;
+  view: 'list' | 'grid';
+  showInNav: boolean;
 }
 
 // ============================================================================
@@ -180,6 +184,8 @@ export interface FilterTab {
   label: string;
   href: string;
   icon?: string;
+  iconColor?: string;
+  count?: number;
   active?: boolean;
 }
 
@@ -360,4 +366,6 @@ export interface SiteConfig {
     indexPageFilters?: FilterTab[];
     aboutPageFilters?: FilterTab[];
   }
+
+  categories: CategoryConfig;
 }

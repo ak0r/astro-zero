@@ -67,7 +67,7 @@ export const siteConfig: SiteConfig = {
         description: 'Technical articles on workflow automation, system architecture, and software development. Plus travel guides and photography tips from around the world.',
       },
       galleries: {
-        title: 'Photo Galleries',
+        title: 'Galleries',
         description: 'Travel photography collections from India, and cities around the world. Urban exploration, street photography, and landscape shots.',
       },
       about: {
@@ -87,8 +87,9 @@ export const siteConfig: SiteConfig = {
   
   navigation: {
     pages: [
-      { title: "Posts", url: "/posts/" },
-      { title: "Galleries", url: "/galleries/" },
+      { title: "Travels", url: "/posts/travel/" },
+      { title: "Tech", url: "/posts/tech/" },
+      { title: "Galleries", url: "/posts/gallery/" },
       { title: "Tags", url: "/tags/" },
       { title: "About", url: "/about/" },
       // { title: "GitHub", url: "https://github.com/ak0r" },
@@ -199,8 +200,37 @@ export const siteConfig: SiteConfig = {
       { label: 'All', href: '/posts/', icon: 'layout-grid' },
       { label: 'Travel', href: '/posts/travel/', icon: 'plane' },
       { label: 'Tech', href: '/posts/tech/', icon: 'code' },
-      { label: 'Galleries', href: '/galleries/', icon: 'library-photo' },
+      { label: 'Galleries', href: '/posts/gallery/', icon: 'library-photo' },
     ],
     aboutPageFilters: undefined
-  }
+  },
+  categories: {
+    travel: {
+      title: 'Travel',
+      description: 'Travel stories from around the world. From bustling cities to quiet temples.',
+      icon: 'map-pin',
+      color: '#3b82f6', // blue
+      view: 'list' as const,
+      showInNav: true,
+    },
+    tech: {
+      title: 'Tech',
+      description: 'Technical articles, coding insights and my journey in software development and system architecture.',
+      icon: 'code',
+      color: '#8b5cf6', // purple
+      view: 'list' as const,
+      showInNav: true,
+    },
+    gallery: {
+      title: 'Gallery',
+      description: 'Photography collections from travels and urban exploration. Visual stories from the streets.',
+      icon: 'camera',
+      color: '#f59e0b', // amber
+      view: 'grid' as const,
+      showInNav: true,
+    },
+  },
 }
+
+export const POST_CATEGORIES = Object.keys(siteConfig.categories) as Array<keyof typeof siteConfig.categories>;
+export type PostCategory = typeof POST_CATEGORIES[number];

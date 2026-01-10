@@ -1,69 +1,6 @@
-import { getCollection } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
-import {
-  filterDrafts,
-  sortEntriesByDate,
-  getUniqueTags,
-  getTagCounts,
-  getEntriesByTag,
-  getFeaturedEntries,
-} from '@/utils/entries';
 import { resolveImage } from '@/utils/images';
 import type { ImageMetadata } from "astro";
-
-export type Gallery = CollectionEntry<'gallery'>;
-
-/**
- * Gallery Utilities
- * Uses generic entries.ts functions + gallery-specific logic
- */
-
-// ============================================================================
-// CORE FUNCTIONS (Use Generic)
-// ============================================================================
-
-/**
- * Get all galleries (excluding drafts in production)
- */
-export async function getAllGalleries(): Promise<Gallery[]> {
-  const allGalleries = await getCollection('gallery');
-  return filterDrafts(allGalleries);
-}
-
-/**
- * Sort galleries by date (newest first)
- */
-export function sortGalleriesByDate(galleries: Gallery[]): Gallery[] {
-  return sortEntriesByDate(galleries);
-}
-
-/**
- * Get featured galleries
- */
-export function getFeaturedGalleries(galleries: Gallery[]): Gallery[] {
-  return getFeaturedEntries(galleries);
-}
-
-/**
- * Get galleries by tag
- */
-export function getGalleriesByTag(galleries: Gallery[], tag: string): Gallery[] {
-  return getEntriesByTag(galleries, tag);
-}
-
-/**
- * Get all unique tags
- */
-export function getUniqueGalleryTags(galleries: Gallery[]): string[] {
-  return getUniqueTags(galleries);
-}
-
-/**
- * Get tag counts
- */
-export function getGalleryTagCounts(galleries: Gallery[]): Record<string, number> {
-  return getTagCounts(galleries);
-}
+import type { Post } from '@/types';
 
 // ============================================================================
 // GALLERY-SPECIFIC FUNCTIONS
@@ -93,12 +30,12 @@ export async function getGalleryImages(
   
   // Build search path
   const searchPath = normalizedDir === '.' || normalizedDir === ''
-    ? `/src/content/gallery/${galleryDir}/`
-    : `/src/content/gallery/${galleryDir}/${normalizedDir}/`;
+    ? `/src/content/posts/${galleryDir}/`
+    : `/src/content/posts/${galleryDir}/${normalizedDir}/`;
   
   // Get all images using import.meta.glob
   const images = import.meta.glob<{ default: ImageMetadata }>(
-    '/src/content/gallery/**/attachments/*.{jpg,jpeg,png,webp,gif}',
+    '/src/content/posts/**/attachments/*.{jpg,jpeg,png,webp,gif}',
     { eager: true }
   );
   
@@ -135,7 +72,7 @@ export async function getGalleryImageCount(
  * Get cover image for gallery card
  */
 export async function getGalleryCoverImage(
-  gallery: Gallery,
+  gallery: Post,
   galleryDir?: string
 ): Promise<ImageMetadata | null> {
   const dir = galleryDir || extractGalleryDir(gallery.filePath);
@@ -154,24 +91,6 @@ export async function getGalleryCoverImage(
   const images = await getGalleryImages(dir, imageDir);
   const resolved = resolveImage(images[0].path)
   return resolved || null;
-}
-/**
- * Gallery statistics
- */
-export async function getGalleryStats(galleries: Gallery[]) {
-  let totalImages = 0;
-  
-  for (const gallery of galleries) {
-    const count = await getGalleryImageCount(gallery.id);
-    totalImages += count;
-  }
-  
-  return {
-    total: galleries.length,
-    featured: getFeaturedGalleries(galleries).length,
-    tags: getUniqueTags(galleries).length,
-    totalImages,
-  };
 }
 
 // ============================================================================

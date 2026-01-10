@@ -1,4 +1,4 @@
-import type { Post, PostData, ReadingTime, Heading, BreadcrumbItem } from "@/types";
+import type { Post, ReadingTime, BreadcrumbItem } from "@/types";
 
 export function slugify(inputText?: string) {
 
@@ -262,4 +262,9 @@ export function getBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
 
 export function getContentDir(filePath: string) {
   return filePath.replace(/\/[^/]+$/, "");
+}
+
+// Helper to check if post is a gallery
+export function isGallery(post: Post): boolean {
+  return post.data.category === 'gallery';
 }
