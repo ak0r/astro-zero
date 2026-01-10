@@ -3,26 +3,37 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
-import YearGroup from '@/components/content/YearGroup.astro';
-import { getAllPosts, getTopLevelPosts, sortPostsByDate, getPostsByYearSorted } from '@/utils/getContent';
-import { getAllGalleries } from '@/utils/getGallery';
-import { siteConfig } from '@/site.config';
+import { getAllPosts, getTopLevelPosts, sortPostsByDate, getCategoryCounts } from '@/utils/getContent';
+import { siteConfig, POST_CATEGORIES } from '@/site.config';
 import { generateIndexSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
 
 
 // Fetch all posts and galleries
+
+
 const allPosts = await getAllPosts();
-const parentPosts = await getTopLevelPosts(allPosts);
-const sortedPosts = await sortPostsByDate(parentPosts);
-const galleries = await getAllGalleries();
+// const parentPosts = await getTopLevelPosts(allPosts);
+const sortedPosts = await sortPostsByDate(allPosts);
+const counts = getCategoryCounts(sortedPosts);
 
-const allContent = [...sortedPosts, ...galleries];
-
-// Combine and sort by date
-const groupedPosts = await getPostsByYearSorted(allContent);
-
-const indexPageFilters = siteConfig.pageFilters.indexPageFilters;
+// Build filter tabs from category config
+const tabs = [
+  {
+    label: 'All',
+    href: '/posts',
+    icon: 'layout-grid',
+    count: allPosts.length,
+  },
+  ...POST_CATEGORIES.map(cat => ({
+    label: siteConfig.categories[cat].title,
+    href: `/posts/${cat}`,
+    icon: siteConfig.categories[cat].icon,
+    iconColor: siteConfig.categories[cat].color,
+    count: counts[cat] || 0,
+  })),
+];
 
 const seoData = generateIndexSEO('posts', Astro.url.href);
 ---
@@ -37,15 +48,15 @@ const seoData = generateIndexSEO('posts', Astro.url.href);
       breadcrumb={Astro.url.pathname}
     />
     
-    <FilterTabs tabs={indexPageFilters} class="mb-12" />
+    <FilterTabs tabs={tabs} class="mb-8" />
     
-    <div class="flex flex-col gap-16">
-      {groupedPosts.map(([year, posts]) => (
-        <YearGroup 
-          year={parseInt(year)} 
-          entries={posts}
-        />
-      ))}
-    </div>
+    <ContentDisplay
+      entries={sortedPosts}
+      display="list"
+      groupByYear={true}
+      showDescription={false}
+      showTags={false}
+      showCategory={true}
+    />
   </Container>
 </BaseLayout>

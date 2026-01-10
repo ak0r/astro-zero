@@ -1,5 +1,6 @@
 ---
 import type { Post, Project } from '@/types';
+import { siteConfig, type PostCategory } from '@/site.config';
 import Icon from '@/components/common/IconWrapper.astro';
 import Arrow from '@/components/common/AnimatedArrow.astro';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
@@ -31,25 +32,23 @@ const {
 const { title, description, date } = entry.data;
 const collection = entry.collection;
 
+// Get category for posts
+const category = 'category' in entry.data ? entry.data.category as PostCategory : undefined;
+const categoryConfig = category ? siteConfig.categories[category] : undefined;
+
 // Process image
 let entryImage = entry.data.cover;
 if (Array.isArray(entryImage)) {
   entryImage = entryImage[0];
 }
 
-const contentDir = entry.filePath
-  ? getContentDir(entry.filePath)
-  : undefined;
-
-const coverImage = resolveImageFromPath(entryImage, {
-  baseDir: contentDir,
-});
+const contentDir = entry.filePath ? getContentDir(entry.filePath) : undefined;
+const coverImage = resolveImageFromPath(entryImage, { baseDir: contentDir });
 const coverImageAlt = entry.data.coverAlt || `Featured image for: ${title}`;
 
 // Type-specific data
 const tags = 'tags' in entry.data ? entry.data.tags : null;
-const series = 'series' in entry.data ? entry.data.series : null;
-const seriesOrder = 'seriesOrder' in entry.data ? entry.data.seriesOrder : null;
+const location = 'location' in entry.data ? entry.data.location : null;
 const isFeatured = 'featured' in entry.data ? entry.data.featured : false;
 const version = 'version' in entry.data ? entry.data.version : null;
 const status = 'status' in entry.data ? entry.data.status : null;
@@ -60,26 +59,28 @@ const shouldShowCoverImage = showImages && coverImage;
 // Card styling
 const cardClass = featured ? 'featured-card' : 'content-card';
 const titleSize = featured ? 'text-lg' : 'text-base';
+
+// Build URL using slug
+const entryUrl = `/${entry.collection}/${entry.id}`;
+// const coverAspect = category === 'gallery' ? 'aspect-4/5' : 'aspect-3/2'
+const coverAspect = 'aspect-3/2';
 ---
 
-<article
+<div
   class={`group ${cardClass} relative blog-card h-full flex flex-col`}
-  role="article"
+  data-category={category}
 >
-  <a href={`/${collection}/${entry.id}`} class="block h-full flex-col">
+  <a href={entryUrl} class="block h-full flex-col">
     {/* Cover Image */}
     {shouldShowCoverImage && (
       <div
         class="overflow-hidden rounded-lg"
-        style={collection === 'posts'
-          ? `aspect-ratio: 3/2;`
-          : 'aspect-ratio: 16/9;'}
       >
         <ImageWrapper
           src={coverImage}
           alt={coverImageAlt}
           fit="cover"
-          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          class={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${coverAspect}`}
           loading={eager ? 'eager' : 'lazy'}
         />
       </div>
@@ -88,7 +89,7 @@ const titleSize = featured ? 'text-lg' : 'text-base';
     {/* Content */}
     <div class="p-4 sm:p-5 grow flex flex-col">
       {/* Badges Row */}
-      {showMeta && (series || isFeatured || version || status) && (
+      {showMeta && (isFeatured || version || status || category) && (
         <div class="flex flex-wrap items-center gap-2 mb-3">
           {/* Featured Badge */}
           {isFeatured && (
@@ -98,14 +99,14 @@ const titleSize = featured ? 'text-lg' : 'text-base';
             </span>
           )}
 
-          {/* Series Badge */}
-          {series && (
-            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-surface-2 text-content-3 rounded border border-ui">
-              <Icon name="list" class="size-3" />
-              {series}
-              {seriesOrder && (
-                <span class="text-content-3">#{seriesOrder}</span>
-              )}
+          {/* Category Badge */}
+          {category && categoryConfig && (
+            <span 
+              class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border"
+              style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
+            >
+              {categoryConfig.icon && <Icon name={categoryConfig.icon} class="size-3" />}
+              {categoryConfig.title}
             </span>
           )}
 
@@ -126,11 +127,22 @@ const titleSize = featured ? 'text-lg' : 'text-base';
       )}
 
       {/* Meta Info */}
-      {showMeta && date && isValidDate(date) && (
-        <div class="text-xs text-content-3 mb-2">
+      <div class="flex items-center gap-2 text-xs text-content-3 mb-2">
+        {showMeta && date && isValidDate(date) && (
           <time datetime={date.toISOString()}>{getFormattedDate(date)}</time>
-        </div>
-      )}
+        )}
+        
+        {/* Location for galleries */}
+        {location && (
+          <>
+            <span>•</span>
+            <span class="flex items-center gap-1">
+              <Icon name="map-pin" size={12} />
+              {location}
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Title */}
       <h3
@@ -161,12 +173,13 @@ const titleSize = featured ? 'text-lg' : 'text-base';
       )}
 
       {/* Footer with Arrow */}
-      <div class="mt-auto pt-4 border-t border-ui flex items-center justify-between">
+      <div class="mt-auto pt-4 border-t border-ui flex flex-row content-center justify-between">
         <span class="text-sm text-content-3">
           Read {collection === 'projects' ? 'details' : 'more'}
         </span>
         <Arrow direction="right" size="5" position="relative" class="text-content-3" />
+        
       </div>
     </div>
   </a>
-</article>
+</div>

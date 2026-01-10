@@ -78,14 +78,14 @@ export function getPageOGImage(
 
 /**
  * Generate OG image with fallback hierarchy
- * Priority: 1. Cover image, 2. Generated OG, 3. Default
+ * Works for both posts and galleries
  */
 export function generateOGImage(
-  entry: Post | Gallery,
+  entry: Post, // Changed from Post | Gallery
   imageAlt?: string
 ): OpenGraphImage {
-  const collection = entry.collection;
-  const slug = entry.id.replace(/\.(md|mdx)$/, '');
+  const isGallery = entry.data.category === 'gallery';
+  const slug = entry.slug;
   
   // Priority 1: Manual cover image
   if (entry.data.cover) {
@@ -112,8 +112,8 @@ export function generateOGImage(
   }
   
   // Priority 2: Generated OG image
-  const ogPath = collection === 'gallery' 
-    ? `/og/galleries/${slug}.png`
+  const ogPath = isGallery
+    ? `/og/gallery/${slug.replace(/^gallery\//, '')}.png`
     : `/og/posts/${slug}.png`;
   
   return {
@@ -191,7 +191,7 @@ export function generatePostSEO(
  * Generate SEO data for gallery
  */
 export function generateGallerySEO(
-  gallery: CollectionEntry<'gallery'>,
+  gallery: Post,
   url: string
 ): SEOData {
   const title = buildTitle(gallery.data.title);
@@ -208,7 +208,7 @@ export function generateGallerySEO(
     ogImage,
     ogType: 'article',
     publishedTime: gallery.data.date?.toISOString(),
-    modifiedTime: gallery.data.lastUpdated?.toISOString(),
+    modifiedTime: gallery.data.lastUpdated?.toISOString(), // Changed from updatedDate
     noIndex: gallery.data.draft || false,
     keywords: gallery.data.tags ? [...gallery.data.tags, ...siteConfig.seoConfig.keywords] : siteConfig.seoConfig.keywords,
     author: siteConfig.seoConfig.author,

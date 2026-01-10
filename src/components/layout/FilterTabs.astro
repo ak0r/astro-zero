@@ -10,18 +10,25 @@ interface Props {
 const { tabs, class: className = '' } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
+
 <section id="archive">
   <div class={`filter-tabs flex flex-wrap sm:flex-nowrap sm:justify-normal items-center gap-2 font-mono ${className}`}>
     {tabs.map(tab => {
       const isActive = tab.active ?? currentPath === tab.href;
-      
+      let iconColor = isActive && (tab?.iconColor ? `color: ${tab.iconColor}` : 'color: var(--text-content-3)');
       return (
-        <a href={tab.href} class:list={[
-          'btn not-prose',
-          isActive ? 'bg-surface-2 text-content' : ' text-content-3 hover:bg-surface-2/50 hover:text-content'
-        ]}>
-          {tab.icon && <IconWrapper name={tab.icon} size={16} />}
+        <a 
+          href={tab.href} 
+          class:list={[
+            'btn not-prose flex items-center gap-2',
+            isActive ? 'bg-surface-2 text-content' : 'text-content-3 hover:bg-surface-2/50 hover:text-content'
+          ]}
+        >
+          {tab.icon && <IconWrapper name={tab.icon} size={16} style={iconColor} />}
           <span>{tab.label}</span>
+          {tab.count !== undefined && (
+            <span class="text-xs opacity-70">({tab.count})</span>
+          )}
         </a>
       );
     })}

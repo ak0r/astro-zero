@@ -3,19 +3,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/Container.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 import FilterTabs from '@/components/layout/FilterTabs.astro';
-import { getAllPosts } from '@/utils/getContent';
-import { getAllGalleries } from '@/utils/getGallery';
+import { getAllPosts, getCategoryCounts } from '@/utils/getContent';
+import { POST_CATEGORIES, siteConfig } from '@/site.config';
 import { generateIndexSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
 
-// Fetch all content
+// Fetch all posts (includes galleries, travel, tech)
 const allPosts = await getAllPosts();
-const allGalleries = await getAllGalleries();
+const counts = getCategoryCounts(allPosts);
 
 // Build comprehensive tag list with metadata
 const tagMap = new Map();
 
-// Add post tags
+// Process all posts (includes all categories)
 allPosts.forEach(post => {
   post.data.tags?.forEach(tag => {
     if (!tagMap.has(tag)) {
@@ -23,18 +23,6 @@ allPosts.forEach(post => {
     }
     const tagData = tagMap.get(tag);
     tagData.categories.add(post.data.category);
-    tagData.count++;
-  });
-});
-
-// Add gallery tags
-allGalleries.forEach(gallery => {
-  gallery.data.tags?.forEach(tag => {
-    if (!tagMap.has(tag)) {
-      tagMap.set(tag, { name: tag, categories: new Set(), count: 0 });
-    }
-    const tagData = tagMap.get(tag);
-    tagData.categories.add('gallery');
     tagData.count++;
   });
 });
@@ -48,24 +36,20 @@ const allTags = Array.from(tagMap.values())
   }))
   .sort((a, b) => b.count - a.count);
 
-// Calculate font sizes for tag cloud effect
-const maxCount = Math.max(...allTags.map(t => t.count));
-const minCount = Math.min(...allTags.map(t => t.count));
-
-const getFontSize = (count: number) => {
-  if (maxCount === minCount) return 'text-base';
-  const ratio = (count - minCount) / (maxCount - minCount);
-  if (ratio > 0.75) return 'text-2xl';
-  if (ratio > 0.5) return 'text-xl';
-  if (ratio > 0.25) return 'text-lg';
-  return 'text-base';
-};
-
-const filterTabs = [
-  { label: 'All', href: '/tags', icon: 'tags' },
-  { label: 'Travel', href: '/tags', icon: 'plane' },
-  { label: 'Tech', href: '/tags', icon: 'code' },
-  { label: 'Galleries', href: '/tags', icon: 'library-photo' },
+// Build filter tabs from category config
+const tabs = [
+  {
+    label: 'All',
+    href: '/tags',
+    icon: 'tags',
+    count: allTags.length,
+  },
+  ...POST_CATEGORIES.map(cat => ({
+    label: siteConfig.categories[cat].title,
+    href: '/tags',
+    icon: siteConfig.categories[cat].icon,
+    count: counts[cat] || 0,
+  })),
 ];
 
 const seoData = generateIndexSEO('tags', Astro.url.href);
@@ -81,14 +65,14 @@ const seoData = generateIndexSEO('tags', Astro.url.href);
     />
     
     <!-- Filter Tabs -->
-    <FilterTabs tabs={filterTabs} class="mb-12" />
+    <FilterTabs tabs={tabs} class="mb-12" />
     
     <!-- Tag Summary -->
     <div class="mb-8 text-sm text-content-3">
       {allTags.length} {allTags.length === 1 ? 'tag' : 'tags'} total
     </div>
     
-    <!-- Tag Cloud (NO category badges here) -->
+    <!-- Tag Cloud -->
     <div class="flex flex-wrap gap-3" data-tag-container>
       {allTags.map(tag => (
         <a 
@@ -96,7 +80,6 @@ const seoData = generateIndexSEO('tags', Astro.url.href);
           class="tag-item badge-ghost inline-flex items-center gap-2 transition-all hover:scale-105"
           data-categories={tag.categories.join(',')}
         >
-          {/* <IconWrapper name="tag" size={14} class="flex-shrink-0" /> */}
           <span class="font-medium">{tag.name}</span>
           <span class="text-xs text-content-4 font-mono">
             {tag.count}
@@ -104,11 +87,12 @@ const seoData = generateIndexSEO('tags', Astro.url.href);
         </a>
       ))}
     </div>
-    
   </Container>
   
   <!-- Client-side filtering -->
   <script>
+    import { POST_CATEGORIES } from '@/site.config';
+    
     function setupTagFiltering() {
       const filterButtons = document.querySelectorAll('.filter-tabs a');
       const tagItems = document.querySelectorAll('.tag-item');
@@ -125,9 +109,8 @@ const seoData = generateIndexSEO('tags', Astro.url.href);
           button.classList.remove('text-content-3');
           button.classList.add('bg-surface-2', 'text-content');
           
-          // Determine filter
-          const filters = ['all', 'travel', 'tech', 'gallery'];
-          const filter = filters[index];
+          // Determine filter: 'all' or category name
+          const filter = index === 0 ? 'all' : POST_CATEGORIES[index - 1];
           
           // Filter tags
           tagItems.forEach(item => {

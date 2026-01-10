@@ -1,61 +1,39 @@
 ---
-import type { Post, Gallery } from '@/types';
+import type { Post } from '@/types';
+import { siteConfig, type PostCategory } from '@/site.config';
 import IconWrapper from '@/components/common/IconWrapper.astro';
 import { formatDate } from '@/utils/commonFunctions';
 
 interface Props {
-  entry: Post | Gallery;
+  entry: Post;
   showCategory?: boolean;
 }
 
 const { entry, showCategory = false } = Astro.props;
 const { title, date, category, featured } = entry.data;
 
-const isGallery = entry.collection === 'gallery';
-const slug = isGallery 
-  ? `galleries/${entry.id.replace(/\.(md|mdx)$/, '')}`
-  : `posts/${entry.id.replace(/\.(md|mdx)$/, '').replace('/index', '')}`;
-
+// Get category config
+const categoryConfig = siteConfig.categories[category as PostCategory];
 
 // Determine icon
-let icon = 'file-text';
-let iconColor = 'text-content-3';
+let icon = categoryConfig?.icon || 'file-text';
+let iconColor = categoryConfig?.color ? `color: ${categoryConfig.color}` : 'color: var(--text-content-3)';
+icon = featured ? 'star' : icon;
 
-if (featured) {
-  icon = 'star';
-  iconColor = 'text-primary';
-} else if (isGallery) {
-  icon = 'library-photo';
-  iconColor = 'text-purple-500';
-} else if (category === 'travel') {
-  icon = 'plane';
-  iconColor = 'text-orange-500';
-} else if (category === 'tech') {
-  icon = 'code';
-  iconColor = 'text-blue-500';
-}
-
-// Category badge config (ONLY shown when showCategory is true)
-const categoryBadges = {
-  travel: { label: 'Travel', class: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
-  tech: { label: 'Tech', class: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  gallery: { label: 'Gallery', class: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
-};
-
-const badge = isGallery 
-  ? categoryBadges.gallery 
-  : categoryBadges[category] || { label: category, class: 'bg-surface-muted text-content-3 border-ui' };
+// Build URL using slug
+const entryUrl = `/${entry.collection}/${entry.id}`;
 ---
 
 <a 
-  href={`/${slug}`}
+  href={entryUrl}
   class="content-entry group link-card flex items-start gap-3 py-2 transition-colors not-prose"
-  data-category={isGallery ? 'gallery' : category}
+  data-category={category}
 >
   <IconWrapper 
     name={icon} 
     size={20} 
-    class={`${iconColor} flex-shrink-0 mt-0.5`}
+    class={`flex-shrink-0 mt-0.5`}
+    style={iconColor}
   />
   
   <div class="flex-1 flex items-center justify-between gap-4 min-w-0">
@@ -63,9 +41,12 @@ const badge = isGallery
       <span class="text-content-2 link-animate transition-colors truncate">
         {title}
       </span>
-      {showCategory && (
-        <span class={`text-xs px-2 py-0.5 rounded border flex-shrink-0 ${badge.class}`}>
-          {badge.label}
+      {showCategory && categoryConfig && (
+        <span 
+          class="text-xs px-2 py-0.5 rounded border flex-shrink-0"
+          style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
+        >
+          {categoryConfig.title}
         </span>
       )}
     </div>

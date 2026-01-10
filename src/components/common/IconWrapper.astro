@@ -95,9 +95,10 @@ const fallbackPath = icons[fallbackIcon];
     stroke-linejoin="round" 
     class={className}
     set:html={iconPath}
+    {...rest}
   />
 ) : fallbackPath ? (
-  <div class={className} style={`width: ${size}px; height: ${size}px; display: inline-flex; align-items: center; justify-content: center; transform: scale(0.7);`}>
+  <div class={className} style={`width: ${size}px; height: ${size}px; display: inline-flex; align-items: center; justify-content: center; transform: scale(0.7);`} {...rest}>
     <svg 
       width={size} 
       height={size} 
@@ -108,6 +109,7 @@ const fallbackPath = icons[fallbackIcon];
       stroke-linecap="round" 
       stroke-linejoin="round"
       set:html={fallbackPath}
+      {...rest}
     />
   </div>
 ) : null}

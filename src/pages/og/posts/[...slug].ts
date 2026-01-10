@@ -1,8 +1,9 @@
 import { getCollection } from 'astro:content';
 import { OGImageRoute } from 'astro-og-canvas';
 import { siteConfig } from '@/site.config';
+import { getAllPosts, sortPostsByDate, } from '@/utils/getContent';
 
-const posts = await getCollection('posts', ({ data }) => !data.draft);
+const posts = await getAllPosts();
 
 const pages = Object.fromEntries(
   posts.map((post) => {

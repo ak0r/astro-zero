@@ -1,11 +1,11 @@
 ---
 import { render } from "astro:content";
 import type { Post } from '@/types';
+import { siteConfig, type PostCategory } from '@/site.config';
 import { resolveImageFromPath } from '@/utils/images';
-import { generatePostSEO } from '@/utils/seo';
+import { generatePostSEO, generateGallerySEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
-// import LinkedMentions from '@/components/widgets/LinkedMentions.astro';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
 import Container from '@/components/layout/Container.astro';
 import ContentNavigation from '@/components/widgets/ContentNavigation.astro';
@@ -15,13 +15,15 @@ import {
   getTopLevelPosts, 
   getAdjacentPosts, 
   sortPostsByDate, 
-  getParentId, 
-  getSeriesContext 
-  } from '@/utils/getContent';
+  getSeriesContext,
+  isGallery 
+} from '@/utils/getContent';
 import { formatDate, calculateReadingTime, getContentDir } from '@/utils/commonFunctions';
 import IconWrapper from "@/components/common/IconWrapper.astro";
 import SeriesPosts from "@/components/widgets/SeriesPosts.astro";
 import PageHeader from '@/components/layout/PageHeader.astro';
+import ContentGallery from "@/components/content/ContentGallery.astro";
+import Lightbox from "@/components/common/Lightbox.astro";
 
 export interface Props {
   post: Post;
@@ -29,8 +31,13 @@ export interface Props {
 
 const { post } = Astro.props;
 
-// Generate SEO data
-const seoData = generatePostSEO(post, Astro.url.href);
+// Check if this is a gallery
+const isGalleryPost = isGallery(post);
+
+// Generate SEO data (works for both posts and galleries)
+const seoData = isGalleryPost 
+  ? generateGallerySEO(post, Astro.url.href)
+  : generatePostSEO(post, Astro.url.href);
 
 // Filter posts based on environment
 const allPosts = await getAllPosts();
@@ -38,7 +45,7 @@ const filteredPosts = filterEntriesBy(allPosts, 'category', post.data.category);
 const sortedPosts = sortPostsByDate(allPosts);
 const topLevelPosts = getTopLevelPosts(sortedPosts);
 
-// Get series context
+// Get series context (works for both posts and galleries)
 const seriesContext = getSeriesContext(allPosts, post);
 
 const { 
@@ -76,6 +83,11 @@ const coverImage = resolveImageFromPath(postImage, {
 });
 
 const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.data.title}`;
+
+// Get category config
+const categoryConfig = siteConfig.categories[post.data.category as PostCategory];
+const category = 'category' in post.data ? post.data.category as PostCategory : undefined;
+const backToCategoryPath = `${post.collection}/${post.data.category}`;
 ---
 
 <BaseLayout>
@@ -101,14 +113,44 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
         />
       </div>
     )}
+    
     <div class="relative">
       <div class="space-y-2 sm:space-y-4">
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-mono text-content-3">
+        
+        <!-- Category Meta -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          {/* Category Badge */}
+          {category && categoryConfig && (
+            <span 
+              class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border"
+              style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
+            >
+              {categoryConfig.icon && <IconWrapper name={categoryConfig.icon} class="size-3" />}
+              {categoryConfig.title}
+            </span>
+          )}
+
+          {/* Gallery location */}
+          {isGalleryPost && post.data.location && (
+            <>
+              <span class="">&bull;</span>
+              <div class="flex items-center gap-2">
+                <IconWrapper name="map-pin" size={16} />
+                <span>{post.data.location}</span>
+              </div>
+            </>
+          )}
+
+        </div>
+        <!-- Common Post Meta -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-mono text-content-3">          
           <div class="flex items-center gap-2">
             <IconWrapper name="calendar-week" size={16} />
             <time>{formatDate(post.data.date, 'full')}</time>
           </div>
-          {readingTime && (
+          
+          {/* Reading time (only for non-gallery posts) */}
+          {!isGalleryPost && readingTime && (
             <>
               <span class="">&bull;</span>
               <span>
@@ -151,6 +193,7 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
 
     <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
       <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-filter="category[content]" content={post.data.category} />
       <meta data-pagefind-meta="title[content]" content={post.data.title} />
       <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
       
@@ -158,11 +201,14 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
       <div class="md-content" id="post-content">
         <Content />
       </div>
-    </article>
 
-    <!-- {siteConfig.postOptions.linkedMentions.enabled && (
-      <LinkedMentions currentSlug={post.id} />
-    )} -->
+      {/* Gallery grid */}
+      {isGalleryPost && post.data.imageDir && (
+        <div class="gallery-section mt-16">
+          <ContentGallery gallery={post} />
+        </div>
+      )}
+    </article>
 
     <!-- Post navigation -->
     <ContentNavigation 
@@ -170,6 +216,7 @@ const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.dat
       nextEntry={nextPost} 
       parentEntry={isCurrentSubpost ? parentPost : undefined}
     />
-
+    <!-- Lightbox Component -->
+    <Lightbox />
   </Container>
 </BaseLayout>
