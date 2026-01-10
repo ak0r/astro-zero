@@ -88,8 +88,8 @@ export const siteConfig: SiteConfig = {
   navigation: {
     pages: [
       { title: "Travels", url: "/posts/travel/" },
-      { title: "Tech", url: "/posts/tech/" },
-      { title: "Galleries", url: "/posts/gallery/" },
+      { title: "Codes", url: "/posts/tech/" },
+      { title: "Photos", url: "/posts/gallery/" },
       { title: "Tags", url: "/tags/" },
       { title: "About", url: "/about/" },
       // { title: "GitHub", url: "https://github.com/ak0r" },
@@ -206,7 +206,7 @@ export const siteConfig: SiteConfig = {
   },
   categories: {
     travel: {
-      title: 'Travel',
+      title: 'Travels',
       description: 'Travel stories from around the world. From bustling cities to quiet temples.',
       icon: 'map-pin',
       color: '#3b82f6', // blue
@@ -214,7 +214,7 @@ export const siteConfig: SiteConfig = {
       showInNav: true,
     },
     tech: {
-      title: 'Tech',
+      title: 'Codes',
       description: 'Technical articles, coding insights and my journey in software development and system architecture.',
       icon: 'code',
       color: '#8b5cf6', // purple
@@ -222,7 +222,7 @@ export const siteConfig: SiteConfig = {
       showInNav: true,
     },
     gallery: {
-      title: 'Gallery',
+      title: 'Photos',
       description: 'Photography collections from travels and urban exploration. Visual stories from the streets.',
       icon: 'camera',
       color: '#f59e0b', // amber

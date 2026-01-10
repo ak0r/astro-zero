@@ -147,15 +147,86 @@
     }
   }
 
-  /* Very small phones: 1 column */
-  @media (max-width: 480px) {
-    .image-grid-masonry {
-      flex-direction: column !important;
-    }
-    
+  @media (max-width: 480px) {    
     .image-grid-masonry > div {
       width: 100% !important;
     }
+  }
+
+  /* Callout Styles */
+  .callout {
+    @apply p-4 my-4 rounded-lg border-l-4;
+  }
+
+  .callout-title {
+    @apply flex items-center gap-2 font-semibold mb-2;
+  }
+
+  .callout-icon {
+    @apply w-4 h-4 flex-shrink-0;
+  }
+
+  .callout-content {
+    @apply text-sm;
+  }
+
+  .callout-content > *:first-child { @apply mt-0; }
+  .callout-content > *:last-child { @apply mb-0; }
+
+  .callout-note {
+    @apply bg-blue/10  border-blue ;
+  }
+  .callout-note .callout-title { @apply text-blue; }
+  .callout-note .callout-content { @apply text-blue-2; }
+
+  .callout-tip {
+    @apply bg-green/10 border-green ;
+  }
+  .callout-tip .callout-title { @apply text-green; }
+  .callout-tip .callout-content { @apply text-green-2; }
+
+  .callout-important {
+    @apply bg-purple/10  border-purple;
+  }
+  .callout-important .callout-title { @apply text-purple; }
+  .callout-important .callout-content { @apply text-purple-2; }
+
+  .callout-warning {
+    @apply bg-yellow/10  border-yellow;
+  }
+  .callout-warning .callout-title { @apply text-yellow; }
+  .callout-warning .callout-content { @apply text-yellow-2; }
+
+  .callout-caution {
+    @apply bg-red/10  border-red;
+  }
+  .callout-caution .callout-title { @apply text-red; }
+  .callout-caution .callout-content { @apply text-red-2; }
+
+  /* Collapsible Callout Styles */
+  .callout-collapsible .callout-title {
+    @apply cursor-pointer select-none;
+  }
+
+  .callout-toggle {
+    @apply ml-auto p-1 rounded transition-colors duration-200;
+    @apply focus:outline-none focus:ring-0;
+  }
+
+  .callout-toggle-icon {
+    @apply transition-transform duration-200;
+  }
+
+  .callout-collapsed .callout-toggle-icon {
+    @apply rotate-90;
+  }
+
+  .callout-content {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .callout-collapsed .callout-content {
+    @apply overflow-hidden;
   }
 
 }

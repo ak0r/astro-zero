@@ -104,7 +104,7 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
 
     <!-- Cover Image -->
     {coverImage && (
-      <div class="mb-10 breakout ring ring-ui rounded-lg">
+      <div class="mb-6 sm:mb-10 breakout ring ring-ui rounded-lg">
         <ImageWrapper
           src={coverImage}
           alt={coverImageAlt}
@@ -204,7 +204,7 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
 
       {/* Gallery grid */}
       {isGalleryPost && post.data.imageDir && (
-        <div class="gallery-section mt-16">
+        <div class="gallery-section">
           <ContentGallery gallery={post} />
         </div>
       )}

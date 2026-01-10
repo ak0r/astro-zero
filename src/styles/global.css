@@ -34,6 +34,30 @@
   
   --color-primary: var(--color-primary);
   --color-primary-2: var(--color-primary-2);
+
+  --color-red     : var(--color-red);
+  --color-red-2   : var(--color-red-2);
+
+  --color-orange     : var(--color-orange);
+  --color-orange-2   : var(--color-orange-2);
+
+  --color-yellow     : var(--color-yellow);
+  --color-yellow-2   : var(--color-yellow-2);
+
+  --color-green     : var(--color-green);
+  --color-green-2   : var(--color-green-2);
+
+  --color-cyan     : var(--color-cyan);
+  --color-cyan-2   : var(--color-cyan-2);
+
+  --color-blue     : var(--color-blue);
+  --color-blue-2   : var(--color-blue-2);
+
+  --color-purple     : var(--color-purple);
+  --color-purple-2   : var(--color-purple-2);
+
+  --color-magenta     : var(--color-magenta);
+  --color-magenta-2   : var(--color-magenta-2);
 }
 
 @layer base {
