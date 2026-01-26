@@ -5,8 +5,8 @@ export const siteConfig: SiteConfig = {
   title: "Amit K",
   description: "Building systems by day, exploring streets around the world whenever possible.Sharing tech articles, travel guides, and photo galleries.",
   author: "Amit K",
-  defaultTheme: "light",
-  availableThemes: ["light", "dark"],
+  defaultTheme: "auto",
+  availableThemes: ["light", "dark", "system", "auto"],
   scrollToTop: true,
   layout: {
     contentWidth: "md",

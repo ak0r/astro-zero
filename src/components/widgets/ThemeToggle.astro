@@ -1,5 +1,4 @@
 ---
-// ThemeToggle.astro
 import Icon from '@/components/common/IconWrapper.astro';
 
 interface Props {
@@ -15,11 +14,14 @@ const { class: className = '' } = Astro.props;
   aria-label="Toggle theme"
   type="button"
 >
-  <span class="sun-icon">
+  <span class="light-icon" data-theme-icon="light">
     <Icon name="sun" size={16} class="shrink-0" />
   </span>
-  <span class="moon-icon">
+  <span class="dark-icon" data-theme-icon="dark">
     <Icon name="moon" size={16} class="shrink-0" />
+  </span>
+  <span class="auto-icon" data-theme-icon="auto">
+    <Icon name="brightness" size={16} class="shrink-0" />
   </span>
 </button>
 
@@ -28,67 +30,112 @@ const { class: className = '' } = Astro.props;
     const button = document.getElementById('theme-toggle');
     if (!button) return;
 
-    const sunIcon = button.querySelector('.sun-icon') as HTMLElement;
-    const moonIcon = button.querySelector('.moon-icon') as HTMLElement;
+    const icons = {
+      light: button.querySelector('[data-theme-icon="light"]') as HTMLElement,
+      dark: button.querySelector('[data-theme-icon="dark"]') as HTMLElement,
+      auto: button.querySelector('[data-theme-icon="auto"]') as HTMLElement,
+    };
     
     const pageDarkTheme = document.documentElement.getAttribute('data-dark-theme') || 'dark';
     const pageLightTheme = document.documentElement.getAttribute('data-light-theme') || 'light';
 
+    // Theme cycle order: light → dark → auto → light
+    const themeOrder = ['light', 'dark', 'auto'] as const;
+    type ThemeMode = typeof themeOrder[number];
+
+    const getStoredThemeMode = (): ThemeMode => {
+      const stored = localStorage.getItem('data-theme');
+      if (stored === 'auto' || stored === 'system') return 'auto';
+      if (stored === pageDarkTheme) return 'dark';
+      return 'light';
+    };
+
+    const applySystemTheme = () => {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? pageDarkTheme : pageLightTheme;
+    };
+
     const updateIcon = () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const mode = getStoredThemeMode();
       
-      if (currentTheme === pageDarkTheme) {
-        // In dark mode, show sun (to switch to light)
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
+      // Hide all icons
+      Object.values(icons).forEach(icon => {
+        if (icon) icon.style.display = 'none';
+      });
+      
+      // Show appropriate icon
+      if (mode === 'auto') {
+        if (icons.auto) icons.auto.style.display = 'block';
+      } else if (mode === 'dark') {
+        if (icons.dark) icons.dark.style.display = 'block';
       } else {
-        // In light mode, show moon (to switch to dark)
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
+        if (icons.light) icons.light.style.display = 'block';
       }
     };
 
-    const toggleTheme = () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === pageDarkTheme ? pageLightTheme : pageDarkTheme;
-      
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('data-theme', newTheme);
+    const setTheme = (mode: ThemeMode) => {
+      if (mode === 'auto') {
+        localStorage.setItem('data-theme', 'auto');
+        const systemTheme = applySystemTheme();
+        document.documentElement.setAttribute('data-theme', systemTheme);
+      } else if (mode === 'dark') {
+        localStorage.setItem('data-theme', pageDarkTheme);
+        document.documentElement.setAttribute('data-theme', pageDarkTheme);
+      } else {
+        localStorage.setItem('data-theme', pageLightTheme);
+        document.documentElement.setAttribute('data-theme', pageLightTheme);
+      }
       updateIcon();
+    };
+
+    const cycleTheme = () => {
+      const currentMode = getStoredThemeMode();
+      const currentIndex = themeOrder.indexOf(currentMode);
+      const nextIndex = (currentIndex + 1) % themeOrder.length;
+      const nextMode = themeOrder[nextIndex];
+      
+      setTheme(nextMode);
     };
 
     // Initialize icon state
     updateIcon();
 
     // Add click handler
-    button.addEventListener('click', toggleTheme);
+    button.addEventListener('click', cycleTheme);
 
-    // Watch for theme changes (from other sources)
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          updateIcon();
-        }
-      });
+    // Watch for theme changes from other sources
+    const observer = new MutationObserver(() => {
+      updateIcon();
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme']
     });
+
+    // Listen for system theme changes when in auto mode
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (getStoredThemeMode() === 'auto') {
+        const systemTheme = applySystemTheme();
+        document.documentElement.setAttribute('data-theme', systemTheme);
+      }
+    });
   }
 
   // Run on initial load
-  document.addEventListener('DOMContentLoaded', initThemeToggle);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  } else {
+    initThemeToggle();
+  }
 
   // Re-run on Astro page transitions
   document.addEventListener('astro:after-swap', initThemeToggle);
 </script>
 
 <style>
-  /* Hide both icons initially */
-  .sun-icon,
-  .moon-icon {
+  /* Hide all icons initially */
+  [data-theme-icon] {
     display: none;
   }
 </style>

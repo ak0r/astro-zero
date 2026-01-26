@@ -272,10 +272,10 @@ export interface SiteConfig {
   defaultOgImageAlt?: string;
   
   // Theme & UI
-  defaultTheme: "light";
-  availableThemes: ["light", "dark"];
+  defaultTheme: "auto";
+  availableThemes: ["light", "dark", "system", "auto"];
   scrollToTop: boolean;
-  
+
   // SEO
   seoConfig: SEOConfig;
 
