@@ -1,11 +1,12 @@
 ---
-import type { Post, Docs, Project } from '@/types';
+import type { Post, Project } from '@/types';
 import { getEntriesByYearSorted } from '@/utils/entries';
 import ContentCard from '@/components/content/ContentCard.astro';
-import ContentEntry from './ContentEntry.astro';
+import ContentEntry from '@/components/content/ContentEntry.astro';
+import ArticleCard from '@/components/cards/ArticleCard.astro';
 
 interface Props {
-  entries: Post[] | Docs[] | Project[];
+  entries: Post[] | Project[];
   display?: 'list' | 'card' | 'grid';
   groupByYear?: boolean;
   title?: string;
@@ -85,13 +86,12 @@ const isCompact = display === 'list';
               useListItem ? (
                 <ContentEntry entry={entry} />
               ) : (
-                <ContentCard
-                  entry={entry}
+                <ArticleCard 
+                  post={entry}
                   showImages={showImages}
                   showDescription={showDescription}
                   showTags={showTags}
                   showMeta={showMeta}
-                  context={cardContext}
                   eager
                 />
               )
@@ -107,13 +107,21 @@ const isCompact = display === 'list';
         useListItem ? (
           <ContentEntry entry={entry} />
         ) : (
-          <ContentCard
-            entry={entry}
+          // <ContentCard
+          //   entry={entry}
+          //   showImages={showImages}
+          //   showDescription={showDescription}
+          //   showTags={showTags}
+          //   showMeta={showMeta}
+          //   context={cardContext}
+          //   eager
+          // />
+          <ArticleCard 
+            post={entry}
             showImages={showImages}
             showDescription={showDescription}
             showTags={showTags}
             showMeta={showMeta}
-            context={cardContext}
             eager
           />
         )
