@@ -1,0 +1,40 @@
+---
+/**
+ * BaseCard Component
+ * 
+ * Foundation component providing consistent styling and structure for all card types.
+ * This component should not be used directly - instead use specialized cards like
+ * ArticleCard, ProjectCard, GalleryCard for specific content types.
+ * 
+ * @slot image - Optional cover image at top
+ * @slot badge - Optional badges/labels (Featured, Category, Status, etc.)
+ * @slot meta - Metadata line (date, location, read time, etc.)
+ * @slot title - Card heading/title
+ * @slot description - Card description or summary text
+ * @slot tags - Container for tag list
+ * @slot default - Footer CTA or additional content
+ */
+
+interface Props {
+  href: string;
+  class?: string;
+}
+
+const { 
+  href, 
+  class: customClass = '', 
+} = Astro.props;
+---
+<a href={href} class={`group base-card relative block h-full flex flex-col ${customClass}`}>
+  <slot name="image" />
+  <div class="p-4 sm:p-5 grow flex flex-col">
+    <slot name="badge" />
+    <slot name="meta" />
+    <slot name="title" />
+    <slot name="description" />
+    <slot name="tags" />
+    <div class="mt-auto">
+      <slot />
+    </div>
+  </div>
+</a>
