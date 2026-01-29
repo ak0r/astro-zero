@@ -260,14 +260,19 @@ export function filterEntriesBy<T extends { data: Record<string, any> }>(
  * Check if entry is a subpost (part of a series)
  */
 export function isSubpost(entryId: string): boolean {
-  return entryId.includes('/');
+  // Has a slash AND is not an index file
+  return entryId.includes('/') && 
+         !entryId.endsWith('/index.md') && 
+         !entryId.endsWith('/index.mdx');
 }
 
 /**
  * Get parent ID from a subpost
+ * "2026-01-29-my-series/part-1.md" → "2026-01-29-my-series"
  */
 export function getParentId(subpostId: string): string {
-  return subpostId.split('/')[0];
+  const parentDir = subpostId.split('/')[0];
+  return parentDir.replace(/^\d{4}-\d{2}-\d{2}-/, '');
 }
 
 /**
@@ -280,44 +285,79 @@ export function getTopLevelEntries<T extends { id: string }>(entries: T[]): T[] 
 /**
  * Get subposts for a parent
  */
-export function getSubpostsForParent<T extends { id: string; data: { draft?: boolean; order?: number; date: Date } }>(
+export function getSubpostsForParent<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
   entries: T[],
   parentId: string
 ): T[] {
   return entries
     .filter(
-      (entry) => !entry.data.draft && isSubpost(entry.id) && getParentId(entry.id) === parentId
+      (entry) =>
+        // !entry.data.draft &&
+        isSubpost(entry.id) &&
+        getParentId(entry.id) === parentId
     )
+    .map((entry) => ({
+      ...entry,
+      // Normalize the ID by removing date prefix
+      id: entry.id.replace(/^\d{4}-\d{2}-\d{2}-/, '')
+    }))
     .sort((a, b) => {
       const dateDiff = a.data.date.valueOf() - b.data.date.valueOf();
       if (dateDiff !== 0) return dateDiff;
       return (a.data.order ?? 0) - (b.data.order ?? 0);
-    });
+    })
 }
 
 /**
  * Check if entry has subposts
  */
-export function hasSubposts<T extends { id: string; data: { draft?: boolean; order?: number; date: Date } }>(
+export function hasSubposts<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
   entries: T[],
   entryId: string
 ): boolean {
-  return getSubpostsForParent(entries, entryId).length > 0;
+  const subposts = getSubpostsForParent(entries, entryId);
+  return subposts.length > 0;
 }
 
 /**
  * Get parent entry from subpost
  */
-export function getParentEntry<T extends { id: string }>(entries: T[], subpostId: string): T | null {
+export function getParentEntry<T extends { id: string }>(
+  entries: T[],
+  subpostId: string
+): T | null {
   if (!isSubpost(subpostId)) return null;
+  
   const parentId = getParentId(subpostId);
   return entries.find((entry) => entry.id === parentId) || null;
 }
 
 /**
+ * Get subpost count for a parent
+ */
+export function getSubpostCount<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
+  entries: T[],
+  parentId: string
+): number {
+  return getSubpostsForParent(entries, parentId).length;
+}
+
+/**
  * Get all series entries (parent + subposts)
  */
-export function getSeriesEntries<T extends { id: string; data: { draft?: boolean; order?: number; date: Date } }>(
+export function getSeriesEntries<T extends { 
+  id: string; 
+  data: { draft?: boolean; order?: number; date: Date } 
+}>(
   entries: T[],
   parentId: string
 ): T[] {
@@ -415,7 +455,13 @@ export function getRelatedEntries<T extends { id: string; data: { tags?: string[
  */
 export async function getAllPosts(includeDrafts = false): Promise<Post[]> {
   const allContent = await getCollection('posts');
-  return includeDrafts ? allContent : filterDrafts(allContent);
+  const filtered = includeDrafts ? allContent : filterDrafts(allContent);
+  
+  // Strip YYYY-MM-DD- prefix from all IDs
+  return filtered.map((post) => ({
+    ...post,
+    id: post.id.replace(/^\d{4}-\d{2}-\d{2}-/, '')
+  }));
 }
 
 /**

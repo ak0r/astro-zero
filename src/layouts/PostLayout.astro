@@ -56,8 +56,8 @@ const {
 
 // Get adjacent posts for navigation (convert null to undefined for type compatibility)
 const adjacentPosts = getAdjacentPosts(sortedPosts, post.id);
-const prevPost = adjacentPosts.older ?? undefined;
-const nextPost = adjacentPosts.newer ?? undefined;
+const prevPost = isCurrentSubpost ? seriesContext.prevInSeries : adjacentPosts.older ?? undefined;
+const nextPost = isCurrentSubpost ? seriesContext.nextInSeries : adjacentPosts.newer ?? undefined;
 
 // Process content
 const { Content } = await render(post);
