@@ -4,24 +4,29 @@ import BaseLayout from "@/layouts/BaseLayout.astro"
 import { generateHomeSEO } from '@/utils/seo';
 import SEO from '@/components/common/SEO.astro';
 import { getHomeContent } from '@/utils/page-sections';
-import { getAllPosts, getTopLevelPosts, sortPostsByDate } from "@/utils/getContent";
+import { getAllPosts, getTopLevelPosts, sortPostsByDate, filterByCategory } from "@/utils/getContent";
 import ContentDisplay from "@/components/content/ContentDisplay.astro";
 import { getContentDir } from "@/utils/commonFunctions";
 import { resolveImageFromPath } from '@/utils/images';
 import { getEntry } from 'astro:content';
 import { siteConfig } from '@/site.config';
 import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import IconWrapper from "@/components/common/IconWrapper.astro";
 
 // Fetch all posts and galleries
 const allPosts = await getAllPosts();
 const parentPosts = await getTopLevelPosts(allPosts);
 const sortedPosts = await sortPostsByDate(parentPosts);
 
+// Split by category
+const travelPosts = sortPostsByDate(filterByCategory(sortedPosts, 'travel')).slice(0, 4);
+const techPosts = sortPostsByDate(filterByCategory(sortedPosts, 'tech')).slice(0, 4);
+
 const entry = await getEntry('pages', 'home-about');
 
 // Load optional content sections
 const sections = await getHomeContent();
-const { hero, intro, about, cta } = sections;
+const {  about, cta } = sections;
 
 const contentDir = entry
   ? getContentDir(entry.filePath)
@@ -63,14 +68,57 @@ const seoData = generateHomeSEO(Astro.url.href);
     <!-- ============================================================ -->
     <!-- Recent Posts -->
     <!-- ============================================================ -->
+    
+    <!-- Travel Section (with images) -->
+    <section class="mb-16">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold flex items-center gap-2">
+          <IconWrapper name={siteConfig.categories.travel.icon} size={24} />
+          Recent {siteConfig.categories.travel.title}
+        </h2>
+        <a 
+          href="/posts/travel" 
+          class="text-sm text-content-3 hover:text-content internal-link"
+        >
+          View all →
+        </a>
+      </div>
+      
+      <ContentDisplay
+        entries={travelPosts}
+        display="grid"          
+        showImages
+        showDescription
+        showTags
+        showBadge={false}
+        class="my-4"
+      />
+    </section>
 
-    <ContentDisplay
-      title="Recent Posts"
-      entries={sortedPosts.slice(0, 4)}
-      display="grid"
-      showImages
-      class="my-4"
-    />
+    <!-- Tech Section (no images) -->
+    <section class="mb-16">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold flex items-center gap-2">
+          <IconWrapper name={siteConfig.categories.tech.icon} size={24} />
+          Recent {siteConfig.categories.tech.title}
+        </h2>
+        <a 
+          href="/posts/tech" 
+          class="text-sm text-content-3 hover:text-content internal-link"
+        >
+          View all →
+        </a>
+      </div>
+      
+      <ContentDisplay
+        entries={techPosts}
+        display="card"
+        showImages={false}
+        showDescription={true}
+        showTags={true}
+        showBadge={false}
+      />
+    </section>
 
     <!-- ============================================================ -->
     <!-- CTA SECTION (Optional from home-cta.md) -->

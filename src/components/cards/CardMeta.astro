@@ -1,0 +1,56 @@
+---
+/**
+ * CardMeta Component
+ *
+ * Reusable metadata row for cards - displays date, location, and reading time.
+ */
+import { isValidDate, getFormattedDate } from '@/utils/commonFunctions';
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  date?: Date;
+  location?: string;
+  readingTime?: string;
+  class?: string;
+}
+
+const {
+  date,
+  location,
+  readingTime,
+  class: customClass = '',
+} = Astro.props;
+
+const hasDate = date && isValidDate(date);
+const hasMeta = hasDate || location || readingTime;
+---
+
+{hasMeta && (
+  <div class={`flex items-center gap-2 text-xs text-content-3 mb-2 ${customClass}`}>
+    {/* Date */}
+    {hasDate && (
+      <time datetime={date!.toISOString()}>
+        {getFormattedDate(date!, "full")}
+      </time>
+    )}
+
+    {/* Location */}
+    {location && (
+      <>
+        {hasDate && <span>•</span>}
+        <span class="flex items-center gap-1">
+          <Icon name="map-pin" size={12} />
+          {location}
+        </span>
+      </>
+    )}
+
+    {/* Reading Time */}
+    {readingTime && (
+      <>
+        {(hasDate || location) && <span>•</span>}
+        <span>{readingTime}</span>
+      </>
+    )}
+  </div>
+)}

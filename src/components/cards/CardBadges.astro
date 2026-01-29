@@ -1,0 +1,65 @@
+---
+/**
+ * CardBadges Component
+ *
+ * Reusable badge row for cards - supports featured, category, status, and version badges.
+ */
+import { siteConfig, type PostCategory } from '@/site.config';
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  featured?: boolean;
+  category?: PostCategory;
+  status?: string;
+  version?: string;
+  class?: string;
+}
+
+const {
+  featured = false,
+  category,
+  status,
+  version,
+  class: customClass = '',
+} = Astro.props;
+
+const categoryConfig = category ? siteConfig.categories[category] : undefined;
+const hasBadges = featured || categoryConfig || status || version;
+---
+
+{hasBadges && (
+  <div class={`flex flex-wrap items-center gap-2 mb-3 ${customClass}`}>
+    {/* Featured Badge */}
+    {featured && (
+      <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-white rounded">
+        <Icon name="star" class="size-3" />
+        Featured
+      </span>
+    )}
+
+    {/* Category Badge */}
+    {categoryConfig && (
+      <span
+        class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border"
+        style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
+      >
+        {categoryConfig.icon && <Icon name={categoryConfig.icon} class="size-3" />}
+        {categoryConfig.title}
+      </span>
+    )}
+
+    {/* Status Badge (for projects) */}
+    {status && (
+      <span class="text-xs text-content-3 bg-surface-2 px-2 py-1 rounded border border-ui capitalize">
+        {status}
+      </span>
+    )}
+
+    {/* Version Badge (for projects) */}
+    {version && (
+      <span class="text-xs text-content-3 font-mono bg-surface-2 px-2 py-1 rounded">
+        v{version}
+      </span>
+    )}
+  </div>
+)}

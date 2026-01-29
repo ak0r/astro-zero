@@ -367,5 +367,5 @@ export interface SiteConfig {
     aboutPageFilters?: FilterTab[];
   }
 
-  categories: CategoryConfig;
+  categories: Record<string, CategoryConfig>;
 }

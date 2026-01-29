@@ -1,0 +1,23 @@
+---
+/**
+ * CardFooter Component
+ *
+ * Reusable footer CTA for cards with animated arrow.
+ */
+import Arrow from '@/components/common/AnimatedArrow.astro';
+
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const {
+  label = 'Read more',
+  class: customClass = '',
+} = Astro.props;
+---
+
+<div class={`pt-4 border-t border-ui flex flex-row content-center justify-between ${customClass}`}>
+  <span class="text-sm text-content-3">{label}</span>
+  <Arrow direction="right" size="5" position="relative" class="text-content-3" />
+</div>

@@ -1,6 +1,5 @@
 ---
 import { Font } from 'astro:assets';
-import { generateThemeHash } from '@/utils/theme';
 import { siteConfig } from "@/site.config";
 import "@/styles/global.css";
 // Components
@@ -28,16 +27,14 @@ const { bodyClass = '' } = Astro.props;
 const defaultTheme = siteConfig.defaultTheme;
 const lightTheme = 'light';
 const darkTheme = 'dark';
-const themeHash = generateThemeHash(siteConfig.title, defaultTheme, lightTheme, darkTheme);
 ---
 
 <!DOCTYPE html>
-<html 
+<html
   lang={siteConfig.language ?? "en"}
   data-theme={defaultTheme}
   data-dark-theme={darkTheme}
   data-light-theme={lightTheme}
-  data-theme-hash={themeHash}
 >
   <head>
     <meta charset="UTF-8">

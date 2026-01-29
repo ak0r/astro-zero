@@ -1,22 +1,24 @@
 ---
+/**
+ * PostLayout Component
+ *
+ * Layout for blog posts and galleries.
+ * Uses _BaseContentLayout for shared structure.
+ */
 import { render } from "astro:content";
 import type { Post } from '@/types';
 import { siteConfig, type PostCategory } from '@/site.config';
 import { resolveImageFromPath } from '@/utils/images';
 import { generatePostSEO, generateGallerySEO } from '@/utils/seo';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import SEO from '@/components/common/SEO.astro';
+import ContentLayout from './ContentLayout.astro';
 import ImageWrapper from '@/components/common/ImageWrapper.astro';
-import Container from '@/components/layout/Container.astro';
 import ContentNavigation from '@/components/widgets/ContentNavigation.astro';
-import { filterEntriesBy } from '@/utils/entries';
-import { 
-  getAllPosts, 
-  getTopLevelPosts, 
-  getAdjacentPosts, 
-  sortPostsByDate, 
+import {
+  getAllPosts,
+  getAdjacentPosts,
+  sortPostsByDate,
   getSeriesContext,
-  isGallery 
+  isGallery
 } from '@/utils/getContent';
 import { formatDate, calculateReadingTime, getContentDir } from '@/utils/commonFunctions';
 import IconWrapper from "@/components/common/IconWrapper.astro";
@@ -34,94 +36,82 @@ const { post } = Astro.props;
 // Check if this is a gallery
 const isGalleryPost = isGallery(post);
 
-// Generate SEO data (works for both posts and galleries)
-const seoData = isGalleryPost 
+// Generate SEO data
+const seoData = isGalleryPost
   ? generateGallerySEO(post, Astro.url.href)
   : generatePostSEO(post, Astro.url.href);
 
-// Filter posts based on environment
+// Get all posts for navigation and series
 const allPosts = await getAllPosts();
-const filteredPosts = filterEntriesBy(allPosts, 'category', post.data.category);
 const sortedPosts = sortPostsByDate(allPosts);
-const topLevelPosts = getTopLevelPosts(sortedPosts);
 
-// Get series context (works for both posts and galleries)
+// Get series context
 const seriesContext = getSeriesContext(allPosts, post);
-
-const { 
-  isCurrentParent,
+const {
   isCurrentSubpost,
   isInSeries,
-  seriesId, 
   seriesPosts,
-  nextInSeries,
-  prevInSeries,
-  parentPost,  
+  parentPost,
 } = seriesContext;
 
-// Get adjacent posts for navigation
-const { older: prevPost, newer: nextPost, parent: parentPostSeries } = getAdjacentPosts(sortedPosts, post.id);
+// Get adjacent posts for navigation (convert null to undefined for type compatibility)
+const adjacentPosts = getAdjacentPosts(sortedPosts, post.id);
+const prevPost = adjacentPosts.older ?? undefined;
+const nextPost = adjacentPosts.newer ?? undefined;
 
-// Process the post content
-const { Content, headings = [], remarkPluginFrontmatter } = await render(post);
+// Process content
+const { Content } = await render(post);
 const readingTime = calculateReadingTime(post.body || '');
 const tags = post.data.tags;
 
-// Process image path
+// Process cover image
 let postImage = post.data.cover;
-
 if (Array.isArray(postImage)) {
   postImage = postImage[0];
 }
 
-const contentDir = post.filePath
-  ? getContentDir(post.filePath)
-  : undefined;
-
-const coverImage = resolveImageFromPath(postImage, {
-  baseDir: contentDir,
-});
-
+const contentDir = post.filePath ? getContentDir(post.filePath) : undefined;
+const coverImage = resolveImageFromPath(postImage, { baseDir: contentDir });
 const coverImageAlt = post.data.coverAlt || `Featured image for post: ${post.data.title}`;
 
-// Get category config
+// Category config
 const categoryConfig = siteConfig.categories[post.data.category as PostCategory];
 const category = 'category' in post.data ? post.data.category as PostCategory : undefined;
-const backToCategoryPath = `${post.collection}/${post.data.category}`;
 ---
 
-<BaseLayout>
-  <!-- SEO -->
-  <SEO data={seoData} slot="seo" />
-
-  <Container class="py-4 sm:py-8">
-
+<ContentLayout seo={seoData}>
+  {/* Header Slot */}
+  <Fragment slot="header">
     <PageHeader
       title={post.data.title}
-      description={post.data.description}
+      description={post.data.description ?? undefined}
       breadcrumb={Astro.url.pathname}
     />
 
-    <!-- Cover Image -->
+    {/* Cover Image */}
     {coverImage && (
       <div class="mb-6 sm:mb-10 breakout ring ring-ui rounded-lg">
         <ImageWrapper
           src={coverImage}
           alt={coverImageAlt}
+          width={600}
+          height={400}
           class="w-full rounded-lg not-prose aspect-3/2 border border-ui shadow-lg"
           fit="cover"
+          loading="eager"
         />
       </div>
     )}
-    
+  </Fragment>
+
+  {/* Meta Slot */}
+  <Fragment slot="meta">
     <div class="relative">
       <div class="space-y-2 sm:space-y-4">
-        
-        <!-- Category Meta -->
+        {/* Category Meta */}
         <div class="flex items-center gap-2 sm:gap-3">
-          {/* Category Badge */}
           {category && categoryConfig && (
-            <span 
+            <span
               class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border"
               style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
             >
@@ -130,32 +120,30 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
             </span>
           )}
 
-          {/* Gallery location */}
           {isGalleryPost && post.data.location && (
             <>
-              <span class="">&bull;</span>
+              <span>&bull;</span>
               <div class="flex items-center gap-2">
                 <IconWrapper name="map-pin" size={16} />
                 <span>{post.data.location}</span>
               </div>
             </>
           )}
-
         </div>
-        <!-- Common Post Meta -->
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-mono text-content-3">          
+
+        {/* Common Post Meta */}
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-mono text-content-3">
           <div class="flex items-center gap-2">
             <IconWrapper name="calendar-week" size={16} />
             <time>{formatDate(post.data.date, 'full')}</time>
           </div>
-          
-          {/* Reading time (only for non-gallery posts) */}
+
           {!isGalleryPost && readingTime && (
             <>
-              <span class="">&bull;</span>
+              <span>&bull;</span>
               <span>
-                {readingTime.text && readingTime.text !== 'read0' && readingTime.text !== '' 
-                  ? readingTime.text 
+                {readingTime.text && readingTime.text !== 'read0' && readingTime.text !== ''
+                  ? readingTime.text
                   : '1 min read'}
               </span>
             </>
@@ -163,7 +151,7 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
 
           {tags && (
             <>
-              <span class="">&bull;</span>
+              <span>&bull;</span>
               <IconWrapper name="tag" size={16} />
               {tags.map(tag => (
                 <div class="not-prose flex gap-1 sm:gap-2 self-start">
@@ -180,9 +168,9 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
         </div>
       </div>
 
-      {/* Series Widget (if in series) */}
+      {/* Series Widget */}
       {isInSeries && seriesPosts.length > 1 && (
-        <SeriesPosts 
+        <SeriesPosts
           seriesPosts={seriesPosts}
           currentPostId={post.id}
           seriesTitle={parentPost?.data.title}
@@ -190,33 +178,33 @@ const backToCategoryPath = `${post.collection}/${post.data.category}`;
         />
       )}
     </div>
+  </Fragment>
 
-    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
-      <meta data-pagefind-filter="collection[content]" content="posts" />
-      <meta data-pagefind-filter="category[content]" content={post.data.category} />
-      <meta data-pagefind-meta="title[content]" content={post.data.title} />
-      <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
-      
-      <!-- Article content -->
-      <div class="md-content" id="post-content">
-        <Content />
+  {/* Content Slot */}
+  <Fragment slot="content">
+    <meta data-pagefind-filter="collection[content]" content="posts" />
+    <meta data-pagefind-filter="category[content]" content={post.data.category} />
+    <meta data-pagefind-meta="title[content]" content={post.data.title} />
+    <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
+
+    <div class="md-content" id="post-content">
+      <Content />
+    </div>
+
+    {isGalleryPost && post.data.imageDir && (
+      <div class="gallery-section">
+        <ContentGallery gallery={post} />
       </div>
+    )}
+  </Fragment>
 
-      {/* Gallery grid */}
-      {isGalleryPost && post.data.imageDir && (
-        <div class="gallery-section">
-          <ContentGallery gallery={post} />
-        </div>
-      )}
-    </article>
-
-    <!-- Post navigation -->
-    <ContentNavigation 
-      prevEntry={prevPost} 
-      nextEntry={nextPost} 
-      parentEntry={isCurrentSubpost ? parentPost : undefined}
+  {/* Navigation Slot */}
+  <Fragment slot="navigation">
+    <ContentNavigation
+      prevEntry={prevPost}
+      nextEntry={nextPost}
+      parentEntry={isCurrentSubpost ? (parentPost ?? undefined) : undefined}
     />
-    <!-- Lightbox Component -->
     <Lightbox />
-  </Container>
-</BaseLayout>
+  </Fragment>
+</ContentLayout>

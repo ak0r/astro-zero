@@ -1,19 +1,26 @@
 ---
-// src/components/cards/ArticleCard.astro
+/**
+ * ArticleCard Component
+ *
+ * Card component for blog posts and galleries.
+ * Composed from reusable card sub-components.
+ */
 import type { Post } from '@/types';
-import { siteConfig, type PostCategory } from '@/site.config';
-import { getContentDir, isValidDate, getFormattedDate } from '@/utils/commonFunctions';
+import type { PostCategory } from '@/site.config';
+import { getContentDir } from '@/utils/commonFunctions';
 import { resolveImageFromPath } from '@/utils/images';
 import BaseCard from '@/components/cards/BaseCard.astro';
-import Icon from '@/components/common/IconWrapper.astro';
-import Arrow from '@/components/common/AnimatedArrow.astro';
-import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import CardImage from '@/components/cards/CardImage.astro';
+import CardBadges from '@/components/cards/CardBadges.astro';
+import CardMeta from '@/components/cards/CardMeta.astro';
+import CardFooter from '@/components/cards/CardFooter.astro';
 
 interface Props {
   post: Post;
   showImage?: boolean;
   showDescription?: boolean;
   showTags?: boolean;
+  showBadge?: boolean;
   showMeta?: boolean;
   featured?: boolean;
   eager?: boolean;
@@ -24,13 +31,13 @@ const {
   showImage = true,
   showDescription = true,
   showTags = true,
+  showBadge = true,
   showMeta = true,
   featured = false,
   eager = false,
 } = Astro.props;
 
 const { title, description, date, category, tags } = post.data;
-const categoryConfig = category ? siteConfig.categories[category as PostCategory] : undefined;
 const isFeatured = post.data.featured || featured;
 
 // Process image
@@ -45,58 +52,44 @@ const coverImageAlt = post.data.coverAlt || `Featured image for: ${title}`;
 
 const entryUrl = `/${post.collection}/${post.id}`;
 const titleSize = featured ? 'text-lg' : 'text-base';
+
+// Determine aspect ratio based on category
+const aspectRatio = category === 'gallery' ? '4:5' : '3:2';
+
+// Footer label based on category
+const footerLabel = category === 'gallery' ? 'View gallery' : 'Read more';
 ---
 
 <BaseCard href={entryUrl} class="article-card">
   {/* Image */}
   {showImage && coverImage && (
     <Fragment slot="image">
-      <div class="overflow-hidden rounded-lg">
-        <ImageWrapper
-          src={coverImage}
-          alt={coverImageAlt}
-          fit="cover"
-          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 aspect-3/2"
-          loading={eager ? 'eager' : 'lazy'}
-        />
-      </div>
+      <CardImage
+        src={coverImage}
+        alt={coverImageAlt}
+        aspectRatio={aspectRatio}
+        eager={eager}
+      />
     </Fragment>
   )}
 
   {/* Badges */}
-  {showMeta && (isFeatured || categoryConfig) && (
+  {showBadge && (
     <Fragment slot="badge">
-      <div class="flex flex-wrap items-center gap-2 mb-3">
-        {/* Featured Badge */}
-        {isFeatured && (
-          <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-white rounded">
-            <Icon name="star" class="size-3" />
-            Featured
-          </span>
-        )}
-
-        {/* Category Badge */}
-        {categoryConfig && (
-          <span 
-            class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border"
-            style={`background-color: ${categoryConfig.color}20; color: ${categoryConfig.color}; border-color: ${categoryConfig.color}40;`}
-          >
-            {categoryConfig.icon && <Icon name={categoryConfig.icon} class="size-3" />}
-            {categoryConfig.title}
-          </span>
-        )}
-      </div>
+      <CardBadges
+        featured={isFeatured}
+        category={category as PostCategory}
+      />
     </Fragment>
   )}
 
   {/* Meta */}
-  {showMeta && date && isValidDate(date) && (
+  {showMeta && (
     <Fragment slot="meta">
-      <div class="flex items-center gap-2 text-xs text-content-3 mb-2">
-        <time datetime={date.toISOString()}>
-          {getFormattedDate(date)}
-        </time>
-      </div>
+      <CardMeta
+        date={date}
+        location={post.data.location}
+      />
     </Fragment>
   )}
 
@@ -133,8 +126,5 @@ const titleSize = featured ? 'text-lg' : 'text-base';
   )}
 
   {/* Footer */}
-  <div class="pt-4 border-t border-ui flex flex-row content-center justify-between">
-    <span class="text-sm text-content-3">Read more</span>
-    <Arrow direction="right" size="5" position="relative" class="text-content-3" />
-  </div>
+  <CardFooter label={footerLabel} />
 </BaseCard>

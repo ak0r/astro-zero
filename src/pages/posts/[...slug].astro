@@ -4,13 +4,20 @@ import { getAllPosts } from '@/utils/getContent';
 import PostLayout from '@/layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
-  // filter posts based on environment
   const allPosts = await getAllPosts();
-  // Generate paths
-  return allPosts.map(post => ({
-    params: { slug: post.data.slug || post.id },
-    props: { post }
-  }));
+  
+  return allPosts.map(post => {
+    // Clean the ID: remove date prefix, extension, and /index
+    let slug = post.id
+      .replace(/^\d{4}-\d{2}-\d{2}-/, '')  // Remove YYYY-MM-DD- prefix
+      .replace(/\.(md|mdx)$/, '')          // Remove extension
+      .replace('/index', '');               // Remove /index
+    
+    return {
+      params: { slug },
+      props: { post }
+    };
+  });
 };
 
 export interface Props {
