@@ -84,7 +84,7 @@ const seoData = generateIndexSEO('posts', Astro.url.href, {
     <FilterTabs tabs={tabs} class="mb-8" />
     
     <ContentDisplay
-      entries={sortedPosts}
+      entries={topLevelPosts}
       display={displayMode}
       groupByYear={shouldGroupByYear}
       showImages={categoryConfig.view === 'grid'}

@@ -1,9 +1,9 @@
 ---
 import type { Post, Project } from '@/types';
 import { getEntriesByYearSorted } from '@/utils/entries';
-import ContentCard from '@/components/content/ContentCard.astro';
 import ContentEntry from '@/components/content/ContentEntry.astro';
 import ArticleCard from '@/components/cards/ArticleCard.astro';
+import ProjectCard from '@/components/cards/ProjectCard.astro';
 
 interface Props {
   entries: Post[] | Project[];
@@ -14,8 +14,9 @@ interface Props {
   showImages?: boolean;
   showDescription?: boolean;
   showTags?: boolean;
+  showBadge?: boolean;
   showMeta?: boolean;
-  cardContext?: 'featured' | 'recent' | 'posts' | 'tags' | 'docs';
+  cardContext?: 'recent' | 'archive';
   class?: string;
 }
 
@@ -28,8 +29,9 @@ const {
   showImages = false,
   showDescription = display !== 'list',
   showTags = display !== 'list',
-  showMeta = true, // Always show meta (includes date) unless explicitly disabled
-  cardContext = 'posts',
+  showBadge = true,
+  showMeta = true,
+  cardContext,
   class: customClass = '',
 } = Astro.props;
 
@@ -46,13 +48,19 @@ const displayClass = {
 
 // Determine if using list item or card
 const useListItem = display === 'list';
-const isCompact = display === 'list';
+
+// Helper to check entry type
+function isProject(entry: Post | Project): entry is Project {
+  return entry.collection === 'projects';
+}
+
+const showIcon = cardContext !== 'recent';
 ---
 
 <section class={`animate not-prose ${customClass}`}>
   {/* Section Header */}
   {(title || description) && (
-    <div class="px-2 sm:px-4 py-2 mb-4 sm:mb-6">
+    <div class="py-2 mb-4 sm:mb-6">
       {title && (
         <h2 class="text-xl font-bold text-content mb-2">
           {title}
@@ -84,13 +92,24 @@ const isCompact = display === 'list';
           <div class={displayClass}>
             {yearEntries.map((entry) =>
               useListItem ? (
-                <ContentEntry entry={entry} />
-              ) : (
-                <ArticleCard 
-                  post={entry}
-                  showImages={showImages}
+                <ContentEntry entry={entry} showIcon={showIcon} />
+              ) : isProject(entry) ? (
+                <ProjectCard
+                  project={entry}
+                  showImage={showImages}
                   showDescription={showDescription}
                   showTags={showTags}
+                  showBadge={showBadge}
+                  showMeta={showMeta}
+                  eager
+                />
+              ) : (
+                <ArticleCard
+                  post={entry}
+                  showImage={showImages}
+                  showDescription={showDescription}
+                  showTags={showTags}
+                  showBadge={showBadge}
                   showMeta={showMeta}
                   eager
                 />
@@ -106,21 +125,23 @@ const isCompact = display === 'list';
       {entries.map((entry) =>
         useListItem ? (
           <ContentEntry entry={entry} />
-        ) : (
-          // <ContentCard
-          //   entry={entry}
-          //   showImages={showImages}
-          //   showDescription={showDescription}
-          //   showTags={showTags}
-          //   showMeta={showMeta}
-          //   context={cardContext}
-          //   eager
-          // />
-          <ArticleCard 
-            post={entry}
-            showImages={showImages}
+        ) : isProject(entry) ? (
+          <ProjectCard
+            project={entry}
+            showImage={showImages}
             showDescription={showDescription}
             showTags={showTags}
+            showBadge={showBadge}
+            showMeta={showMeta}
+            eager
+          />
+        ) : (
+          <ArticleCard
+            post={entry}
+            showImage={showImages}
+            showDescription={showDescription}
+            showTags={showTags}
+            showBadge={showBadge}
             showMeta={showMeta}
             eager
           />

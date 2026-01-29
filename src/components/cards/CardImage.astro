@@ -1,0 +1,44 @@
+---
+/**
+ * CardImage Component
+ *
+ * Reusable image component for cards with lazy loading and aspect ratio support.
+ */
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  aspectRatio?: '4:5' | '16:9' | '3:2' | '1:1';
+  eager?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  aspectRatio = '3:2',
+  eager = false,
+  class: customClass = '',
+} = Astro.props;
+
+// Map aspect ratio to Tailwind class
+const aspectClasses: Record<string, string> = {
+  '4:5': 'aspect-4/5',
+  '16:9': 'aspect-video',
+  '3:2': 'aspect-3/2',
+  '1:1': 'aspect-square',
+};
+
+const aspectClass = aspectClasses[aspectRatio] || 'aspect-3/2';
+---
+
+<div class={`overflow-hidden rounded-lg ${customClass}`}>
+  <ImageWrapper
+    src={src}
+    alt={alt}
+    fit="cover"
+    class={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${aspectClass}`}
+    loading={eager ? 'eager' : 'lazy'}
+  />
+</div>

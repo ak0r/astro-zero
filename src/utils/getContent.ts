@@ -1,78 +1,85 @@
-import { getCollection } from 'astro:content';
-import { siteConfig, type PostCategory } from '@/site.config';
-import type { Post } from '@/types';
-import {
+/**
+ * Content Collection Utilities
+ *
+ * @deprecated This file is maintained for backward compatibility.
+ * Please import from @/utils/content.utils instead.
+ */
+
+// Re-export all content utilities
+export {
+  // Async functions
+  getAllContent,
+  getAllPosts,
+  getPosts,
+  getGalleries,
+  // Filtering
+  filterByCategory,
+  getCategoryCounts,
   filterDrafts,
+  filterEntriesBy,
+  getFeaturedEntries,
+  // Sorting
+  sortPostsByDate,
   sortEntriesByDate,
+  // Grouping
   getEntriesByYearSorted,
+  groupEntriesBy,
+  // Tags
   getUniqueTags,
   getEntriesByTag,
-  getFeaturedEntries,
+  getTagCounts,
+  // Series
+  isSubpost,
+  getParentId,
+  getTopLevelPosts,
+  getTopLevelEntries,
+  getSubpostsForParent,
+  hasSubposts,
+  getParentEntry,
+  getSeriesEntries,
+  getSeriesContext,
+  // Navigation
+  getAdjacentPosts,
   getAdjacentEntriesWithSeries,
   getRelatedEntries,
+  // Category helpers
+  isGallery,
+  isTravel,
+  isTech,
+} from './content.utils';
+
+// Re-export from entries for additional functions
+export {
   searchEntries,
   paginateEntries,
-  isSubpost as isSubpostGeneric,
-  getParentId as getParentIdGeneric,
-  getParentEntry,
-  getSubpostsForParent as getSubpostsForParentGeneric,
-  hasSubposts as hasSubpostsGeneric,
-  getSubpostCount as getSubpostCountGeneric,
-  getSeriesEntries,
-  getNextInSeries as getNextInSeriesGeneric,
-  getPrevInSeries as getPrevInSeriesGeneric,
-  getTopLevelEntries,
+  getSubpostCount,
+  getNextInSeries,
+  getPrevInSeries,
 } from './entries';
 
-/**
- * Get all content (posts + galleries), filtered by draft status
- */
-export async function getAllContent(includeDrafts = false): Promise<Post[]> {
-  const allContent = await getCollection('posts');
-  return includeDrafts ? allContent : filterDrafts(allContent);
-}
+// Additional exports for backward compatibility
+import { siteConfig, type PostCategory, POST_CATEGORIES } from '@/site.config';
+import type { Post } from '@/types';
+import {
+  filterByCategory,
+  getUniqueTags,
+  getEntriesByYearSorted,
+  getEntriesByTag,
+  getFeaturedEntries,
+  getRelatedEntries,
+  getParentEntry,
+  getSeriesEntries,
+} from './content.utils';
+import { searchEntries, paginateEntries } from './entries';
 
 /**
- * Get all posts (alias for getAllContent for backward compatibility)
- */
-export async function getAllPosts(includeDrafts = false): Promise<Post[]> {
-  return getAllContent(includeDrafts);
-}
-
-/**
- * Get posts only (exclude galleries)
- */
-export async function getPosts(includeDrafts = false): Promise<Post[]> {
-  const all = await getAllContent(includeDrafts);
-  return all.filter(p => p.data.category !== 'gallery');
-}
-
-/**
- * Get galleries only
- */
-export async function getGalleries(includeDrafts = false): Promise<Post[]> {
-  const all = await getAllContent(includeDrafts);
-  return all.filter(p => p.data.category === 'gallery');
-}
-
-/**
- * Filter by category
- */
-export function filterByCategory(
-  posts: Post[], 
-  category: PostCategory
-): Post[] {
-  return posts.filter(p => p.data.category === category);
-}
-
-/**
- * Get posts by multiple categories
+ * Filter posts by multiple categories
  */
 export function filterByCategories(
   posts: Post[],
   categories: PostCategory[]
 ): Post[] {
-  return posts.filter(p => categories.includes(p.data.category as PostCategory));
+  return posts.filter((p) => categories.includes(p.data.category as PostCategory));
 }
 
 /**
@@ -81,30 +88,17 @@ export function filterByCategories(
 export function groupByCategory(posts: Post[]): Record<PostCategory, Post[]> {
   return posts.reduce((acc, post) => {
     const category = post.data.category as PostCategory;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
+    if (!acc[category]) acc[category] = [];
     acc[category].push(post);
     return acc;
   }, {} as Record<PostCategory, Post[]>);
 }
 
 /**
- * Get category counts
- */
-export function getCategoryCounts(posts: Post[]): Record<PostCategory, number> {
-  return posts.reduce((acc, post) => {
-    const category = post.data.category as PostCategory;
-    acc[category] = (acc[category] || 0) + 1;
-    return acc;
-  }, {} as Record<PostCategory, number>);
-}
-
-/**
  * Get unique tags by category
  */
 export function getUniqueTagsByCategory(
-  posts: Post[], 
+  posts: Post[],
   category: PostCategory
 ): string[] {
   const categoryPosts = filterByCategory(posts, category);
@@ -112,28 +106,21 @@ export function getUniqueTagsByCategory(
 }
 
 /**
- * Sort posts by date (descending - newest first)
- */
-export function sortPostsByDate(posts: Post[]): Post[] {
-  return sortEntriesByDate(posts);
-}
-
-/**
- * Group posts by year and sort descending within year
+ * Alias for getEntriesByYearSorted
  */
 export function getPostsByYearSorted(posts: Post[]): [string, Post[]][] {
   return getEntriesByYearSorted(posts);
 }
 
 /**
- * Get unique tags from posts
+ * Get unique post tags
  */
 export function getUniquePostTags(posts: Post[]): string[] {
   return getUniqueTags(posts);
 }
 
 /**
- * Filter posts by tag
+ * Get posts by tag
  */
 export function getPostsByTag(posts: Post[], tag: string): Post[] {
   return getEntriesByTag(posts, tag);
@@ -147,23 +134,7 @@ export function getFeaturedPosts(posts: Post[]): Post[] {
 }
 
 /**
- * Get adjacent posts with series awareness
- * For subposts: returns prev/next within series + parent
- * For parent/standalone: returns prev/next top-level posts
- */
-export function getAdjacentPosts(
-  posts: Post[],
-  currentId: string
-): {
-  newer: Post | null;
-  older: Post | null;
-  parent: Post | null;
-} {
-  return getAdjacentEntriesWithSeries(posts, currentId);
-}
-
-/**
- * Get related posts based on tags
+ * Get related posts
  */
 export function getRelatedPosts(
   posts: Post[],
@@ -174,7 +145,7 @@ export function getRelatedPosts(
 }
 
 /**
- * Search posts by title or description
+ * Search posts
  */
 export function searchPosts(posts: Post[], query: string): Post[] {
   return searchEntries(posts, query);
@@ -183,162 +154,22 @@ export function searchPosts(posts: Post[], query: string): Post[] {
 /**
  * Paginate posts
  */
-export function paginatePosts(
-  posts: Post[],
-  page: number,
-  perPage: number
-) {
+export function paginatePosts(posts: Post[], page: number, perPage: number) {
   return paginateEntries(posts, page, perPage);
-}
-
-// ============================================================================
-// SERIES & SUBPOSTS (Post-specific wrappers)
-// ============================================================================
-
-/**
- * Check if a post is a subpost
- */
-export function isSubpost(postId: string): boolean {
-  return isSubpostGeneric(postId);
-}
-
-/**
- * Get parent ID from post
- */
-export function getParentId(postId: string): string {
-  return getParentIdGeneric(postId);
 }
 
 /**
  * Get parent post
  */
-export function getParentPost(
-  posts: Post[],
-  subpostId: string
-): Post | null {
+export function getParentPost(posts: Post[], subpostId: string): Post | null {
   return getParentEntry(posts, subpostId);
 }
 
 /**
- * Get all subposts for a parent series
+ * Get series posts
  */
-export function getSubpostsForParent(
-  posts: Post[],
-  parentId: string
-): Post[] {
-  return getSubpostsForParentGeneric(posts, parentId);
-}
-
-/**
- * Check if a post has subposts
- */
-export function hasSubposts(
-  posts: Post[],
-  postId: string
-): boolean {
-  return hasSubpostsGeneric(posts, postId);
-}
-
-/**
- * Get subpost count for a parent
- */
-export function getSubpostCount(
-  posts: Post[],
-  parentId: string
-): number {
-  return getSubpostCountGeneric(posts, parentId);
-}
-
-/**
- * Get all posts in a series (parent + subposts)
- */
-export function getSeriesPosts(
-  posts: Post[],
-  parentId: string
-): Post[] {
+export function getSeriesPosts(posts: Post[], parentId: string): Post[] {
   return getSeriesEntries(posts, parentId);
-}
-
-/**
- * Get next post in series
- */
-export function getNextInSeries(
-  posts: Post[],
-  currentPost: Post
-): Post | null {
-  return getNextInSeriesGeneric(posts, currentPost);
-}
-
-/**
- * Get previous post in series
- */
-export function getPrevInSeries(
-  posts: Post[],
-  currentPost: Post
-): Post | null {
-  return getPrevInSeriesGeneric(posts, currentPost);
-}
-
-/**
- * Get only top-level posts (standalone + series parents)
- */
-export function getTopLevelPosts(posts: Post[]): Post[] {
-  return getTopLevelEntries(posts);
-}
-
-/**
- * Get series context for current post
- * Works for both regular posts and galleries
- */
-export function getSeriesContext(
-  allPosts: Post[],
-  currentPost: Post
-): {
-  isCurrentSubpost: boolean;
-  isCurrentParent: boolean;
-  isInSeries: boolean;
-  seriesId: string;
-  parentPost: Post | null;
-  seriesPosts: Post[];
-  prevInSeries: Post | null;
-  nextInSeries: Post | null;
-} {
-  const isCurrentSubpost = isSubpost(currentPost.id);
-  const isCurrentParent = hasSubposts(allPosts, currentPost.id);
-  const isInSeries = isCurrentSubpost || isCurrentParent;
-
-  if (!isInSeries) {
-    return {
-      isCurrentSubpost,
-      isCurrentParent,
-      isInSeries: false,
-      seriesId: '',
-      parentPost: null,
-      seriesPosts: [],
-      prevInSeries: null,
-      nextInSeries: null,
-    };
-  }
-
-  // Determine series ID and parent
-  const seriesId = isCurrentSubpost ? getParentId(currentPost.id) : currentPost.id;
-  const parentPost = isCurrentSubpost ? getParentPost(allPosts, currentPost.id) : currentPost;
-
-  // Get series data
-  const seriesPosts = getSeriesPosts(allPosts, seriesId);
-  const prevInSeries = getPrevInSeries(allPosts, currentPost);
-  const nextInSeries = getNextInSeries(allPosts, currentPost);
-
-  return {
-    isCurrentSubpost,
-    isCurrentParent,
-    isInSeries: true,
-    seriesId,
-    parentPost,
-    seriesPosts,
-    prevInSeries,
-    nextInSeries,
-  };
 }
 
 /**
@@ -349,10 +180,10 @@ export function getCategoryConfig(category: PostCategory) {
 }
 
 /**
- * Get all categories that should show in navigation
+ * Get categories for navigation
  */
 export function getNavCategories() {
-  return POST_CATEGORIES.filter(cat => siteConfig.categories[cat].showInNav);
+  return POST_CATEGORIES.filter((cat) => siteConfig.categories[cat].showInNav);
 }
 
 /**
@@ -367,25 +198,4 @@ export function getCategoryColor(category: PostCategory): string {
  */
 export function getCategoryIcon(category: PostCategory): string | undefined {
   return siteConfig.categories[category].icon;
-}
-
-/**
- * Helper to check if post is gallery
- */
-export function isGallery(post: Post): boolean {
-  return post.data.category === 'gallery';
-}
-
-/**
- * Helper to check if post is travel
- */
-export function isTravel(post: Post): boolean {
-  return post.data.category === 'travel';
-}
-
-/**
- * Helper to check if post is tech
- */
-export function isTech(post: Post): boolean {
-  return post.data.category === 'tech';
 }

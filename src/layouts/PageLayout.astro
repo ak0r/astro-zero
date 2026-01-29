@@ -1,10 +1,14 @@
 ---
+/**
+ * PageLayout Component
+ *
+ * Layout for static pages.
+ * Uses ContentLayout for shared structure.
+ */
 import { render } from 'astro:content';
 import type { Page } from "@/types";
 import { generatePageSEO } from '@/utils/seo';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import SEO from '@/components/common/SEO.astro';
-import Container from '@/components/layout/Container.astro';
+import ContentLayout from './ContentLayout.astro';
 import PageHeader from '@/components/layout/PageHeader.astro';
 
 export interface Props {
@@ -17,7 +21,7 @@ const { page } = Astro.props;
 const currentPath = Astro.url.pathname;
 
 // Process the page content
-const { Content, headings } = await render(page);
+const { Content } = await render(page);
 const pageTitle = page.data.title;
 const pageDesc = page.data.description;
 
@@ -25,26 +29,24 @@ const pageDesc = page.data.description;
 const seoData = generatePageSEO(page, Astro.url.href);
 ---
 
-<BaseLayout>
-  <!-- SEO -->
-  <SEO data={seoData} slot="seo" />
-
-  <Container class="py-4 sm:py-8">
+<ContentLayout seo={seoData}>
+  {/* Header Slot */}
+  <Fragment slot="header">
     <PageHeader
       breadcrumb={currentPath}
       title={pageTitle}
-      description={pageDesc}
+      description={pageDesc ?? undefined}
     />
+  </Fragment>
 
-    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
-      <meta data-pagefind-meta="collection[content]" content="pages" />
-      <meta data-pagefind-meta="title[content]" content={pageTitle} />
+  {/* Content Slot */}
+  <Fragment slot="content">
+    <meta data-pagefind-meta="collection[content]" content="pages" />
+    <meta data-pagefind-meta="title[content]" content={pageTitle} />
 
-      <!-- Article content -->
-      <div class="" id="page-content">
-        <Content />
-        <slot />
-      </div>
-    </article>
-  </Container>
-</BaseLayout>
+    <div class="" id="page-content">
+      <Content />
+      <slot />
+    </div>
+  </Fragment>
+</ContentLayout>

@@ -82,7 +82,7 @@
   }
 
   .link-card {
-    @apply p-2 rounded-lg;
+    @apply py-2 rounded-lg;
   }
 
   .blog-card {

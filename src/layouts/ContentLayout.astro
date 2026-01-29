@@ -1,0 +1,52 @@
+---
+/**
+ * _BaseContentLayout Component
+ *
+ * Shared wrapper for all content pages (posts, pages, galleries).
+ * Uses named slots for flexible composition.
+ *
+ * @slot header - Page header content (breadcrumbs, title, cover image)
+ * @slot meta - Metadata section (date, reading time, tags, series)
+ * @slot content - Main article content
+ * @slot navigation - Navigation section (prev/next, related)
+ */
+import type { SEOData } from '@/types';
+import BaseLayout from './BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import Container from '@/components/layout/Container.astro';
+
+export interface Props {
+  seo: SEOData;
+  bodyClass?: string;
+  containerClass?: string;
+}
+
+const {
+  seo,
+  bodyClass = '',
+  containerClass = 'py-4 sm:py-8',
+} = Astro.props;
+---
+
+<BaseLayout bodyClass={bodyClass}>
+  <SEO data={seo} slot="seo" />
+
+  <Container class={containerClass}>
+    {/* Header Section */}
+    <slot name="header" />
+
+    {/* Meta Section */}
+    <slot name="meta" />
+
+    {/* Main Content */}
+    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
+      <slot name="content" />
+    </article>
+
+    {/* Navigation Section */}
+    <slot name="navigation" />
+
+    {/* Additional Content */}
+    <slot />
+  </Container>
+</BaseLayout>

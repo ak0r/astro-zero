@@ -3,7 +3,7 @@ import { visit } from 'unist-util-visit';
 
 /**
  * Rehype plugin to add loading attributes and optimize image paths in markdown content
- * Adds lazy loading attributes and converts image paths to WebP versions when available
+ * Adds eager loading for markdown images and async decoding
  */
 export function rehypeImageAttributes() {
   return (tree: Root) => {
@@ -12,9 +12,9 @@ export function rehypeImageAttributes() {
         const properties = node.properties || {};
         const src = (properties.src as string) || '';
 
-        // Add loading="lazy" if not already set
+        // Add loading="eager" if not already set
         if (!properties.loading) {
-          properties.loading = 'lazy';
+          properties.loading = 'eager';
         }
         
         // Add decoding="async" if not already set

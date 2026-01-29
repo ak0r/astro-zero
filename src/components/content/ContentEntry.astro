@@ -7,9 +7,10 @@ import { formatDate } from '@/utils/commonFunctions';
 interface Props {
   entry: Post;
   showCategory?: boolean;
+  showIcon?: boolean;
 }
 
-const { entry, showCategory = false } = Astro.props;
+const { entry, showCategory = false, showIcon } = Astro.props;
 const { title, date, category, featured } = entry.data;
 
 // Get category config
@@ -29,12 +30,14 @@ const entryUrl = `/${entry.collection}/${entry.id}`;
   class="content-entry group link-card flex items-start gap-3 py-2 transition-colors not-prose"
   data-category={category}
 >
-  <IconWrapper 
-    name={icon} 
-    size={20} 
-    class={`flex-shrink-0 mt-0.5`}
-    style={iconColor}
-  />
+  {showIcon && 
+    <IconWrapper 
+      name={icon} 
+      size={20} 
+      class={`flex-shrink-0 mt-0.5`}
+      style={iconColor}
+    />
+  }
   
   <div class="flex-1 flex items-center justify-between gap-4 min-w-0">
     <div class="flex items-center gap-2 flex-wrap min-w-0">

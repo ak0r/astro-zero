@@ -1,52 +1,48 @@
 ---
-// ThemeManager handles initial load and system preference detection
+/**
+ * ThemeManager Component
+ *
+ * Initializes theme on page load. Must be included in BaseLayout.
+ * Simplified for static sites - no hash-based cache busting needed.
+ */
 ---
 <script is:inline>
-  ;(function loadTheme() {
-    const pageDefaultTheme = document.documentElement.getAttribute('data-theme')
-    const pageDarkTheme = document.documentElement.getAttribute('data-dark-theme')
-    const pageLightTheme = document.documentElement.getAttribute('data-light-theme')
-    const pageThemeHash = document.documentElement.getAttribute('data-theme-hash')
-    
-    if (!pageDefaultTheme || !pageDarkTheme || !pageLightTheme || !pageThemeHash) {
-      throw new Error('Theme attributes are required.')
-    }
+  ;(function initTheme() {
+    const root = document.documentElement;
+    const darkTheme = root.getAttribute('data-dark-theme') || 'dark';
+    const lightTheme = root.getAttribute('data-light-theme') || 'light';
+    const defaultTheme = root.getAttribute('data-theme') || 'auto';
 
-    const getStoredTheme = () => localStorage.getItem('data-theme')
-    const storedTheme = getStoredTheme()
-    const storedThemeHash = localStorage.getItem('data-theme-hash')
-    const themeHashMatches = storedThemeHash === pageThemeHash
+    // Get stored preference
+    const stored = localStorage.getItem('data-theme');
 
-    if (!storedTheme || !storedThemeHash || !themeHashMatches) {
-      // First time loading
-      localStorage.setItem('data-theme', pageDefaultTheme)
-      localStorage.setItem('data-theme-hash', pageThemeHash)
-    }
-
-    // Helper to apply system preference
+    // Apply system preference helper
     const applySystemTheme = () => {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const systemTheme = prefersDark ? pageDarkTheme : pageLightTheme
-      document.documentElement.setAttribute('data-theme', systemTheme)
-      return systemTheme
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', prefersDark ? darkTheme : lightTheme);
+    };
+
+    // Determine which theme to apply
+    if (!stored) {
+      // First visit - use default
+      localStorage.setItem('data-theme', defaultTheme);
+      if (defaultTheme === 'auto' || defaultTheme === 'system') {
+        applySystemTheme();
+      }
+    } else if (stored === 'auto' || stored === 'system') {
+      // Auto mode - follow system
+      applySystemTheme();
+    } else {
+      // Explicit theme stored
+      root.setAttribute('data-theme', stored);
     }
 
-    const currentStoredTheme = getStoredTheme()
-
-    // Apply theme based on stored preference
-    if (currentStoredTheme === 'auto' || currentStoredTheme === 'system') {
-      applySystemTheme()
-      
-      // Listen for system theme changes
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (getStoredTheme() === 'auto' || getStoredTheme() === 'system') {
-          applySystemTheme()
-        }
-      })
-    } else if (currentStoredTheme && currentStoredTheme !== pageDefaultTheme) {
-      document.documentElement.setAttribute('data-theme', currentStoredTheme)
-    } else if (pageDefaultTheme === 'auto' || pageDefaultTheme === 'system') {
-      applySystemTheme()
-    }
-  })()
+    // Listen for system preference changes when in auto mode
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const current = localStorage.getItem('data-theme');
+      if (current === 'auto' || current === 'system') {
+        applySystemTheme();
+      }
+    });
+  })();
 </script>
